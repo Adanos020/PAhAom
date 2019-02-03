@@ -1,15 +1,5 @@
-# exclude all object files
-*.o
-*.dll
-*.cbp
-*.depend
-# exclude the save and bin folders
-save
-bin
-# exclude all the files in the root folder
-vgcore.*
 .vscode
-config.cfg
-# except for:
-!/Makefile
-!/*.sh
+build
+CMakeFiles
+
+vgcore.*
