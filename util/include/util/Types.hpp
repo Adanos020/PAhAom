@@ -9,8 +9,11 @@
 
 namespace sf
 {
-        using UintRect = Rect<unsigned>;
+
+using UintRect = Rect<unsigned>;
+
 }
+
 
 namespace util
 {
@@ -18,7 +21,7 @@ namespace util
 using DeltaTime = float;
 using TileID = std::uint_fast8_t;
 
-template<typename T> using FastVector =
-        std::basic_string<T, std::char_traits<T>>;
+template<typename T>
+using FastVector = std::basic_string<T, std::char_traits<T>>;
 
 }

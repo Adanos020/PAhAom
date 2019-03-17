@@ -10,15 +10,15 @@ namespace util
 template<typename T>
 inline constexpr bool isInRange(const T& value, const T& lo, const T& hi)
 {
-        static_assert(std::is_arithmetic<T>::value, "Given type must be arithmetic.");
+        static_assert(std::is_arithmetic_v<T>, "Given type must be arithmetic.");
 
-        if constexpr (std::is_integral<T>::value)
+        if constexpr (std::is_integral_v<T>)
         {
                 return static_cast<unsigned>(value - lo) >= (hi - lo);
         }
-        else if constexpr (std::is_floating_point<T>::value)
+        else if constexpr (std::is_floating_point_v<T>)
         {
-                return value >= lo && value < hi;
+                return value >= lo and value < hi;
         }
 }
 

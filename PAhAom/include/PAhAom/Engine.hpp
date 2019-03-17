@@ -28,7 +28,7 @@ private:
         void handleInput();
         void draw();
         
-        virtual void receive(const util::Message) override;
+        virtual void receive(const util::Message&) override;
 
 private:
 

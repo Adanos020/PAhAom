@@ -32,9 +32,10 @@ struct Message
 class Observer
 {
         friend class Subject;
+
 private:
 
-        virtual void receive(const Message) = 0;
+        virtual void receive(const Message&) = 0;
 };
 
 
@@ -44,8 +45,18 @@ class Subject
 
 public:
 
-        static void addObserver(Observer* const);
-        static void send(const Message);
+        static void addObserver(Observer* const o)
+        {
+                observers.insert(o);
+        }
+
+        static void send(const Message& msg)
+        {
+                for (Observer* o: observers)
+                {
+                        o->receive(msg);
+                }
+        }
 
 private:
 

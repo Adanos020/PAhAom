@@ -31,7 +31,7 @@ public:
 
         template<typename T> static T normal(const T mean = 0, const T stddev = 1)
         {
-                static_assert(std::is_arithmetic<T>::value, "Given type must be arithmetic.");
+                static_assert(std::is_arithmetic_v<T>, "Given type must be arithmetic.");
                 std::normal_distribution<T> distribution = { mean, stddev };
                 return distribution(rng);
         }
@@ -46,13 +46,13 @@ private:
 
         template<typename T> static auto getUniformDistribution(const T lo, const T hi)
         {
-                static_assert(std::is_arithmetic<T>::value, "Given type must be arithmetic.");
+                static_assert(std::is_arithmetic_v<T>, "Given type must be arithmetic.");
 
-                if constexpr (std::is_integral<T>::value)
+                if constexpr (std::is_integral_v<T>)
                 {
                         return std::uniform_int_distribution<T>{ lo, hi };
                 }
-                else if constexpr (std::is_floating_point<T>::value)
+                else if constexpr (std::is_floating_point_v<T>)
                 {
                         return std::uniform_real_distribution<T>{ lo, hi };
                 }

@@ -2,6 +2,7 @@
 #include <PAhAom/Resources.hpp>
 #include <PAhAom/Settings.hpp>
 
+#include <util/Constants.hpp>
 #include <util/Random.hpp>
 #include <util/Types.hpp>
 
@@ -17,7 +18,7 @@ namespace PAhAom
 
 Engine::Engine()
 : window ({Settings::Video::windowSize.x,
-          Settings::Video::windowSize.y}, "PAhAom", sf::Style::Close)
+           Settings::Video::windowSize.y}, "PAhAom", sf::Style::Close)
 , screen (sf::Vector2f(Settings::Video::windowSize))
 , running (true)
 {
@@ -39,7 +40,6 @@ Engine::Engine()
 int Engine::run()
 {
         util::DeltaTime lag = 0.0;
-        const util::DeltaTime frame_time = 1.0 / 60;
 
         sf::Clock timer;
 
@@ -48,10 +48,10 @@ int Engine::run()
                 lag += timer.restart().asSeconds();
                 this->handleInput();
 
-                while (lag >= frame_time)
+                while (lag >= util::FRAME_TIME)
                 {
-                        this->states.top()->update(frame_time);
-                        lag -= frame_time;
+                        this->states.top()->update();
+                        lag -= util::FRAME_TIME;
                 }
 
                 this->draw();
@@ -86,7 +86,7 @@ void Engine::draw()
         this->window.display();
 }
 
-void Engine::receive(const util::Message msg)
+void Engine::receive(const util::Message& msg)
 {
         if (auto val = std::get_if<util::Message::PushState>(&msg.msg))
         {
@@ -116,13 +116,13 @@ bool init()
         PAhAom::Settings::Video::load("settings.cfg");
 
         // Resources
-        return PAhAom::Resources::load<sf::Font>   ("unifont", "data/font/unifont.ttf") &&
+        return PAhAom::Resources::load<sf::Font>("unifont", "data/font/unifont.ttf") and
                PAhAom::Resources::load<sf::Texture>("tileset", "data/graphics/tileset.png");
 }
 
 int main()
 {
-        if (!init())
+        if (not init())
         {
                 std::cout << "Some resources could not be loaded." << std::endl;
                 return 1;

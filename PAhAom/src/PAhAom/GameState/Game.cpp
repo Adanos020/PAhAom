@@ -32,7 +32,7 @@ void Game::handleInput(const sf::Event& event)
         }
 }
 
-void Game::update(const util::DeltaTime dt)
+void Game::update()
 {
 
 }

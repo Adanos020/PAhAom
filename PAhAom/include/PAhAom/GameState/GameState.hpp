@@ -19,9 +19,9 @@ public:
 
         virtual ~State() {}
 
-        virtual void handleInput(const sf::Event&) = 0;
-        virtual void update(const util::DeltaTime) = 0;
-        virtual void draw(sf::RenderTarget&) = 0;
+        virtual void handleInput(const sf::Event& event) = 0;
+        virtual void update() = 0;
+        virtual void draw(sf::RenderTarget& target) = 0;
 };
 
 
@@ -31,7 +31,7 @@ public:
         Menu();
 
         virtual void handleInput(const sf::Event&) override;
-        virtual void update(const util::DeltaTime) override;
+        virtual void update() override;
         virtual void draw(sf::RenderTarget&) override;
 
 private:
@@ -46,13 +46,12 @@ public:
         Game();
 
         virtual void handleInput(const sf::Event&) override;
-        virtual void update(const util::DeltaTime) override;
+        virtual void update() override;
         virtual void draw(sf::RenderTarget&) override;
 
 private:
 
         Level::DungeonGenerator<Level::MAP_WIDTH, Level::MAP_HEIGHT> dungeonGen;
-
         Level::Level<Level::MAP_WIDTH, Level::MAP_HEIGHT> currentLevel;
 };
 

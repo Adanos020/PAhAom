@@ -30,7 +30,7 @@ void Menu::handleInput(const sf::Event& event)
 
                         case sf::Keyboard::Escape:
                         {
-                                util::Subject::send({ util::Message::PopState{} });
+                                util::Subject::send({ util::Message::PopState{}});
                                 break;
                         }
 
@@ -39,7 +39,7 @@ void Menu::handleInput(const sf::Event& event)
         }
 }
 
-void Menu::update(const util::DeltaTime dt)
+void Menu::update()
 {
 
 }
