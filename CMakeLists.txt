@@ -15,22 +15,22 @@ project(
 
 # SELENE
 
-include_directories("Selene/include")
-file(GLOB_RECURSE HEADERS "Selene/include/*.h")
+include_directories("modules/Selene/include")
+file(GLOB_RECURSE HEADERS "modules/Selene/include/*.h")
 
 
 # UTILITIES
 
-set(UTIL_SOURCES "util/src/util/*.cpp")
-set(UTIL_HEADERS "util/include/util/*.hpp")
+set(UTIL_SOURCES "modules/Util/src/Util/*.cpp")
+set(UTIL_HEADERS "modules/Util/include/Util/*.hpp")
 
 file(GLOB_RECURSE SOURCES ${UTIL_SOURCES} ${UTIL_HEADERS})
-add_library(util STATIC ${SOURCES})
+add_library(Util STATIC ${SOURCES})
 
-target_include_directories(util PUBLIC "util/include")
+target_include_directories(Util PUBLIC "modules/Util/include")
 
 set_target_properties(
-    util
+    Util
         PROPERTIES
             LINKER_LANGUAGE CXX
             CXX_STANDARD 17
@@ -42,13 +42,13 @@ set_target_properties(
 
 # MAIN EXEC
 
-set(PAHAOM_SOURCES "PAhAom/src/PAhAom/*.cpp")
-set(PAHAOM_HEADERS "PAhAom/include/PAhAom/*.hpp")
+set(PAHAOM_SOURCES "modules/Engine/src/Engine/*.cpp")
+set(PAHAOM_HEADERS "modules/Engine/include/Engine/*.hpp")
 
 file(GLOB_RECURSE SOURCES ${PAHAOM_SOURCES} ${PAHAOM_HEADERS})
 add_executable(pahaom ${SOURCES})
 
-target_include_directories(pahaom PUBLIC "PAhAom/include")
+target_include_directories(pahaom PUBLIC "modules/Engine/include")
 target_link_libraries(
     pahaom
         PUBLIC
@@ -56,7 +56,7 @@ target_link_libraries(
             sfml-window-d
             sfml-audio-d
             sfml-system-d
-            util
+            Util
 )
 
 set_target_properties(

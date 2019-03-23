@@ -1,9 +1,9 @@
 #pragma once
 
 
-#include <PAhAom/GameState/GameState.hpp>
+#include <Engine/GameState/GameState.hpp>
 
-#include <util/Observer.hpp>
+#include <Util/Observer.hpp>
 
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -13,7 +13,7 @@
 #include <stack>
 
 
-namespace PAhAom
+namespace engine
 {
 
 class Engine : public util::Observer

@@ -6,7 +6,7 @@
 #include <string_view>
 
 
-namespace PAhAom::Settings
+namespace engine::Settings
 {
 
 struct Video

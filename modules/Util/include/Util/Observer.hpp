@@ -1,8 +1,9 @@
 #pragma once
 
 
-#include <PAhAom/GameState/GameState.hpp>
+#include <Engine/GameState/GameState.hpp>
 
+#include <algorithm>
 #include <string_view>
 #include <type_traits>
 #include <unordered_set>
@@ -19,7 +20,7 @@ struct Message
 
         struct PushState
         {
-                PAhAom::GameState::State* state;
+                engine::GameState::State* state;
         };
 
         std::variant<None,
@@ -52,10 +53,8 @@ public:
 
         static void send(const Message& msg)
         {
-                for (Observer* o: observers)
-                {
-                        o->receive(msg);
-                }
+                std::for_each(observers.begin(), observers.end(),
+                        [&](Observer* o) { o->receive(msg); });
         }
 
 private:

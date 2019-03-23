@@ -1,8 +1,8 @@
 #pragma once
 
 
-#include <PAhAom/Level/TileMap.hpp>
-#include <PAhAom/Resources.hpp>
+#include <Engine/Level/TileMap.hpp>
+#include <Engine/Resources.hpp>
 
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
@@ -11,7 +11,7 @@
 #include <SFML/Graphics/VertexArray.hpp>
 
 
-namespace PAhAom::Level
+namespace engine::level
 {
 
 template<size_t width, size_t height>

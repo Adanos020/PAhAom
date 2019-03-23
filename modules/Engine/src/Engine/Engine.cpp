@@ -1,10 +1,10 @@
-#include <PAhAom/Engine.hpp>
-#include <PAhAom/Resources.hpp>
-#include <PAhAom/Settings.hpp>
+#include <Engine/Engine.hpp>
+#include <Engine/Resources.hpp>
+#include <Engine/Settings.hpp>
 
-#include <util/Constants.hpp>
-#include <util/Random.hpp>
-#include <util/Types.hpp>
+#include <Util/Constants.hpp>
+#include <Util/Random.hpp>
+#include <Util/Types.hpp>
 
 #include <SFML/Window/Event.hpp>
 #include <SFML/System/Clock.hpp>
@@ -13,7 +13,7 @@
 #include <iostream>
 
 
-namespace PAhAom
+namespace engine
 {
 
 Engine::Engine()
@@ -107,20 +107,20 @@ void Engine::receive(const util::Message& msg)
 
 }
 
-bool init()
+auto init() -> bool
 {
         // RNG
         util::Random::rng.seed(std::chrono::system_clock::now().time_since_epoch().count());
 
         // Settings
-        PAhAom::Settings::Video::load("settings.cfg");
+        engine::Settings::Video::load("settings.cfg");
 
         // Resources
-        return PAhAom::Resources::load<sf::Font>("unifont", "data/font/unifont.ttf") and
-               PAhAom::Resources::load<sf::Texture>("tileset", "data/graphics/tileset.png");
+        return engine::Resources::load<sf::Font>("unifont", "data/font/unifont.ttf") and
+               engine::Resources::load<sf::Texture>("tileset", "data/graphics/tileset.png");
 }
 
-int main()
+auto main() -> int
 {
         if (not init())
         {
@@ -128,5 +128,5 @@ int main()
                 return 1;
         }
 
-        return PAhAom::Engine().run();
+        return engine::Engine().run();
 }

@@ -1,9 +1,9 @@
 #pragma once
 
 
-#include <PAhAom/Level/Generator.hpp>
-#include <PAhAom/Level/GfxMap.hpp>
-#include <PAhAom/Level/TileMap.hpp>
+#include <Engine/Level/Generator.hpp>
+#include <Engine/Level/GfxMap.hpp>
+#include <Engine/Level/TileMap.hpp>
 
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
@@ -11,7 +11,7 @@
 #include <SFML/Graphics/Transformable.hpp>
 
 
-namespace PAhAom::Level
+namespace engine::level
 {
 
 template<size_t width, size_t height>

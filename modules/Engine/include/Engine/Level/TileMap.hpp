@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include <util/Types.hpp>
+#include <Util/Types.hpp>
 
 #include <SFML/System/Vector2.hpp>
 
@@ -9,7 +9,7 @@
 #include <fstream>
 
 
-namespace PAhAom::Level
+namespace engine::level
 {
 
 enum class Tile : util::TileID

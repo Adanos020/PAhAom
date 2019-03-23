@@ -1,13 +1,13 @@
-#include <PAhAom/Level/Generator.hpp>
+#include <Engine/Level/Generator.hpp>
 
-#include <util/Random.hpp>
-#include <util/Ranges.hpp>
-#include <util/Types.hpp>
+#include <Util/Random.hpp>
+#include <Util/Ranges.hpp>
+#include <Util/Types.hpp>
 
 #include <SFML/Graphics/Rect.hpp>
 
 
-namespace PAhAom::Level
+namespace engine::level
 {
 
 using Neighbours = int;
@@ -79,10 +79,10 @@ Neighbours DungeonGenerator<width, height>::findNeighbours(const sf::Vector2u ce
                                                            const size_t distance) const
 {
         // Setting all relevant bits corresponding to the neighbouring wall blocks.
-        return LEFT   * int(cell.x > distance - 1      && tileMap[cell.x - distance][cell.y] == tile)
-             | RIGHT  * int(cell.x < width - distance  && tileMap[cell.x + distance][cell.y] == tile)
-             | TOP    * int(cell.y > distance - 1      && tileMap[cell.x][cell.y - distance] == tile)
-             | BOTTOM * int(cell.y < height - distance && tileMap[cell.x][cell.y + distance] == tile)
+        return LEFT   * int(cell.x > distance - 1      and tileMap[cell.x - distance][cell.y] == tile)
+             | RIGHT  * int(cell.x < width - distance  and tileMap[cell.x + distance][cell.y] == tile)
+             | TOP    * int(cell.y > distance - 1      and tileMap[cell.x][cell.y - distance] == tile)
+             | BOTTOM * int(cell.y < height - distance and tileMap[cell.x][cell.y + distance] == tile)
         ;
 }
 
@@ -201,7 +201,7 @@ size_t DungeonGenerator<width, height>::countCloseNeighbours(const sf::Vector2u 
 template<size_t width, size_t height>
 void DungeonGenerator<width, height>::reduceCorridors(const util::FastVector<Room>& rooms)
 {
-        
+        // TODO: finish implementation
 }
 
 template<size_t width, size_t height>

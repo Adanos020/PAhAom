@@ -1,16 +1,16 @@
 #pragma once
 
 
-#include <PAhAom/Level/Level.hpp>
+#include <Engine/Level/Level.hpp>
 
-#include <util/Types.hpp>
+#include <Util/Types.hpp>
 
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Window/Event.hpp>
 
 
-namespace PAhAom::GameState
+namespace engine::GameState
 {
 
 class State
@@ -51,8 +51,8 @@ public:
 
 private:
 
-        Level::DungeonGenerator<Level::MAP_WIDTH, Level::MAP_HEIGHT> dungeonGen;
-        Level::Level<Level::MAP_WIDTH, Level::MAP_HEIGHT> currentLevel;
+        level::DungeonGenerator<level::MAP_WIDTH, level::MAP_HEIGHT> dungeonGen;
+        level::Level<level::MAP_WIDTH, level::MAP_HEIGHT> currentLevel;
 };
 
 }

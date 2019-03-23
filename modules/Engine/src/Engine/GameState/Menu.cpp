@@ -1,11 +1,11 @@
-#include <PAhAom/GameState/GameState.hpp>
-#include <PAhAom/Resources.hpp>
-#include <PAhAom/Settings.hpp>
+#include <Engine/GameState/GameState.hpp>
+#include <Engine/Resources.hpp>
+#include <Engine/Settings.hpp>
 
-#include <util/Observer.hpp>
+#include <Util/Observer.hpp>
 
 
-namespace PAhAom::GameState
+namespace engine::GameState
 {
 
 Menu::Menu()
