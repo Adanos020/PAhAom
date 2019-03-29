@@ -7,6 +7,6 @@
 namespace util
 {
 
-constexpr DeltaTime FRAME_TIME = 1.0 / 60;
+static constexpr DeltaTime FRAME_TIME = 1.0 / 60;
 
 }

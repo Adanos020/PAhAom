@@ -1,5 +1,7 @@
 Game = {
-    currentLevel = { type = "Level" }
+    drawables = {
+        currentLevel = { type = "Level" },
+    },
 }
 
 function Game:new(o)
@@ -10,7 +12,7 @@ function Game:new(o)
 end
 
 function Game:handle_input(event)
-    if event.type == Event.KeyPressed then
+    if event.type == "KeyPressed" then
         local kc = event.key.code
         if kc == Keyboard.Escape then
             broadcast { type = "PopState" }
@@ -19,9 +21,7 @@ function Game:handle_input(event)
 end
 
 function Game:update(dt)
-
 end
 
 function Game:draw()
-    return currentLevel
 end

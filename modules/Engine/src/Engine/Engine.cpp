@@ -34,7 +34,7 @@ Engine::Engine()
         this->screen.setTexture(&this->screenTexture.getTexture());
 
         // State.
-        this->states.emplace(new GameState::Menu());
+        this->states.emplace("Menu");
 }
 
 int Engine::run()
@@ -50,7 +50,7 @@ int Engine::run()
 
                 while (lag >= util::FRAME_TIME)
                 {
-                        this->states.top()->update();
+                        this->states.top().update();
                         lag -= util::FRAME_TIME;
                 }
 
@@ -70,7 +70,7 @@ void Engine::handleInput()
                 {
                         this->running = false;
                 }
-                this->states.top()->handleInput(event);
+                this->states.top().handleInput(event);
         }
 }
 
@@ -79,7 +79,7 @@ void Engine::draw()
         this->window.clear();
 
         this->screenTexture.clear();
-        this->states.top()->draw(screenTexture);
+        this->states.top().draw(screenTexture);
         this->screenTexture.display();
 
         this->window.draw(screen);
@@ -90,7 +90,7 @@ void Engine::receive(const util::Message& msg)
 {
         if (auto val = std::get_if<util::Message::PushState>(&msg.msg))
         {
-                this->states.emplace(val->state);
+                this->states.emplace(val->scriptPath);
         }
         else if (std::get_if<util::Message::PopState>(&msg.msg))
         {
@@ -111,6 +111,9 @@ auto init() -> bool
 {
         // RNG
         util::Random::rng.seed(std::chrono::system_clock::now().time_since_epoch().count());
+
+        // Scripts.
+        util::Lua::load("data/script/init.lua");
 
         // Settings
         engine::Settings::Video::load("settings.cfg");

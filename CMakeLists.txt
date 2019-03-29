@@ -56,6 +56,7 @@ target_link_libraries(
             sfml-window-d
             sfml-audio-d
             sfml-system-d
+            lua
             Util
 )
 

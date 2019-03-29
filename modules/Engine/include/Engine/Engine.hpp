@@ -1,7 +1,8 @@
 #pragma once
 
 
-#include <Engine/GameState/GameState.hpp>
+// #include <Engine/GameState/GameState.hpp>
+#include <Engine/GameState.hpp>
 
 #include <Util/Observer.hpp>
 
@@ -36,7 +37,7 @@ private:
         sf::RenderTexture screenTexture;
         sf::RectangleShape screen;
 
-        std::stack<std::unique_ptr<GameState::State>> states;
+        std::stack<GameState> states;
 
         bool running;
 };

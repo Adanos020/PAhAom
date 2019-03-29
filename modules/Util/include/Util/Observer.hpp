@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include <Engine/GameState/GameState.hpp>
+#include <Engine/GameState.hpp>
 
 #include <algorithm>
 #include <string_view>
@@ -20,7 +20,7 @@ struct Message
 
         struct PushState
         {
-                engine::GameState::State* state;
+                std::string scriptPath;
         };
 
         std::variant<None,
