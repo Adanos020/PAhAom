@@ -40,7 +40,7 @@ public:
 
 public:
 
-        virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override
+        virtual auto draw(sf::RenderTarget& target, sf::RenderStates states) const override -> void
         {
                 states.transform *= this->getTransform();
                 target.draw(this->map, states);

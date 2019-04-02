@@ -1,6 +1,8 @@
 #pragma once
 
 
+#include <Util/ErrorMessages.hpp>
+
 #include <random>
 #include <type_traits>
 
@@ -31,7 +33,7 @@ public:
 
         template<typename T> static T normal(const T mean = 0, const T stddev = 1)
         {
-                static_assert(std::is_arithmetic_v<T>, "Given type must be arithmetic.");
+                static_assert(std::is_arithmetic_v<T>, typeNotArithmetic);
                 std::normal_distribution<T> distribution = { mean, stddev };
                 return distribution(rng);
         }
@@ -46,7 +48,7 @@ private:
 
         template<typename T> static auto getUniformDistribution(const T lo, const T hi)
         {
-                static_assert(std::is_arithmetic_v<T>, "Given type must be arithmetic.");
+                static_assert(std::is_arithmetic_v<T>, typeNotArithmetic);
 
                 if constexpr (std::is_integral_v<T>)
                 {

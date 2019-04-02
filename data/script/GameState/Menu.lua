@@ -5,9 +5,8 @@ Menu = {
             content = "Menu, press Enter to continue,\nEsc to exit.",
             font = "unifont",
             position = {
-                -- x = Settings.Video.resolution.x / 2,
-                -- y = Settings.Video.resolution.y / 2,
-                0, 0
+                x = Settings.Video.resolution.x / 2,
+                y = Settings.Video.resolution.y / 2,
             },
             color = "white"
         },

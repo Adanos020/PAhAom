@@ -140,7 +140,7 @@ util::FastVector<Room> DungeonGenerator<width, height>::spreadRooms()
                 tileMap.fillArea(room, Tile::ROOM);
         }
 
-        return std::move(rooms);
+        return rooms;
 }
 
 template<size_t width, size_t height>
@@ -199,7 +199,7 @@ size_t DungeonGenerator<width, height>::countCloseNeighbours(const sf::Vector2u 
 }
 
 template<size_t width, size_t height>
-void DungeonGenerator<width, height>::reduceCorridors(const util::FastVector<Room>& rooms)
+void DungeonGenerator<width, height>::reduceCorridors([[maybe_unused]] const util::FastVector<Room>& rooms)
 {
         // TODO: finish implementation
 }
@@ -240,7 +240,7 @@ util::FastVector<Neighbours> DungeonGenerator<width, height>::extractNeighbours(
         std::copy_if(all.begin(), all.end(), existing.begin(),
                 [=](Neighbours n) { return bool(neighbours & n); });
 
-        return std::move(existing);
+        return existing;
 }
 
 template class DungeonGenerator<MAP_WIDTH, MAP_HEIGHT>;

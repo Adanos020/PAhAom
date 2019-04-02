@@ -28,16 +28,15 @@ public:
         GameState(const std::string& stateType)
         : stateName(stateType + "_state")
         {
-                using util::Lua;
+                const lua::Table classTable = util::luaContext.global["Menu"];
+                util::luaContext.global[this->stateName] = classTable["new"](classTable);
 
-                Lua::setVariable(this->stateName, stateType + ":new()");
-
-                sel::Selector drawables = Lua::getVariable(this->stateName)["drawables"];
-                util::LuaVariable temp{ "temp", std::string("#") + this->stateName + ".drawables" };
+                const lua::Table thisObj = util::luaContext.global[this->stateName];
+                const lua::Table drawables = thisObj["drawables"];
                 
-                for (int i = 1, nDrawables = temp.get(); i <= nDrawables; ++i)
+                for (int i = 1, nDrawables = drawables.len(); i <= nDrawables; ++i)
                 {
-                        this->drawableObjects.push_back(Lua::tableToDrawable(drawables[i]));
+                        this->drawableObjects.push_back(util::tableToDrawable(drawables[i]));
                         if (not this->drawableObjects.back().get())
                         {
                                 std::cerr << "Error: the following drawable definition is incorrect:" << std::endl;
@@ -50,31 +49,26 @@ public:
                 }
         }
 
-        void handleInput(const sf::Event& event)
+        auto handleInput(const sf::Event& event) -> void
         {
 
         }
 
-        void update()
+        auto update() -> void
         {
-                // util::Lua::getVariable(this->stateName)["update"](lua_Number(util::FRAME_TIME));
-                util::Lua::runCode(this->stateName + ":update(" + std::to_string(util::FRAME_TIME) + ")");
+                const lua::Table thisObj = util::luaContext.global[this->stateName];
+                thisObj["update"](thisObj, util::FRAME_TIME);
         }
 
-        void draw(sf::RenderTarget& target)
+        auto draw(sf::RenderTarget& target) -> void
         {
-                using util::Lua;
+                const lua::Table thisObj = util::luaContext.global[this->stateName];
+                const lua::Table drawables = thisObj["draw"](thisObj);
 
-                sel::Selector drawables = Lua::getVariable(this->stateName)["drawables"];
-                util::LuaVariable temp{ "temp", std::string("#") + this->stateName + ":draw()" };
-
-                for (int i = 1, nDrawables = temp.get(); i <= nDrawables; ++i)
+                for (int i = 1, nDrawables = drawables.len(); i <= nDrawables; ++i)
                 {
-                        if (sel::Selector drawable = drawables[i]; Lua::hasType(drawable, "number"))
-                        {
-                                std::cout << "draw" << std::endl;
-                                target.draw(*drawableObjects[int(drawable)]);
-                        }
+                        const lua::Value drawable = drawables[i];
+                        target.draw(*drawableObjects[int(drawable)]);
                 }
         }
 

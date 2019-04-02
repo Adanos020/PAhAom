@@ -33,22 +33,22 @@ public:
                 std::fill_n(*this->tiles, rows * cols, fill);
         }
 
-        Tile* operator[](size_t row)
+        auto operator[](size_t row) -> Tile*
         {
                 return this->tiles[row];
         }
 
-        Tile* operator[](size_t row) const
+        auto operator[](size_t row) const -> Tile*
         {
                 return const_cast<Tile* const>(this->tiles[row]);
         }
 
-        std::ifstream& loadFromFile(std::ifstream& file)
+        auto loadFromFile(std::ifstream& file) -> std::ifstream&
         {
                 return file;
         }
 
-        void fillArea(const sf::UintRect area, Tile tile)
+        auto fillArea(const sf::UintRect area, Tile tile) -> void
         {
                 for (size_t col = area.left; col < area.left + area.width; ++col)
                 {

@@ -21,6 +21,7 @@ using UintRect = Rect<unsigned>;
 namespace util
 {
 
+using CStr = const char*;
 using DeltaTime = float;
 using TileID = std::uint_fast8_t;
 

@@ -13,10 +13,29 @@ project(
 )
 
 
-# SELENE
+# Lua API++
 
-include_directories("modules/Selene/include")
-file(GLOB_RECURSE HEADERS "modules/Selene/include/*.h")
+include_directories("modules/lua-api-pp/luapp")
+file(GLOB_RECURSE HEADERS "modules/lua-api-pp/luapp/lua.hpp")
+
+set(LUAPP_SOURCES "modules/lua-api-pp/luapp/impl.cpp")
+set(LUAPP_HEADERS "modules/lua-api-pp/luapp/*.{h,hpp,hxx}")
+
+file(GLOB_RECURSE SOURCES ${LUAPP_SOURCES} ${LUAPP_HEADERS})
+add_library(LuaPP STATIC ${SOURCES})
+
+target_include_directories(LuaPP PUBLIC "modules/lua-api-pp/luapp")
+target_link_libraries(LuaPP PUBLIC lua)
+
+set_target_properties(
+    LuaPP
+        PROPERTIES
+            LINKER_LANGUAGE CXX
+            CXX_STANDARD 17
+            CXX_STANDARD_REQUIRED YES
+            CXX_EXTENSIONS NO
+            INTERPROCEDURAL_OPTIMIZATION true
+)
 
 
 # UTILITIES
@@ -27,6 +46,7 @@ set(UTIL_HEADERS "modules/Util/include/Util/*.hpp")
 file(GLOB_RECURSE SOURCES ${UTIL_SOURCES} ${UTIL_HEADERS})
 add_library(Util STATIC ${SOURCES})
 
+target_compile_options(Util PUBLIC -Wall -Wextra)
 target_include_directories(Util PUBLIC "modules/Util/include")
 
 set_target_properties(
@@ -46,22 +66,23 @@ set(PAHAOM_SOURCES "modules/Engine/src/Engine/*.cpp")
 set(PAHAOM_HEADERS "modules/Engine/include/Engine/*.hpp")
 
 file(GLOB_RECURSE SOURCES ${PAHAOM_SOURCES} ${PAHAOM_HEADERS})
-add_executable(pahaom ${SOURCES})
+add_executable(Pahaom ${SOURCES})
 
-target_include_directories(pahaom PUBLIC "modules/Engine/include")
+target_compile_options(Pahaom PUBLIC -Wall -Wextra)
+target_include_directories(Pahaom PUBLIC "modules/Engine/include")
 target_link_libraries(
-    pahaom
+    Pahaom
         PUBLIC
             sfml-graphics-d
             sfml-window-d
             sfml-audio-d
             sfml-system-d
-            lua
+            LuaPP
             Util
 )
 
 set_target_properties(
-    pahaom
+    Pahaom
         PROPERTIES
             CXX_STANDARD 17
             CXX_STANDARD_REQUIRED YES

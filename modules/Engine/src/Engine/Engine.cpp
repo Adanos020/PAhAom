@@ -113,10 +113,10 @@ auto init() -> bool
         util::Random::rng.seed(std::chrono::system_clock::now().time_since_epoch().count());
 
         // Scripts.
-        util::Lua::load("data/script/init.lua");
+        util::luaState.runFile("data/script/init.lua");
 
         // Settings
-        engine::Settings::Video::load("settings.cfg");
+        engine::Settings::Video::load();
 
         // Resources
         return engine::Resources::load<sf::Font>("unifont", "data/font/unifont.ttf") and

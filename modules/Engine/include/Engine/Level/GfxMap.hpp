@@ -32,7 +32,7 @@ public:
                 this->setMap(tiles);
         }
 
-        void setTile(const sf::Vector2u pos, const Tile newTile)
+        auto setTile(const sf::Vector2u pos, const Tile newTile) -> void
         {
                 const size_t vertex = 4 * (pos.x + pos.y * width);
                 const size_t iconIndex = idToIconIndex[int(newTile)];
@@ -52,7 +52,7 @@ public:
                 this->tileMap[vertex + 3].texCoords = texCoords + bottomLeft;
         }
 
-        void setMap(const TileMap<width, height>& tiles)
+        auto setMap(const TileMap<width, height>& tiles) -> void
         {
                 for (unsigned x = 0; x <  width; ++x)
                 for (unsigned y = 0; y < height; ++y)
@@ -63,7 +63,7 @@ public:
 
 public:
 
-        virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override
+        virtual auto draw(sf::RenderTarget& target, sf::RenderStates states) const override -> void
         {
                 states.transform *= this->getTransform();
                 states.texture = this->tileSet;
@@ -72,7 +72,7 @@ public:
 
 private:
 
-        void placeVertices()
+        auto placeVertices() -> void
         {
                 const sf::Vector2f topLeft     = { 0,        0 };
                 const sf::Vector2f topRight    = { tileSize, 0 };

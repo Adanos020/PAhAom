@@ -19,7 +19,7 @@ class Resources
 public:
 
         template<typename Resource>
-        static bool load(std::string_view id, const std::string& path)
+        static auto load(const std::string& id, const std::string& path) -> bool
         {
                 static_assert(std::is_same_v<Resource, sf::Font> or std::is_same_v<Resource, sf::Texture>,
                               "Resource type is not recognised.");
@@ -35,7 +35,7 @@ public:
         }
 
         template<typename Resource>
-        static auto get(std::string_view id)
+        static auto get(const std::string& id)
         {
                 static_assert(std::is_same_v<Resource, sf::Font> or std::is_same_v<Resource, sf::Texture>,
                               "Resource type is not recognised.");
@@ -59,7 +59,7 @@ public:
         }
 
         template<typename Resource>
-        static bool unload(std::string_view id)
+        static auto unload(const std::string& id) -> bool
         {
                 static_assert(std::is_same_v<Resource, sf::Font> or std::is_same_v<Resource, sf::Texture>,
                               "Resource type is not recognised.");
@@ -75,7 +75,7 @@ public:
         }
 
         template<typename Resource>
-        static void unloadAll()
+        static auto unloadAll() -> void
         {
                 static_assert(std::is_same_v<Resource, sf::Font> or std::is_same_v<Resource, sf::Texture>,
                               "Resource type is not recognised.");
@@ -92,8 +92,8 @@ public:
 
 private:
 
-        inline static std::unordered_map<std::string_view, sf::Font> fonts;
-        inline static std::unordered_map<std::string_view, sf::Texture> textures;
+        inline static std::unordered_map<std::string, sf::Font> fonts;
+        inline static std::unordered_map<std::string, sf::Texture> textures;
 };
 
 }
