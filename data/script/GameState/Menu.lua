@@ -5,10 +5,11 @@ Menu = {
             content = "Menu, press Enter to continue,\nEsc to exit.",
             font = "unifont",
             position = {
-                x = Settings.Video.resolution.x / 2,
-                y = Settings.Video.resolution.y / 2,
+                -- x = Settings.Video.resolution.x / 2,
+                -- y = Settings.Video.resolution.y / 2,
+                0, 0
             },
-            fillColor = "white",
+            fillColor = "yellow",
             centeredOrigin = true
         },
     },
@@ -24,7 +25,7 @@ end
 function Menu:handle_input(event)
     if event.type == "KeyPressed" then
         local kc = event.code
-        if kc == Keyboard.Return then
+        if kc == Keyboard.Enter then
             broadcast { type = "PushState", state = "Game" }
         elseif kc == Keyboard.Escape then
             broadcast { type = "PopState"}

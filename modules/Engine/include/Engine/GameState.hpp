@@ -2,7 +2,7 @@
 
 
 #include <Util/Constants.hpp>
-#include <Util/Lua.hpp>
+#include <Util/Script.hpp>
 #include <Util/Types.hpp>
 
 #include <SFML/Graphics/Drawable.hpp>
@@ -28,7 +28,7 @@ public:
         GameState(const std::string& stateType)
         : stateName(stateType + "_state")
         {
-                const lua::Table classTable = util::luaContext.global["Menu"];
+                const lua::Table classTable = util::luaContext.global[stateType];
                 util::luaContext.global[this->stateName] = classTable["new"](classTable);
 
                 const lua::Table thisObj = util::luaContext.global[this->stateName];
@@ -36,7 +36,7 @@ public:
                 
                 for (int i = 1, nDrawables = drawables.len(); i <= nDrawables; ++i)
                 {
-                        this->drawableObjects.push_back(util::tableToDrawable(drawables[i]));
+                        this->drawableObjects.push_back(util::script::tableToDrawable(drawables[i]));
                         if (not this->drawableObjects.back().get())
                         {
                                 std::cerr << util::err::wrongDrawableDefinition(i) << std::endl;
@@ -56,7 +56,7 @@ public:
 
         auto handleInput(const sf::Event& event) -> void
         {
-                const lua::Table evt = util::eventToTable(event);
+                const lua::Table evt = util::script::eventToTable(event);
                 const lua::Table thisObj = util::luaContext.global[this->stateName];
                 thisObj["handle_input"](thisObj, evt);
         }

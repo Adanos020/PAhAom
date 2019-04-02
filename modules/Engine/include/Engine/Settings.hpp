@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include <Util/Lua.hpp>
+#include <Util/Script.hpp>
 
 #include <SFML/System/Vector2.hpp>
 

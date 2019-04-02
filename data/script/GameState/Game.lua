@@ -1,6 +1,17 @@
 Game = {
     drawables = {
-        currentLevel = { type = "Level" },
+        {
+            type = "sfText",
+            content = "Game, press Esc to exit.",
+            font = "unifont",
+            position = {
+                -- x = Settings.Video.resolution.x / 2,
+                -- y = Settings.Video.resolution.y / 2,
+                0, 0
+            },
+            fillColor = "red",
+            centeredOrigin = true
+        }
     },
 }
 
@@ -24,4 +35,5 @@ function Game:update(dt)
 end
 
 function Game:draw()
+    return self.drawables
 end

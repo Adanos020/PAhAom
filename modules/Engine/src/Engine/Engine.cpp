@@ -114,7 +114,7 @@ auto init() -> bool
 
         // Scripts.
         util::luaState.runFile("data/script/init.lua");
-        util::luaContext.global["broadcast"] = util::broadcast;
+        util::luaContext.global["broadcast"] = util::script::broadcast;
 
         // Settings
         engine::Settings::Video::load();
