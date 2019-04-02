@@ -36,7 +36,8 @@ public:
                 
                 for (int i = 1, nDrawables = drawables.len(); i <= nDrawables; ++i)
                 {
-                        this->drawableObjects.push_back(util::script::tableToDrawable(drawables[i]));
+                        lua::Table drawable = drawables[i];
+                        this->drawableObjects.push_back(util::script::tableToDrawable(drawable));
                         if (not this->drawableObjects.back().get())
                         {
                                 std::cerr << util::err::wrongDrawableDefinition(i) << std::endl;
@@ -45,7 +46,7 @@ public:
                         }
 
                         // Changing the drawable's recipe to its index.
-                        drawables[i]["index"] = i - 1;
+                        drawable["index"] = i - 1;
                 }
         }
 
