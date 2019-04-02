@@ -8,7 +8,7 @@ namespace util
 {
 
 template<typename T>
-inline constexpr bool isInRange(const T& value, const T& lo, const T& hi)
+inline constexpr auto isInRange(const T& value, const T& lo, const T& hi) -> bool
 {
         static_assert(std::is_arithmetic_v<T>, "Given type must be arithmetic.");
 

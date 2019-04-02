@@ -36,7 +36,7 @@ class Observer
 
 private:
 
-        virtual void receive(const Message&) = 0;
+        virtual auto receive(const Message&) -> void = 0;
 };
 
 
@@ -46,12 +46,12 @@ class Subject
 
 public:
 
-        static void addObserver(Observer* const o)
+        static auto addObserver(Observer* const o) -> void
         {
                 observers.insert(o);
         }
 
-        static void send(const Message& msg)
+        static auto send(const Message& msg) -> void
         {
                 std::for_each(observers.begin(), observers.end(),
                         [&](Observer* o) { o->receive(msg); });

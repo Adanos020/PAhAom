@@ -11,22 +11,22 @@ namespace util::err
 #define typeNotArithmetic "Given type must be arithmetic."
 
 // Lua errors.
-static constexpr CStr noDrawableTypeId()
+static constexpr auto noDrawableTypeId() -> CStr
 {
         return "Error: drawable type ID was not specified.";
 }
 
-static CStr badColorName(const std::string& cname)
+static auto badColorName(const std::string& cname) -> CStr
 {
         return (std::string("Error: color name '") + cname + "' was not recognized.").c_str();
 }
 
-static CStr badTextStyleName(const std::string& sname)
+static auto badTextStyleName(const std::string& sname) -> CStr
 {
         return (std::string("Error: text style '") + sname + "' was not recognized.").c_str();
 }
 
-static CStr badFontName(const std::string& fname)
+static auto badFontName(const std::string& fname) -> CStr
 {
         return (std::string("Error: font '") + fname + "' was not recognized.").c_str();
 }

@@ -19,19 +19,19 @@ class Random
 
 public:
 
-        static bool chance(const double prob = 0.5)
+        static auto chance(const double prob = 0.5) -> bool
         {
                 std::bernoulli_distribution distribution(prob);
                 return distribution(rng);
         }
 
-        template<typename T> static T uniform(const T lo, const T hi)
+        template<typename T> static auto uniform(const T lo, const T hi) -> T
         {
                 auto distribution = getUniformDistribution(lo, hi);
                 return distribution(rng);
         }
 
-        template<typename T> static T normal(const T mean = 0, const T stddev = 1)
+        template<typename T> static auto normal(const T mean = 0, const T stddev = 1) -> T
         {
                 static_assert(std::is_arithmetic_v<T>, typeNotArithmetic);
                 std::normal_distribution<T> distribution = { mean, stddev };

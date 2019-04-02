@@ -11,8 +11,8 @@ class CRTP
 
 public:
 
-        T& super()       { return static_cast<T&>(*this); }
-        T& super() const { return static_cast<const T&>(*this); }
+        auto super()       -> T& { return static_cast<T&>(*this); }
+        auto super() const -> T& { return static_cast<const T&>(*this); }
 
 private:
 

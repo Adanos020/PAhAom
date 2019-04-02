@@ -37,7 +37,7 @@ Engine::Engine()
         this->states.emplace("Menu");
 }
 
-int Engine::run()
+auto Engine::run() -> int
 {
         util::DeltaTime lag = 0.0;
 
@@ -61,7 +61,7 @@ int Engine::run()
         return 0;
 }
 
-void Engine::handleInput()
+auto Engine::handleInput() -> void
 {
         sf::Event event;
         while (this->window.pollEvent(event))
@@ -74,7 +74,7 @@ void Engine::handleInput()
         }
 }
 
-void Engine::draw()
+auto Engine::draw() -> void
 {
         this->window.clear();
 
@@ -86,7 +86,7 @@ void Engine::draw()
         this->window.display();
 }
 
-void Engine::receive(const util::Message& msg)
+auto Engine::receive(const util::Message& msg) -> void
 {
         if (auto val = std::get_if<util::Message::PushState>(&msg.msg))
         {

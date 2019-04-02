@@ -16,7 +16,7 @@ struct Video
         inline static sf::Vector2u resolution = {640, 360};
         inline static sf::Vector2u windowSize = {1280, 720};
 
-        static void load()
+        static auto load() -> void
         {
                 const lua::Table settings = util::luaContext.global["Settings"];
 
@@ -24,6 +24,10 @@ struct Video
                 resolution = {
                         video["resolution"]["x"],
                         video["resolution"]["y"],
+                };
+                windowSize = {
+                        video["window_size"]["x"],
+                        video["window_size"]["y"],
                 };
         }
 
