@@ -20,7 +20,7 @@ struct Message
 
         struct PushState
         {
-                std::string scriptPath;
+                std::string stateName;
         };
 
         std::variant<None,

@@ -90,7 +90,7 @@ auto Engine::receive(const util::Message& msg) -> void
 {
         if (auto val = std::get_if<util::Message::PushState>(&msg.msg))
         {
-                this->states.emplace(val->scriptPath);
+                this->states.emplace(val->stateName);
         }
         else if (std::get_if<util::Message::PopState>(&msg.msg))
         {
@@ -114,6 +114,7 @@ auto init() -> bool
 
         // Scripts.
         util::luaState.runFile("data/script/init.lua");
+        util::luaContext.global["broadcast"] = util::broadcast;
 
         // Settings
         engine::Settings::Video::load();

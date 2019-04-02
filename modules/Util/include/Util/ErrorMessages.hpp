@@ -10,7 +10,13 @@ namespace util::err
 // Static assertion errors.
 #define typeNotArithmetic "Given type must be arithmetic."
 
-// Lua errors.
+// Lua graphics-related errors.
+static auto wrongDrawableDefinition(int i) -> CStr
+{
+        return (std::string("Error: drawable object of index ") + std::to_string(i)
+                + " is not correctly defined.").c_str();
+}
+
 static constexpr auto noDrawableTypeId() -> CStr
 {
         return "Error: drawable type ID was not specified.";
@@ -29,6 +35,17 @@ static auto badTextStyleName(const std::string& sname) -> CStr
 static auto badFontName(const std::string& fname) -> CStr
 {
         return (std::string("Error: font '") + fname + "' was not recognized.").c_str();
+}
+
+// Lua messages errors.
+static constexpr auto noMessageTypeId() -> CStr
+{
+        return "Error: message type ID was not specified.";
+}
+
+static constexpr auto noPushStateName() -> CStr
+{
+        return "Error: name of the state to push was not specified.";
 }
 
 }

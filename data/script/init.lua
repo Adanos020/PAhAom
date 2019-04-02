@@ -1,7 +1,7 @@
 -- Scripts to load.
 scripts_path = "data/script/"
 scripts = {
-    "keyboard.lua",
+    "input.lua",
     "settings.lua",
     "GameState/Menu.lua",
     "GameState/Game.lua",

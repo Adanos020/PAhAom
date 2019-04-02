@@ -39,7 +39,7 @@ public:
                         this->drawableObjects.push_back(util::tableToDrawable(drawables[i]));
                         if (not this->drawableObjects.back().get())
                         {
-                                std::cerr << "Error: the following drawable definition is incorrect:" << std::endl;
+                                std::cerr << util::err::wrongDrawableDefinition(i) << std::endl;
                                 this->drawableObjects.pop_back();
                                 break;
                         }

@@ -4,6 +4,7 @@
 #include <Engine/Resources.hpp>
 
 #include <Util/ErrorMessages.hpp>
+#include <Util/Observer.hpp>
 
 #include <lua.hpp>
 
@@ -31,9 +32,35 @@ inline static lua::Context luaContext = {
 
 // Messages.
 
-inline auto broadcast(const lua::Table msg) -> void
+/** Broadcasts a message from Lua to the Subject.
+ */
+inline auto broadcast(lua::Context& context) -> lua::Retval
 {
-        
+        const lua::Table msg = context.args.at(0);
+
+        lua::Value type = msg["type"];
+        if (type.type() != lua::ValueType::String)
+        {
+                std::cerr << util::err::noMessageTypeId() << std::endl;
+        }
+
+        if (type == "PushState")
+        {
+                if (lua::Value state = msg["state"]; state.type() == lua::ValueType::String)
+                {
+                        util::Subject::send({ util::Message::PushState{ state } });
+                }
+                else
+                {
+                        std::cerr << util::err::noPushStateName() << std::endl;
+                }
+        }
+        else if (type == "PopState")
+        {
+                util::Subject::send({ util::Message::PopState{} });
+        }
+
+        return context.ret();
 }
 
 // Window handling.
@@ -429,7 +456,7 @@ inline auto tableToText(const lua::Table& obj) -> std::unique_ptr<sf::Text>
  */
 inline auto tableToDrawable(const lua::Value& obj) -> std::unique_ptr<sf::Drawable>
 {
-        if (!obj["type"])
+        if (not obj["type"])
         {
                 std::cerr << util::err::noDrawableTypeId() << std::endl;
                 return nullptr;
