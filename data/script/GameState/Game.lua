@@ -13,7 +13,7 @@ end
 
 function Game:handle_input(event)
     if event.type == "KeyPressed" then
-        local kc = event.key.code
+        local kc = event.code
         if kc == Keyboard.Escape then
             broadcast { type = "PopState" }
         end

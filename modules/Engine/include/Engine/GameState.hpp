@@ -49,9 +49,16 @@ public:
                 }
         }
 
+        ~GameState()
+        {
+                util::luaContext.global[this->stateName] = lua::nil;
+        }
+
         auto handleInput(const sf::Event& event) -> void
         {
-
+                const lua::Table evt = util::eventToTable(event);
+                const lua::Table thisObj = util::luaContext.global[this->stateName];
+                thisObj["handle_input"](thisObj, evt);
         }
 
         auto update() -> void
@@ -65,11 +72,9 @@ public:
                 const lua::Table thisObj = util::luaContext.global[this->stateName];
                 const lua::Table drawables = thisObj["draw"](thisObj);
 
-                for (int i = 1, nDrawables = drawables.len(); i <= nDrawables; ++i)
-                {
-                        const lua::Value drawable = drawables[i];
+                drawables.iterate([&](lua::Valref, lua::Valref drawable) {
                         target.draw(*drawableObjects[int(drawable)]);
-                }
+                });
         }
 
 private:

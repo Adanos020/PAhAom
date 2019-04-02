@@ -8,7 +8,7 @@ Menu = {
                 x = Settings.Video.resolution.x / 2,
                 y = Settings.Video.resolution.y / 2,
             },
-            color = "white"
+            fillColor = "white"
         },
     },
 }
@@ -22,7 +22,7 @@ end
 
 function Menu:handle_input(event)
     if event.type == "KeyPressed" then
-        local kc = event.key.code
+        local kc = event.code
         if kc == Keyboard.Return then
             broadcast { type = "PushState", state = "Game" }
         elseif kc == Keyboard.Escape then
