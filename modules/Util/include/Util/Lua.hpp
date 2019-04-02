@@ -8,11 +8,7 @@
 
 #include <lua.hpp>
 
-#include <SFML/Graphics/Color.hpp>
-#include <SFML/Graphics/Drawable.hpp>
-#include <SFML/Graphics/Font.hpp>
-#include <SFML/Graphics/Text.hpp>
-#include <SFML/Graphics/Transformable.hpp>
+#include <SFML/Graphics.hpp>
 #include <SFML/Window/Event.hpp>
 
 #include <iostream>
@@ -311,23 +307,173 @@ inline auto stringToColor(const std::string& obj) -> sf::Color
         return sf::Color::Transparent;
 }
 
-/** Transforms a Lua table into an sf::Vector2f object.
+/** Transforms a Lua table into an sf::Vector2<T> object.
  * 
  *  Table syntax:
  *  - x: Number specifying the x coordinate.
  *  - y: Number specifying the y coordinate.
  */
-inline auto tableToVector(const lua::Table& obj) -> sf::Vector2f
+template<typename T = float>
+inline auto tableToVector(const lua::Table& obj) -> sf::Vector2<T>
 {
         const lua::Value x = obj["x"];
         const lua::Value y = obj["y"];
         return {
-                x.type() == lua::ValueType::Number ? x : 0.f,
-                y.type() == lua::ValueType::Number ? y : 0.f,
+                T(x.type() == lua::ValueType::Number ? x : 0),
+                T(y.type() == lua::ValueType::Number ? y : 0),
         };
 }
 
+/** Transforms a Lua table into an sf::Rect<T> object.
+ * 
+ *  Table syntax:
+ *  - left:   Number specifying the x coordinate of the top-left corner.
+ *  - top:    Number specifying the y coordinate of the top-left corner.
+ *  - width:  Number specifying the rectangle's width.
+ *  - height: Number specifying the rectangle's height.
+ */
+template<typename T = float>
+inline auto tableToRectangle(const lua::Table& obj) -> sf::Rect<T>
+{
+        const lua::Value left   = obj["left"];
+        const lua::Value top    = obj["top"];
+        const lua::Value width  = obj["width"];
+        const lua::Value height = obj["height"];
+        return {
+                T(left.type()   == lua::ValueType::Number ? left   : 0),
+                T(top.type()    == lua::ValueType::Number ? top    : 0),
+                T(width.type()  == lua::ValueType::Number ? width  : 0),
+                T(height.type() == lua::ValueType::Number ? height : 0),
+        };
+}
+
+
+// Shorthand for checking table properties.
 #define prop(x, luatype) if (lua::Value x = obj[#x]; x.type() == lua::ValueType::luatype)
+
+
+/** Transforms a Lua table into an sf::CircleShape object.
+ * 
+ *  Table syntax:
+ *  - radius:     Number representing radius of the circle.
+ *  - pointCount: Number representing number of vertices around the center.
+ *  - all properties from Shape
+ */
+inline auto tableToCircleShape(const lua::Table& obj) -> std::unique_ptr<sf::CircleShape>
+{
+        std::unique_ptr<sf::CircleShape> circleShape { new sf::CircleShape };
+
+        prop (radius, Number)
+        {
+                circleShape->setRadius(radius);
+        }
+        prop (pointCount, Number)
+        {
+                circleShape->setPointCount(int(pointCount));
+        }
+
+        return circleShape;
+}
+
+/** Transforms a Lua table into an sf::ConvexShape object.
+ * 
+ *  Table syntax:
+ *  - points: Table of vectors representing positions of all vertices.
+ *  - all properties from Shape
+ */
+inline auto tableToConvexShape(const lua::Table& obj) -> std::unique_ptr<sf::ConvexShape>
+{
+        std::unique_ptr<sf::ConvexShape> convShape { new sf::ConvexShape };
+
+        prop (points, Table)
+        {
+                lua::Table pts = points;
+                convShape->setPointCount(int(pts.len()));
+                pts.iterate([&](lua::Valref i, lua::Valref pos) {
+                        convShape->setPoint(int(i) - 1, tableToVector(pos));
+                });
+        }
+
+        return convShape;
+}
+
+/** Transforms a Lua table into an sf::RectangleShape object.
+ * 
+ *  Table syntax:
+ *  - size: Vector representing size of the rectangle.
+ *  - all properties from Shape
+ */
+inline auto tableToRectangleShape(const lua::Table& obj) -> std::unique_ptr<sf::RectangleShape>
+{
+        std::unique_ptr<sf::RectangleShape> rectShape { new sf::RectangleShape };
+
+        prop (size, Table)
+        {
+                rectShape->setSize(tableToVector(size));
+        }
+
+        return rectShape;
+}
+
+/** Transforms a Lua table into an sf::Shape object.
+ * 
+ *  Table syntax:
+ *  - texture:          String containting the id of the texture.
+ *  - textureRect:      Rectangle representing the area of the texture to be displayed.
+ *  - fillColor:        Color of the font.
+ *  - outlineColor:     Color of the text outline.
+ *  - outlineThickness: Number representing width of the text outline.
+ */
+inline auto tableToShape(const lua::Table& obj) -> std::unique_ptr<sf::Shape>
+{
+        std::unique_ptr<sf::Shape> shape { nullptr };
+
+#define get(type, retfun) if (obj["type"] == #type) shape = retfun(obj)
+
+        get(sfCircleShape, tableToCircleShape); else
+        get(sfConvexShape, tableToConvexShape); else
+        get(sfRectangleShape, tableToRectangleShape);
+
+#undef get
+
+        prop (texture, String)
+        {
+                if (auto tex = engine::Resources::get<sf::Texture>(texture))
+                {
+                        shape->setTexture(tex);
+                }
+                else
+                {
+                        std::cerr << std::endl;
+                }
+        }
+        prop (textureRect, Table)
+        {
+                shape->setTextureRect(tableToRectangle<int>(textureRect));
+        }
+        prop (fillColor, String)
+        {
+                shape->setFillColor(stringToColor(fillColor));
+        }
+        prop (fillColor, Table)
+        {
+                shape->setFillColor(tableToColor(fillColor));
+        }
+        prop (outlineColor, String)
+        {
+                shape->setOutlineColor(stringToColor(outlineColor));
+        }
+        prop (outlineColor, Table)
+        {
+                shape->setOutlineColor(tableToColor(outlineColor));
+        }
+        prop (outlineThickness, Number)
+        {
+                shape->setOutlineThickness(outlineThickness);
+        }
+
+        return shape;
+}
 
 /** Transforms a Lua table into an sf::Text object.
  * 
@@ -466,7 +612,10 @@ inline auto tableToDrawable(const lua::Value& obj) -> std::unique_ptr<sf::Drawab
 
 #define get(type, retfun) if (obj["type"] == #type) drawable = retfun(obj)
 
-        get(sfText, tableToText);
+        get(sfText, tableToText);         else
+        get(sfCircleShape, tableToShape); else
+        get(sfConvexShape, tableToShape); else
+        get(sfRectangleShape, tableToShape);
 
 #undef get
 
@@ -492,5 +641,6 @@ inline auto tableToDrawable(const lua::Value& obj) -> std::unique_ptr<sf::Drawab
 }
 
 #undef prop
+#undef get
 
 }

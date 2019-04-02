@@ -8,7 +8,8 @@ Menu = {
                 x = Settings.Video.resolution.x / 2,
                 y = Settings.Video.resolution.y / 2,
             },
-            fillColor = "white"
+            fillColor = "white",
+            centeredOrigin = true
         },
     },
 }

@@ -45,7 +45,7 @@ public:
                         }
 
                         // Changing the drawable's recipe to its index.
-                        drawables[i] = i - 1;
+                        drawables[i]["index"] = i - 1;
                 }
         }
 
@@ -73,7 +73,7 @@ public:
                 const lua::Table drawables = thisObj["draw"](thisObj);
 
                 drawables.iterate([&](lua::Valref, lua::Valref drawable) {
-                        target.draw(*drawableObjects[int(drawable)]);
+                        target.draw(*drawableObjects[int(drawable["index"])]);
                 });
         }
 
