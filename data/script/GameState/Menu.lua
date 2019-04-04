@@ -11,7 +11,7 @@ Menu = {
             fillColor = "yellow",
             origin = "center"
         },
-    },
+    }
 }
 
 function Menu:new(o)

@@ -3,7 +3,7 @@
 
 #include <SFML/Window/Event.hpp>
 
-#include <lua.hpp>
+#include <Util/Script.hpp>
 
 
 namespace util::script

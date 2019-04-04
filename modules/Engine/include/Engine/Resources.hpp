@@ -1,6 +1,8 @@
 #pragma once
 
 
+#include <Util/Types.hpp>
+
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/Texture.hpp>
 
@@ -21,7 +23,8 @@ public:
         template<typename Resource>
         static auto load(const std::string& id, const std::string& path) -> bool
         {
-                static_assert(std::is_same_v<Resource, sf::Font> or std::is_same_v<Resource, sf::Texture>,
+                static_assert(std::is_same_v<Resource, sf::Font> or
+                              std::is_same_v<Resource, sf::Texture>,
                               "Resource type is not recognised.");
 
                 if constexpr (std::is_same_v<Resource, sf::Font>)
@@ -37,7 +40,8 @@ public:
         template<typename Resource>
         static auto get(const std::string& id)
         {
-                static_assert(std::is_same_v<Resource, sf::Font> or std::is_same_v<Resource, sf::Texture>,
+                static_assert(std::is_same_v<Resource, sf::Font> or
+                              std::is_same_v<Resource, sf::Texture>,
                               "Resource type is not recognised.");
 
                 if constexpr (std::is_same_v<Resource, sf::Font>)
@@ -61,7 +65,8 @@ public:
         template<typename Resource>
         static auto unload(const std::string& id) -> bool
         {
-                static_assert(std::is_same_v<Resource, sf::Font> or std::is_same_v<Resource, sf::Texture>,
+                static_assert(std::is_same_v<Resource, sf::Font> or
+                              std::is_same_v<Resource, sf::Texture>,
                               "Resource type is not recognised.");
 
                 if constexpr (std::is_same_v<Resource, sf::Font>)
@@ -77,7 +82,8 @@ public:
         template<typename Resource>
         static auto unloadAll() -> void
         {
-                static_assert(std::is_same_v<Resource, sf::Font> or std::is_same_v<Resource, sf::Texture>,
+                static_assert(std::is_same_v<Resource, sf::Font> or
+                              std::is_same_v<Resource, sf::Texture>,
                               "Resource type is not recognised.");
 
                 if constexpr (std::is_same_v<Resource, sf::Font>)
@@ -92,8 +98,8 @@ public:
 
 private:
 
-        inline static std::unordered_map<std::string, sf::Font> fonts;
-        inline static std::unordered_map<std::string, sf::Texture> textures;
+        inline static util::MapStringTo<sf::Font> fonts;
+        inline static util::MapStringTo<sf::Texture> textures;
 };
 
 }

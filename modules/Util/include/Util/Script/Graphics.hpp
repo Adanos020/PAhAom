@@ -4,8 +4,8 @@
 #include <Engine/Resources.hpp>
 
 #include <Util/ErrorMessages.hpp>
-
-#include <lua.hpp>
+#include <Util/Script.hpp>
+#include <Util/Types.hpp>
 
 #include <SFML/Graphics.hpp>
 
@@ -42,7 +42,7 @@ inline auto tableToColor(const lua::Table& obj) -> sf::Color
 
 inline auto stringToColor(const std::string& obj) -> sf::Color
 {
-        static const std::unordered_map<std::string, sf::Color> predefinedColors = {
+        static const util::MapStringTo<sf::Color> predefinedColors = {
                 { "black",       sf::Color::Black       },
                 { "white",       sf::Color::White       },
                 { "red",         sf::Color::Red         },
@@ -127,7 +127,8 @@ inline auto extractBounds(lua::Table& obj, T* drawable) -> void
 
 
 // Shorthand for checking table properties.
-#define prop(x, luatype) if (lua::Value x = obj[#x]; x.type() == lua::ValueType::luatype)
+#define prop(x, luatype)\
+        if (lua::Value x = obj[#x]; x.type() == lua::ValueType::luatype)
 
 
 /** Transforms a Lua table into an sf::CircleShape object.
@@ -139,7 +140,7 @@ inline auto extractBounds(lua::Table& obj, T* drawable) -> void
  */
 inline auto tableToCircleShape(lua::Table& obj) -> std::unique_ptr<sf::CircleShape>
 {
-        std::unique_ptr<sf::CircleShape> circleShape { new sf::CircleShape };
+        auto circleShape = std::make_unique<sf::CircleShape>();
 
         prop (radius, Number)
         {
@@ -161,7 +162,7 @@ inline auto tableToCircleShape(lua::Table& obj) -> std::unique_ptr<sf::CircleSha
  */
 inline auto tableToConvexShape(lua::Table& obj) -> std::unique_ptr<sf::ConvexShape>
 {
-        std::unique_ptr<sf::ConvexShape> convShape { new sf::ConvexShape };
+        auto convShape = std::make_unique<sf::ConvexShape>();
 
         prop (points, Table)
         {
@@ -183,7 +184,7 @@ inline auto tableToConvexShape(lua::Table& obj) -> std::unique_ptr<sf::ConvexSha
  */
 inline auto tableToRectangleShape(lua::Table& obj) -> std::unique_ptr<sf::RectangleShape>
 {
-        std::unique_ptr<sf::RectangleShape> rectShape { new sf::RectangleShape };
+        auto rectShape = std::make_unique<sf::RectangleShape>();
 
         prop (size, Table)
         {
@@ -213,6 +214,8 @@ inline auto tableToShape(lua::Table& obj) -> std::unique_ptr<sf::Shape>
         get(sfRectangleShape, tableToRectangleShape);
 
 #undef get
+
+        if (not shape) return shape;
 
         prop (texture, String)
         {
@@ -264,7 +267,7 @@ inline auto tableToShape(lua::Table& obj) -> std::unique_ptr<sf::Shape>
  */
 inline auto tableToSprite(lua::Table& obj) -> std::unique_ptr<sf::Sprite>
 {
-        std::unique_ptr<sf::Sprite> sprite { new sf::Sprite };
+        auto sprite = std::make_unique<sf::Sprite>();
 
         prop (texture, String)
         {
@@ -314,7 +317,7 @@ inline auto tableToSprite(lua::Table& obj) -> std::unique_ptr<sf::Sprite>
  */
 inline auto tableToText(lua::Table& obj) -> std::unique_ptr<sf::Text>
 {
-        static const std::unordered_map<std::string, sf::Text::Style> styles = {
+        static const util::MapStringTo<sf::Text::Style> styles = {
                 { "regular",       sf::Text::Regular       },
                 { "bold",          sf::Text::Bold          },
                 { "italic",        sf::Text::Italic        },
@@ -322,17 +325,18 @@ inline auto tableToText(lua::Table& obj) -> std::unique_ptr<sf::Text>
                 { "strikethrough", sf::Text::StrikeThrough },
         };
         
-        std::unique_ptr<sf::Text> text { new sf::Text };
+        auto text = std::make_unique<sf::Text>();
 
-        const auto setStyle = [&](const std::string& style)
+        const auto getStyle = [&](const std::string& style)
         {
                 if (auto s = styles.find(style); s != styles.end())
                 {
-                        text->setStyle(s->second);
+                        return s->second;
                 }
                 else
                 {
                         std::cerr << util::err::badTextStyleName(style) << std::endl;
+                        return sf::Text::Style::Regular;
                 }
         };
         
@@ -365,14 +369,14 @@ inline auto tableToText(lua::Table& obj) -> std::unique_ptr<sf::Text>
         }
         prop (style, String)
         {
-                setStyle(style);
+                text->setStyle(getStyle(style));
         }
         prop (style, Table)
         {
-                for (int i = 1, nStyles = style.len(); i < nStyles; ++i)
-                {
-                        setStyle(style[i]);
-                }
+                int compound = sf::Text::Style::Regular;
+                static_cast<lua::Table>(style).iterate(
+                        [&](lua::Valref, lua::Valref s) { compound |= getStyle(s); });
+                text->setStyle(compound);
         }
         prop (fillColor, String)
         {
@@ -405,10 +409,11 @@ inline auto tableToText(lua::Table& obj) -> std::unique_ptr<sf::Text>
  *  Table syntax for all sf::Drawable objects:
  *  - type:     String representing drawable type ID (full list of IDs below).
  *  - position: Vector representing the world coordinates of the sf::Text object.
- *  - rotation: Number representing the angle (in degrees) by which the object
- *              is rotated.
+ *  - rotation: Number representing the angle (in degrees) by which the object is rotated.
  *  - scale:    Vector representing the factors by which the object should be scaled.
- *  - origin:   Vector representing the coordinates of the object's reference frame's origin.
+ *  - origin:   Vector representing the coordinates of the object's reference frame's origin,
+ *              or a string choosing one of the predefined anchors (top, bottom, left, right,
+ *              center, top-left, top-right, bottom-left, bottom-right)
  * 
  *  Drawable type IDs:
  *  - sfText: sf::Text
@@ -437,6 +442,8 @@ inline auto tableToDrawable(lua::Table& obj) -> std::unique_ptr<sf::Drawable>
 
 #undef get
 
+        if (not drawable) return drawable;
+
         auto transformable = dynamic_cast<sf::Transformable*>(drawable.get());
         prop (position, Table)
         {
@@ -455,17 +462,17 @@ inline auto tableToDrawable(lua::Table& obj) -> std::unique_ptr<sf::Drawable>
                 prop (globalBounds, Table)
                 {
                         sf::FloatRect bounds = tableToRectangle(globalBounds);
-                        sf::Vector2f org = origin == "center"       ? sf::Vector2f{ bounds.width / 2, bounds.height / 2 }
-                                         : origin == "top"          ? sf::Vector2f{ bounds.width / 2, 0.f               }
-                                         : origin == "left"         ? sf::Vector2f{ 0.f,              bounds.height / 2 }
-                                         : origin == "bottom"       ? sf::Vector2f{ bounds.width / 2, bounds.height     }
-                                         : origin == "right"        ? sf::Vector2f{ bounds.width,     bounds.height / 2 }
-                                         : origin == "top-left"     ? sf::Vector2f{ 0.f,              0.f               }
-                                         : origin == "bottom-left"  ? sf::Vector2f{ 0.f,              bounds.height     }
-                                         : origin == "top-right"    ? sf::Vector2f{ bounds.width,     0.f               }
-                                         : origin == "bottom-right" ? sf::Vector2f{ bounds.width,     bounds.height     }
-                                         :                            sf::Vector2f{ 0.f,              0.f               };
-                        transformable->setOrigin(org);
+                        transformable->setOrigin(
+                                origin == "center"       ? sf::Vector2f(bounds.width / 2, bounds.height / 2) :
+                                origin == "top"          ? sf::Vector2f(bounds.width / 2, 0.f              ) :
+                                origin == "left"         ? sf::Vector2f(0.f,              bounds.height / 2) :
+                                origin == "bottom"       ? sf::Vector2f(bounds.width / 2, bounds.height    ) :
+                                origin == "right"        ? sf::Vector2f(bounds.width,     bounds.height / 2) :
+                                origin == "bottom-left"  ? sf::Vector2f(0.f,              bounds.height    ) :
+                                origin == "top-right"    ? sf::Vector2f(bounds.width,     0.f              ) :
+                                origin == "bottom-right" ? sf::Vector2f(bounds.width,     bounds.height    ) :
+                                /* origin == "top-left" */ sf::Vector2f(0.f,              0.f              )
+                        );
                 }
         }
         prop (origin, Table)

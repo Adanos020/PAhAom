@@ -7,6 +7,7 @@
 #include <memory>
 #include <stack>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 
@@ -30,5 +31,8 @@ using FastVector = std::basic_string<T, std::char_traits<T>>;
 
 template<typename T>
 using UniquePtrs = std::vector<std::unique_ptr<T>>;
+
+template<typename T>
+using MapStringTo = std::unordered_map<std::string, T>;
 
 }

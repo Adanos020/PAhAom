@@ -11,7 +11,7 @@ Game = {
             fillColor = "red",
             origin = "center"
         }
-    },
+    }
 }
 
 function Game:new(o)

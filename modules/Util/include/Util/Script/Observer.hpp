@@ -3,8 +3,7 @@
 
 #include <Util/ErrorMessages.hpp>
 #include <Util/Observer.hpp>
-
-#include <lua.hpp>
+#include <Util/Script.hpp>
 
 #include <iostream>
 
@@ -13,6 +12,9 @@ namespace util::script
 {
 
 /** Broadcasts a message from Lua to the Subject.
+ * 
+ *  Its sole argument is a table containing a string (message type) and other parameters
+ *  relevant to that type of message.
  */
 inline auto broadcast(lua::Context& context) -> lua::Retval
 {
