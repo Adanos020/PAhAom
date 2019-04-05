@@ -16,32 +16,28 @@ namespace util::script
  *  Its sole argument is a table containing a string (message type) and other parameters
  *  relevant to that type of message.
  */
-inline auto broadcast(lua::Context& context) -> lua::Retval
+inline auto pushState(lua::Context& context) -> lua::Retval
 {
-        const lua::Table msg = context.args.at(0);
-
-        lua::Value type = msg["type"];
-        if (type.type() != lua::ValueType::String)
+        if (lua::Value state = context.args.at(0); state.type() == lua::ValueType::String)
         {
-                std::cerr << util::err::noMessageTypeId() << std::endl;
+                util::Subject::send({ util::Message::PushState{ state } });
+        }
+        else
+        {
+                std::cerr << util::err::noPushStateName() << std::endl;
         }
 
-        if (type == "PushState")
-        {
-                if (lua::Value state = msg["state"]; state.type() == lua::ValueType::String)
-                {
-                        util::Subject::send({ util::Message::PushState{ state } });
-                }
-                else
-                {
-                        std::cerr << util::err::noPushStateName() << std::endl;
-                }
-        }
-        else if (type == "PopState")
-        {
-                util::Subject::send({ util::Message::PopState{} });
-        }
+        return context.ret();
+}
 
+/** Broadcasts a message from Lua to the Subject.
+ * 
+ *  Its sole argument is a table containing a string (message type) and other parameters
+ *  relevant to that type of message.
+ */
+inline auto popState(lua::Context& context) -> lua::Retval
+{
+        util::Subject::send({ util::Message::PopState{} });
         return context.ret();
 }
 

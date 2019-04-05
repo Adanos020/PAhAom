@@ -327,7 +327,7 @@ inline auto tableToText(lua::Table& obj) -> std::unique_ptr<sf::Text>
         
         auto text = std::make_unique<sf::Text>();
 
-        const auto getStyle = [&](const std::string& style)
+        const auto getStyle = [&](const std::string& style) -> sf::Text::Style
         {
                 if (auto s = styles.find(style); s != styles.end())
                 {
