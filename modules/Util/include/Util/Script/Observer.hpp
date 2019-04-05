@@ -11,10 +11,9 @@
 namespace util::script
 {
 
-/** Broadcasts a message from Lua to the Subject.
+/** Broadcasts a PushState message from Lua to the Subject.
  * 
- *  Its sole argument is a table containing a string (message type) and other parameters
- *  relevant to that type of message.
+ *  Its sole argument is a table containing a string containing the name of the state to push.
  */
 inline auto pushState(lua::Context& context) -> lua::Retval
 {
@@ -30,10 +29,7 @@ inline auto pushState(lua::Context& context) -> lua::Retval
         return context.ret();
 }
 
-/** Broadcasts a message from Lua to the Subject.
- * 
- *  Its sole argument is a table containing a string (message type) and other parameters
- *  relevant to that type of message.
+/** Broadcasts a PopState message from Lua to the Subject.
  */
 inline auto popState(lua::Context& context) -> lua::Retval
 {
