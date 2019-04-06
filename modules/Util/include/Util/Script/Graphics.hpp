@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include <Engine/Graphics/TileMap.hpp>
+#include <Engine/Graphics/SquareTileMap.hpp>
 #include <Engine/Resources.hpp>
 
 #include <Util/ErrorMessages.hpp>
