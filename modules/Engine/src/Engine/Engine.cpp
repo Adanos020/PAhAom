@@ -17,24 +17,35 @@ namespace engine
 {
 
 Engine::Engine()
-: window ({Settings::Video::windowSize.x,
-           Settings::Video::windowSize.y}, "PAhAom", sf::Style::Close)
-, screen (sf::Vector2f(Settings::Video::windowSize))
-, running (true)
+: running (true)
 {
+        // Observer.
         util::Subject::addObserver(this);
 
+        // RNG.
+        util::Random::rng.seed(std::chrono::system_clock::now().time_since_epoch().count());
+
+        // Scripts.
+        util::luaContext.global["push_state"]   = util::script::pushState;
+        util::luaContext.global["pop_state"]    = util::script::popState;
+        util::luaContext.global["load_font"]    = util::script::load<sf::Font>;
+        util::luaContext.global["load_texture"] = util::script::load<sf::Texture>;
+        util::luaState.runFile("data/scripts/init.lua");
+
+        // Settings.
+        Settings::Video::load();
+
         // Window setup.
+        this->window.create({Settings::Video::windowSize.x, Settings::Video::windowSize.y},
+                            "PAhAom", sf::Style::Close);
         this->window.setFramerateLimit(60);
         this->window.setKeyRepeatEnabled(false);
 
         // Render texture setup.
+        screen.setSize(sf::Vector2f(Settings::Video::windowSize));
         const sf::Vector2u screenRes = Settings::Video::resolution;
         this->screenTexture.create(screenRes.x, screenRes.y);
         this->screen.setTexture(&this->screenTexture.getTexture());
-
-        // State.
-        this->states.emplace("Menu");
 }
 
 auto Engine::run() -> int
@@ -107,31 +118,7 @@ auto Engine::receive(const util::Message& msg) -> void
 
 }
 
-auto init() -> bool
-{
-        // RNG
-        util::Random::rng.seed(std::chrono::system_clock::now().time_since_epoch().count());
-
-        // Scripts.
-        util::luaState.runFile("data/script/init.lua");
-        util::luaContext.global["push_state"] = util::script::pushState;
-        util::luaContext.global["pop_state"] = util::script::popState;
-
-        // Settings
-        engine::Settings::Video::load();
-
-        // Resources
-        return engine::Resources::load<sf::Font>("unifont", "data/font/unifont.ttf") and
-               engine::Resources::load<sf::Texture>("tileset", "data/graphics/tileset.png");
-}
-
 auto main() -> int
 {
-        if (not init())
-        {
-                std::cout << "Some resources could not be loaded." << std::endl;
-                return 1;
-        }
-
         return engine::Engine().run();
 }

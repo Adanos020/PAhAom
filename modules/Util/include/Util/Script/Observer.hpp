@@ -17,7 +17,7 @@ namespace util::script
  */
 inline auto pushState(lua::Context& context) -> lua::Retval
 {
-        if (lua::Value state = context.args.at(0); state.type() == lua::ValueType::String)
+        if (lua::Value state = context.args.at(0); state.is<std::string>())
         {
                 util::Subject::send({ util::Message::PushState{ state } });
         }

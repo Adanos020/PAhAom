@@ -48,4 +48,15 @@ static constexpr auto noPushStateName() -> CStr
         return "Error: name of the state to push was not specified.";
 }
 
+// Lua resources errors.
+static constexpr auto noResourceName() -> CStr
+{
+        return "Error: required resource name was not specified.";
+}
+
+static constexpr auto noResourcePath() -> CStr
+{
+        return "Error: required resource path was not specified.";
+}
+
 }

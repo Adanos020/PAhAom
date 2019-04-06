@@ -1,6 +1,8 @@
 #pragma once
 
 
+#include <Engine/Engine.hpp>
+
 #include <Util/ErrorMessages.hpp>
 
 #include <random>
@@ -15,7 +17,7 @@ namespace util
 class Random
 {
         Random() = delete;
-        friend bool ::init();
+        friend class engine::Engine;
 
 public:
 
