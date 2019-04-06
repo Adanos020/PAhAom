@@ -13,19 +13,29 @@ Menu = {
         },
         {
             type = "sfCircleShape",
-            fillColor = "yellow",
+            fillColor = "green",
             radius = 30,
-            position = { 40, 140 }
+            position = { x = 40, y = 140 }
         },
-        -- {
-        --     type = "sfRectangleShape",
-        --     fillColor = "blue",
-        --     size = { 69, 42 },
-        --     position = {
-        --         Settings.video.resolution.x - 80,
-        --         Settings.video.resolution.y - 50
-        --     }
-        -- },
+        {
+            type = "sfRectangleShape",
+            fillColor = "blue",
+            size = { x = 69, y = 42 },
+            position = {
+                x = Settings.video.resolution.x - 80,
+                y = Settings.video.resolution.y - 50
+            }
+        },
+        {
+            type = "sfSprite",
+            texture = "tileset",
+            textureRect = {
+                left = 0, top = 16,
+                width = 16, height = 16
+            },
+            scale = 4,
+            position = { x = 10, y = 10 }
+        }
     }
 }
 

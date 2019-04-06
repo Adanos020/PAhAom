@@ -166,9 +166,9 @@ inline auto tableToConvexShape(lua::Table& obj) -> std::unique_ptr<sf::ConvexSha
         prop (points, lua::Table)
         {
                 lua::Table pts = points;
-                convShape->setPointCount(int(pts.len()));
+                convShape->setPointCount(unsigned(pts.len()));
                 pts.iterate([&](lua::Valref i, lua::Valref pos) {
-                        convShape->setPoint(int(i) - 1, tableToVector(pos));
+                        convShape->setPoint(unsigned(i) - 1, tableToVector(pos));
                 });
         }
 
@@ -413,7 +413,8 @@ inline auto tableToText(lua::Table& obj) -> std::unique_ptr<sf::Text>
  *  - type:     String representing drawable type ID (full list of IDs below).
  *  - position: Vector representing the world coordinates of the sf::Text object.
  *  - rotation: Number representing the angle (in degrees) by which the object is rotated.
- *  - scale:    Vector representing the factors by which the object should be scaled.
+ *  - scale:    Vector representing the factors or a single number also representing the factor
+ *              by which the object should be scaled.
  *  - origin:   Vector representing the coordinates of the object's reference frame's origin,
  *              or a string choosing one of the predefined anchors (top, bottom, left, right,
  *              center, top-left, top-right, bottom-left, bottom-right)
@@ -469,6 +470,10 @@ inline auto tableToDrawable(lua::Table& obj) -> std::unique_ptr<sf::Drawable>
         prop (scale, lua::Table)
         {
                 transformable->setScale(tableToVector(scale));
+        }
+        prop (scale, float)
+        {
+                transformable->setScale(scale, scale);
         }
         prop (origin, std::string)
         {
