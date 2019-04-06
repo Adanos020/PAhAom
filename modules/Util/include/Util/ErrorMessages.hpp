@@ -37,6 +37,11 @@ static auto badFontName(const std::string& fname) -> CStr
         return (std::string("Error: font '") + fname + "' was not recognized.").c_str();
 }
 
+static auto badTextureName(const std::string& fname) -> CStr
+{
+        return (std::string("Error: texture '") + fname + "' was not recognized.").c_str();
+}
+
 // Lua messages errors.
 static constexpr auto noMessageTypeId() -> CStr
 {

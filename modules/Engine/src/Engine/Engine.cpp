@@ -36,15 +36,14 @@ Engine::Engine()
         Settings::Video::load();
 
         // Window setup.
-        this->window.create({Settings::Video::windowSize.x, Settings::Video::windowSize.y},
-                            "PAhAom", sf::Style::Close);
+        this->window.create(Settings::Video::videoMode(), "PAhAom", sf::Style::Close);
         this->window.setFramerateLimit(60);
         this->window.setKeyRepeatEnabled(false);
 
         // Render texture setup.
-        screen.setSize(sf::Vector2f(Settings::Video::windowSize));
         const sf::Vector2u screenRes = Settings::Video::resolution;
         this->screenTexture.create(screenRes.x, screenRes.y);
+        this->screen.setSize(sf::Vector2f(Settings::Video::windowSize));
         this->screen.setTexture(&this->screenTexture.getTexture());
 }
 

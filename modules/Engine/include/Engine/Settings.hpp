@@ -4,6 +4,7 @@
 #include <Util/Script.hpp>
 
 #include <SFML/System/Vector2.hpp>
+#include <SFML/Window/VideoMode.hpp>
 
 #include <string_view>
 
@@ -29,6 +30,11 @@ struct Video
                         video["window_size"]["x"],
                         video["window_size"]["y"],
                 };
+        }
+
+        static auto videoMode() -> sf::VideoMode
+        {
+                return { windowSize.x, windowSize.y };
         }
 
         Video() = delete;

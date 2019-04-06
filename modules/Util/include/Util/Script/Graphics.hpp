@@ -9,7 +9,6 @@
 
 #include <SFML/Graphics.hpp>
 
-#include <iostream>
 #include <memory>
 #include <type_traits>
 #include <unordered_map>
@@ -59,7 +58,7 @@ inline auto stringToColor(const std::string& obj) -> sf::Color
                 return c->second;
         }
 
-        std::cerr << util::err::badColorName(obj) << std::endl;
+        luaContext.error(util::err::badColorName(obj));
         return sf::Color::Transparent;
 }
 
@@ -147,7 +146,7 @@ inline auto tableToCircleShape(lua::Table& obj) -> std::unique_ptr<sf::CircleSha
         }
         prop (pointCount, unsigned)
         {
-                circleShape->setPointCount(unsigned(pointCount));
+                circleShape->setPointCount(pointCount.to<unsigned>());
         }
 
         return circleShape;
@@ -166,9 +165,9 @@ inline auto tableToConvexShape(lua::Table& obj) -> std::unique_ptr<sf::ConvexSha
         prop (points, lua::Table)
         {
                 lua::Table pts = points;
-                convShape->setPointCount(unsigned(pts.len()));
+                convShape->setPointCount(pts.len().to<unsigned>());
                 pts.iterate([&](lua::Valref i, lua::Valref pos) {
-                        convShape->setPoint(unsigned(i) - 1, tableToVector(pos));
+                        convShape->setPoint(i.to<unsigned>() - 1, tableToVector(pos));
                 });
         }
 
@@ -228,7 +227,7 @@ inline auto tableToShape(lua::Table& obj) -> std::unique_ptr<sf::Shape>
                 }
                 else
                 {
-                        std::cerr << std::endl;
+                        luaContext.error(util::err::badTextureName(texture));
                 }
         }
         prop (textureRect, lua::Table)
@@ -280,7 +279,7 @@ inline auto tableToSprite(lua::Table& obj) -> std::unique_ptr<sf::Sprite>
                 }
                 else
                 {
-                        std::cerr << std::endl;
+                        luaContext.error(util::err::badTextureName(texture));
                 }
         }
         prop (textureRect, lua::Table)
@@ -338,7 +337,7 @@ inline auto tableToText(lua::Table& obj) -> std::unique_ptr<sf::Text>
                 }
                 else
                 {
-                        std::cerr << util::err::badTextStyleName(style) << std::endl;
+                        luaContext.error(util::err::badTextStyleName(style));
                         return sf::Text::Style::Regular;
                 }
         };
@@ -355,7 +354,7 @@ inline auto tableToText(lua::Table& obj) -> std::unique_ptr<sf::Text>
                 }
                 else
                 {
-                        std::cerr << util::err::badFontName(font) << std::endl;
+                        luaContext.error(util::err::badFontName(font));
                 }
         }
         prop (characterSize, unsigned)
@@ -433,7 +432,7 @@ inline auto tableToDrawable(lua::Table& obj) -> std::unique_ptr<sf::Drawable>
 
         if (not type)
         {
-                std::cerr << util::err::noDrawableTypeId() << std::endl;
+                luaContext.error(util::err::noDrawableTypeId());
                 return nullptr;
         }
 

@@ -5,8 +5,6 @@
 #include <Util/Observer.hpp>
 #include <Util/Script/Script.hpp>
 
-#include <iostream>
-
 
 namespace util::script
 {
@@ -17,13 +15,13 @@ namespace util::script
  */
 inline auto pushState(lua::Context& context) -> lua::Retval
 {
-        if (lua::Value state = context.args.at(0); state.is<std::string>())
+        if (lua::Value state = context.args[0]; state.is<std::string>())
         {
                 util::Subject::send({ util::Message::PushState{ state } });
         }
         else
         {
-                std::cerr << util::err::noPushStateName() << std::endl;
+                context.error(util::err::noPushStateName());
         }
 
         return context.ret();
