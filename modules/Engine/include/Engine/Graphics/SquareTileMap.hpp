@@ -19,31 +19,30 @@ class SquareTileMap : public sf::Drawable, public sf::Transformable
 {
 public: // Interface.
 
-        SquareTileMap(size_t columns, size_t rows, size_t tileSize, size_t tileIconSize)
+        SquareTileMap(size_t columns, size_t rows, float tileSize, size_t tileIconSize)
         : columns(columns), rows(rows)
         , tileSize(tileSize), tileIconSize(tileIconSize)
-        , vertices(sf::Quads, 4 * this->columns * this->rows)
+        , vertices(sf::Quads)
         {
                 this->tiles.resize(columns);
                 std::for_each(
-                        this->tiles.begin(),
-                        this->tiles.end(),
+                        this->tiles.begin(), this->tiles.end(),
                         [=](auto& row) { row.resize(rows); }
                 );
                 this->placeVertices();
         }
 
-        SquareTileMap(size_t columns, size_t rows, const util::TileID fill, size_t tileSize, size_t tileIconSize)
+        SquareTileMap(size_t columns, size_t rows, const util::TileID fill, float tileSize, size_t tileIconSize)
         : SquareTileMap(columns, rows, tileSize, tileIconSize)
         {
-                for (unsigned x = 0; x < this->columns; ++x)
-                for (unsigned y = 0; y < this->rows; ++y)
-                {
-                        this->setTile({x, y}, fill);
-                }
+                this->fillArea({
+                        0u, 0u,
+                        static_cast<unsigned int>(this->columns),
+                        static_cast<unsigned int>(this->rows)
+                }, fill);
         }
 
-        SquareTileMap(const util::Matrix<util::TileID>& tiles, size_t tileSize, size_t tileIconSize)
+        SquareTileMap(const util::Matrix<util::TileID>& tiles, float tileSize, size_t tileIconSize)
         : SquareTileMap(tiles.size(), tiles.size() ? tiles[0].size() : 0, tileSize, tileIconSize)
         {
                 this->setMap(tiles);
@@ -71,50 +70,6 @@ public: // Interface.
         {
         }
 
-        void setTexture(sf::Texture* const texture)
-        {
-                this->texture = texture;
-        }
-
-        void setTile(const sf::Vector2u pos, const util::TileID iconIndex)
-        {
-                const size_t vertex = 4 * (pos.x + pos.y * this->columns);
-
-                const size_t texWidth = this->texture->getSize().x;
-                const sf::Vector2f texCoords = {
-                        this->tileIconSize * float(iconIndex % (texWidth / this->tileIconSize)),
-                        this->tileIconSize * float(iconIndex / (texWidth / this->tileIconSize))
-                };
-
-                const sf::Vector2f topLeft     = { 0,                         0 };
-                const sf::Vector2f topRight    = { float(this->tileIconSize), 0 };
-                const sf::Vector2f bottomRight = { float(this->tileIconSize), float(this->tileIconSize) };
-                const sf::Vector2f bottomLeft  = { 0,                         float(this->tileIconSize) };
-
-                this->vertices[vertex + 0].texCoords = texCoords + topLeft;
-                this->vertices[vertex + 1].texCoords = texCoords + topRight;
-                this->vertices[vertex + 2].texCoords = texCoords + bottomRight;
-                this->vertices[vertex + 3].texCoords = texCoords + bottomLeft;
-        }
-
-        util::TileID getTile(const sf::Vector2u pos) const
-        {
-                return this->tiles[pos.x][pos.y];
-        }
-
-        void setMap(const util::Matrix<util::TileID>& tiles)
-        {
-                this->tiles = tiles;
-                this->columns = tiles.size();
-                this->rows = this->columns ? tiles[0].size() : 0;
-
-                for (unsigned x = 0; x < this->columns; ++x)
-                for (unsigned y = 0; y < this->rows; ++y)
-                {
-                        this->setTile({x, y}, tiles[x][y]);
-                }
-        }
-
         void fillArea(sf::UintRect area, util::TileID fill)
         {
                 for (unsigned x = area.left; x < area.width; ++x)
@@ -124,7 +79,63 @@ public: // Interface.
                 }
         }
 
+public: // Mutators.
+
+        void setTexture(sf::Texture* const texture)
+        {
+                this->texture = texture;
+        }
+
+        void setTile(const sf::Vector2u pos, const util::TileID iconIndex)
+        {
+                this->tiles[pos.x][pos.y] = iconIndex;
+
+                const size_t vertex = 4 * (pos.x + pos.y * this->columns);
+
+                const float iconSize = this->tileIconSize;
+                const size_t texWidth = this->texture->getSize().x;
+                const sf::Vector2f texCoords = {
+                        iconIndex % (texWidth / this->tileIconSize) * iconSize,
+                        iconIndex / (texWidth / this->tileIconSize) * iconSize
+                };
+
+                const sf::Vector2f topLeft     = {0,        0};
+                const sf::Vector2f topRight    = {iconSize, 0};
+                const sf::Vector2f bottomRight = {iconSize, iconSize};
+                const sf::Vector2f bottomLeft  = {0,        iconSize};
+
+                this->vertices[vertex + 0].texCoords = texCoords + topLeft;
+                this->vertices[vertex + 1].texCoords = texCoords + topRight;
+                this->vertices[vertex + 2].texCoords = texCoords + bottomRight;
+                this->vertices[vertex + 3].texCoords = texCoords + bottomLeft;
+        }
+
+        void setMap(const util::Matrix<util::TileID>& tiles)
+        {
+                this->tiles = tiles;
+                this->columns = tiles.size();
+                this->rows = this->columns ? tiles[0].size() : 0;
+
+                this->placeVertices();
+
+                for (unsigned x = 0; x < this->columns; ++x)
+                for (unsigned y = 0; y < this->rows; ++y)
+                {
+                        this->setTile({x, y}, tiles[x][y]);
+                }
+        }
+
 public: // Accessors.
+
+        sf::Texture* getTexture() const
+        {
+                return this->texture;
+        }
+
+        util::TileID getTile(const sf::Vector2u pos) const
+        {
+                return this->tiles[pos.x][pos.y];
+        }
 
         size_t getColumns() const
         {
@@ -195,19 +206,18 @@ private: // Helper functions.
 
         void placeVertices()
         {
-                const sf::Vector2f topLeft     = { 0,                     0 };
-                const sf::Vector2f topRight    = { float(this->tileSize), 0 };
-                const sf::Vector2f bottomRight = { float(this->tileSize), float(this->tileSize) };
-                const sf::Vector2f bottomLeft  = { 0,                     float(this->tileSize) };
+                this->vertices.resize(4 * this->columns * this->rows);
+
+                const sf::Vector2f topLeft     = {0,              0};
+                const sf::Vector2f topRight    = {this->tileSize, 0};
+                const sf::Vector2f bottomRight = {this->tileSize, this->tileSize};
+                const sf::Vector2f bottomLeft  = {0,              this->tileSize};
 
                 for (size_t x = 0; x < this->columns; ++x)
                 for (size_t y = 0; y < this->rows; ++y)
                 {
                         const size_t tile = 4 * (x + y * this->columns);
-                        const sf::Vector2f position = {
-                                float(x * this->tileSize),
-                                float(y * this->tileSize)
-                        };
+                        const sf::Vector2f position = {x * this->tileSize, y * this->tileSize};
 
                         this->vertices[tile + 0].position = position + topLeft;
                         this->vertices[tile + 1].position = position + topRight;
@@ -221,7 +231,7 @@ private: // Fields.
         size_t columns;
         size_t rows;
 
-        size_t tileSize;
+        float tileSize;
         size_t tileIconSize;
 
         util::Matrix<util::TileID> tiles;

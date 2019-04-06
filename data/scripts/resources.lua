@@ -17,8 +17,8 @@ Resources = {
     sounds = {
 
     },
-    -- All paths originate in "data/lang/".
-    lang = {
+    -- All paths originate in "data/languages/".
+    languages = {
 
     },
 }
