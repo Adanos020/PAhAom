@@ -21,19 +21,19 @@ class Random
 
 public:
 
-        static auto chance(const double prob = 0.5) -> bool
+        static bool chance(const double prob = 0.5)
         {
                 std::bernoulli_distribution distribution(prob);
                 return distribution(rng);
         }
 
-        template<typename T> static auto uniform(const T lo, const T hi) -> T
+        template<typename T> static T uniform(const T lo, const T hi)
         {
                 auto distribution = getUniformDistribution(lo, hi);
                 return distribution(rng);
         }
 
-        template<typename T> static auto normal(const T mean = 0, const T stddev = 1) -> T
+        template<typename T> static T normal(const T mean = 0, const T stddev = 1)
         {
                 static_assert(std::is_arithmetic_v<T>, typeNotArithmetic);
                 std::normal_distribution<T> distribution = { mean, stddev };
@@ -41,7 +41,7 @@ public:
         }
 
         template<typename RandomAccessIterator>
-        static auto oneOf(RandomAccessIterator begin, RandomAccessIterator end)
+        static decltype(auto) oneOf(RandomAccessIterator begin, RandomAccessIterator end)
         {
                 return *(begin + uniform(0, int(end - begin)));
         }

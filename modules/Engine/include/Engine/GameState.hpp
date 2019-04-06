@@ -55,20 +55,20 @@ public:
                 util::luaContext.global[this->stateName] = lua::nil;
         }
 
-        auto handleInput(const sf::Event& event) -> void
+        void handleInput(const sf::Event& event)
         {
                 const lua::Table evt = util::script::eventToTable(event);
                 const lua::Table thisObj = util::luaContext.global[this->stateName];
                 thisObj["handle_input"](thisObj, evt);
         }
 
-        auto update() -> void
+        void update()
         {
                 const lua::Table thisObj = util::luaContext.global[this->stateName];
                 thisObj["update"](thisObj, util::FRAME_TIME);
         }
 
-        auto draw(sf::RenderTarget& target) -> void
+        void draw(sf::RenderTarget& target)
         {
                 const lua::Table thisObj = util::luaContext.global[this->stateName];
                 const lua::Table drawables = thisObj["draw"](thisObj);

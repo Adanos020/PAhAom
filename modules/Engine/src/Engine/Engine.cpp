@@ -17,7 +17,7 @@ namespace engine
 {
 
 Engine::Engine()
-: running (true)
+: running(true)
 {
         // Observer.
         util::Subject::addObserver(this);
@@ -47,7 +47,7 @@ Engine::Engine()
         this->screen.setTexture(&this->screenTexture.getTexture());
 }
 
-auto Engine::run() -> int
+int Engine::run()
 {
         util::DeltaTime lag = 0.0;
 
@@ -71,7 +71,7 @@ auto Engine::run() -> int
         return 0;
 }
 
-auto Engine::handleInput() -> void
+void Engine::handleInput()
 {
         sf::Event event;
         while (this->window.pollEvent(event))
@@ -84,7 +84,7 @@ auto Engine::handleInput() -> void
         }
 }
 
-auto Engine::draw() -> void
+void Engine::draw()
 {
         this->window.clear();
 
@@ -96,7 +96,7 @@ auto Engine::draw() -> void
         this->window.display();
 }
 
-auto Engine::receive(const util::Message& msg) -> void
+void Engine::receive(const util::Message& msg)
 {
         if (auto val = std::get_if<util::Message::PushState>(&msg.msg))
         {
@@ -117,7 +117,7 @@ auto Engine::receive(const util::Message& msg) -> void
 
 }
 
-auto main() -> int
+int main()
 {
         return engine::Engine().run();
 }

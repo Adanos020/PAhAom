@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include <Engine/Graphics/TileMap.hpp>
 #include <Engine/Resources.hpp>
 
 #include <Util/ErrorMessages.hpp>
@@ -25,7 +26,7 @@ namespace util::script
  *  - b: Number specifying the b component.
  *  - a: Number specifying the a component.
  */
-inline auto tableToColor(const lua::Table& obj) -> sf::Color
+inline sf::Color tableToColor(const lua::Table& obj)
 {
         const lua::Value r = obj["r"];
         const lua::Value g = obj["g"];
@@ -39,7 +40,7 @@ inline auto tableToColor(const lua::Table& obj) -> sf::Color
         };
 }
 
-inline auto stringToColor(const std::string& obj) -> sf::Color
+inline sf::Color stringToColor(const std::string& obj)
 {
         static const util::MapStringTo<sf::Color> predefinedColors = {
                 { "black",       sf::Color::Black       },
@@ -69,7 +70,7 @@ inline auto stringToColor(const std::string& obj) -> sf::Color
  *  - y: Number specifying the y coordinate.
  */
 template<typename T = float>
-inline auto tableToVector(const lua::Table& obj) -> sf::Vector2<T>
+inline sf::Vector2<T> tableToVector(const lua::Table& obj)
 {
         const lua::Value x = obj["x"];
         const lua::Value y = obj["y"];
@@ -88,7 +89,7 @@ inline auto tableToVector(const lua::Table& obj) -> sf::Vector2<T>
  *  - height: Number specifying the rectangle's height.
  */
 template<typename T = float>
-inline auto tableToRectangle(const lua::Table& obj) -> sf::Rect<T>
+inline sf::Rect<T> tableToRectangle(const lua::Table& obj)
 {
         const lua::Value lft = obj["left"];
         const lua::Value top = obj["top"];
@@ -103,7 +104,7 @@ inline auto tableToRectangle(const lua::Table& obj) -> sf::Rect<T>
 }
 
 template<typename T>
-inline auto extractBounds(lua::Table& obj, const std::unique_ptr<T>& drawable) -> void
+inline void extractBounds(lua::Table& obj, const std::unique_ptr<T>& drawable)
 {
         static_assert(std::is_base_of_v<sf::Drawable, T>);
 
@@ -136,7 +137,7 @@ inline auto extractBounds(lua::Table& obj, const std::unique_ptr<T>& drawable) -
  *  - pointCount: Number representing number of vertices around the center.
  *  - all properties from Shape
  */
-inline auto tableToCircleShape(lua::Table& obj) -> std::unique_ptr<sf::CircleShape>
+inline std::unique_ptr<sf::CircleShape> tableToCircleShape(lua::Table& obj)
 {
         auto circleShape = std::make_unique<sf::CircleShape>();
 
@@ -158,7 +159,7 @@ inline auto tableToCircleShape(lua::Table& obj) -> std::unique_ptr<sf::CircleSha
  *  - points: Table of vectors representing positions of all vertices.
  *  - all properties from Shape
  */
-inline auto tableToConvexShape(lua::Table& obj) -> std::unique_ptr<sf::ConvexShape>
+inline std::unique_ptr<sf::ConvexShape> tableToConvexShape(lua::Table& obj)
 {
         auto convShape = std::make_unique<sf::ConvexShape>();
 
@@ -180,7 +181,7 @@ inline auto tableToConvexShape(lua::Table& obj) -> std::unique_ptr<sf::ConvexSha
  *  - size: Vector representing size of the rectangle.
  *  - all properties from Shape
  */
-inline auto tableToRectangleShape(lua::Table& obj) -> std::unique_ptr<sf::RectangleShape>
+inline std::unique_ptr<sf::RectangleShape> tableToRectangleShape(lua::Table& obj)
 {
         auto rectShape = std::make_unique<sf::RectangleShape>();
 
@@ -201,7 +202,7 @@ inline auto tableToRectangleShape(lua::Table& obj) -> std::unique_ptr<sf::Rectan
  *  - outlineColor:     Color of the text outline.
  *  - outlineThickness: Number representing width of the text outline.
  */
-inline auto tableToShape(lua::Table& obj) -> std::unique_ptr<sf::Shape>
+inline std::unique_ptr<sf::Shape> tableToShape(lua::Table& obj)
 {
         std::unique_ptr<sf::Shape> shape { nullptr };
         const lua::Value type = obj["type"];
@@ -267,7 +268,7 @@ inline auto tableToShape(lua::Table& obj) -> std::unique_ptr<sf::Shape>
  *  - textureRect: Rectangle representing the area of the texture to be displayed.
  *  - color:       Color of the font.
  */
-inline auto tableToSprite(lua::Table& obj) -> std::unique_ptr<sf::Sprite>
+inline std::unique_ptr<sf::Sprite> tableToSprite(lua::Table& obj)
 {
         auto sprite = std::make_unique<sf::Sprite>();
 
@@ -317,7 +318,7 @@ inline auto tableToSprite(lua::Table& obj) -> std::unique_ptr<sf::Sprite>
  *  - underlined
  *  - strikethrough
  */
-inline auto tableToText(lua::Table& obj) -> std::unique_ptr<sf::Text>
+inline std::unique_ptr<sf::Text> tableToText(lua::Table& obj)
 {
         static const util::MapStringTo<sf::Text::Style> styles = {
                 { "regular",       sf::Text::Regular       },
@@ -426,7 +427,7 @@ inline auto tableToText(lua::Table& obj) -> std::unique_ptr<sf::Text>
  *  - Color:  String representing the color name; or Table containing "r", "g", "b", and "a"
  *            entries.
  */
-inline auto tableToDrawable(lua::Table& obj) -> std::unique_ptr<sf::Drawable>
+inline std::unique_ptr<sf::Drawable> tableToDrawable(lua::Table& obj)
 {
         const lua::Value type = obj["type"];
 

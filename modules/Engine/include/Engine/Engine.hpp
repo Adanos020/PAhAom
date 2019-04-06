@@ -22,14 +22,14 @@ class Engine : public util::Observer
 public:
 
         Engine();
-        auto run() -> int;
+        int run();
 
 private:
 
-        auto handleInput() -> void;
-        auto draw() -> void;
+        void handleInput();
+        void draw();
         
-        virtual auto receive(const util::Message&) -> void override;
+        virtual void receive(const util::Message&) override;
 
 private:
 

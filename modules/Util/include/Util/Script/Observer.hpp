@@ -13,7 +13,7 @@ namespace util::script
  * 
  *  Its sole argument is a table containing a string containing the name of the state to push.
  */
-inline auto pushState(lua::Context& context) -> lua::Retval
+inline lua::Retval pushState(lua::Context& context)
 {
         if (lua::Value state = context.args[0]; state.is<std::string>())
         {
@@ -29,7 +29,7 @@ inline auto pushState(lua::Context& context) -> lua::Retval
 
 /** Broadcasts a PopState message from Lua to the Subject.
  */
-inline auto popState(lua::Context& context) -> lua::Retval
+inline lua::Retval popState(lua::Context& context)
 {
         util::Subject::send({ util::Message::PopState{} });
         return context.ret();

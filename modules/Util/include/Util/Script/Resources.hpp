@@ -10,7 +10,7 @@ namespace util::script
 {
 
 template<typename T>
-inline auto load(lua::Context& context) -> lua::Retval
+inline lua::Retval load(lua::Context& context)
 {
         if (lua::Value resource = context.args[0]; resource.is<std::string>())
         {

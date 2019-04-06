@@ -21,7 +21,7 @@ class Resources
 public:
 
         template<typename Resource>
-        static auto load(const std::string& id, const std::string& path) -> bool
+        static bool load(const std::string& id, const std::string& path)
         {
                 static_assert(std::is_same_v<Resource, sf::Font> or
                               std::is_same_v<Resource, sf::Texture>,
@@ -38,7 +38,7 @@ public:
         }
 
         template<typename Resource>
-        static auto get(const std::string& id)
+        static Resource* get(const std::string& id)
         {
                 static_assert(std::is_same_v<Resource, sf::Font> or
                               std::is_same_v<Resource, sf::Texture>,
@@ -63,7 +63,7 @@ public:
         }
 
         template<typename Resource>
-        static auto unload(const std::string& id) -> bool
+        static bool unload(const std::string& id)
         {
                 static_assert(std::is_same_v<Resource, sf::Font> or
                               std::is_same_v<Resource, sf::Texture>,
@@ -80,7 +80,7 @@ public:
         }
 
         template<typename Resource>
-        static auto unloadAll() -> void
+        static void unloadAll()
         {
                 static_assert(std::is_same_v<Resource, sf::Font> or
                               std::is_same_v<Resource, sf::Texture>,

@@ -15,7 +15,7 @@ Menu = {
             type = "sfCircleShape",
             fillColor = "green",
             radius = 30,
-            position = { x = 40, y = 140 }
+            position = { x = 140, y = 40 }
         },
         {
             type = "sfRectangleShape",

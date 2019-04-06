@@ -62,7 +62,7 @@ set_target_properties(
 
 # MAIN EXEC
 
-set(PAHAOM_SOURCES "modules/Engine/src/Engine/*.cpp")
+set(PAHAOM_SOURCES "modules/Engine/src/Engine/Engine.cpp")
 set(PAHAOM_HEADERS "modules/Engine/include/Engine/*.hpp")
 
 file(GLOB_RECURSE SOURCES ${PAHAOM_SOURCES} ${PAHAOM_HEADERS})
