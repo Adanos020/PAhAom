@@ -114,8 +114,8 @@ auto init() -> bool
 
         // Scripts.
         util::luaState.runFile("data/script/init.lua");
-        util::luaContext.global["pushState"] = util::script::pushState;
-        util::luaContext.global["popState"] = util::script::popState;
+        util::luaContext.global["push_state"] = util::script::pushState;
+        util::luaContext.global["pop_state"] = util::script::popState;
 
         // Settings
         engine::Settings::Video::load();

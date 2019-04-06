@@ -20,7 +20,7 @@ struct Video
         {
                 const lua::Table settings = util::luaContext.global["Settings"];
 
-                const lua::Table video = settings["Video"];
+                const lua::Table video = settings["video"];
                 resolution = {
                         video["resolution"]["x"],
                         video["resolution"]["y"],

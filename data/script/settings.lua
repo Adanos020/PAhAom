@@ -1,6 +1,6 @@
 -- Game settings.
 Settings = {
-    Video = {
+    video = {
         resolution = {
             x = 640,
             y = 360,

@@ -5,8 +5,8 @@ Game = {
             content = "Game, press Esc to exit.",
             font = "unifont",
             position = {
-                x = Settings.Video.resolution.x / 2,
-                y = Settings.Video.resolution.y / 2,
+                x = Settings.video.resolution.x / 2,
+                y = Settings.video.resolution.y / 2,
             },
             fillColor = "red",
             origin = "center"
@@ -25,7 +25,7 @@ function Game:handle_input(event)
     if event.type == "KeyPressed" then
         local kc = event.code
         if kc == Keyboard.Escape then
-            popState()
+            pop_state()
         end
     end
 end

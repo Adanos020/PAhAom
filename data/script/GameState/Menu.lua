@@ -5,12 +5,27 @@ Menu = {
             content = "Menu, press Enter to continue,\nEsc to exit.",
             font = "unifont",
             position = {
-                x = Settings.Video.resolution.x / 2,
-                y = Settings.Video.resolution.y / 2,
+                x = Settings.video.resolution.x / 2,
+                y = Settings.video.resolution.y / 2,
             },
             fillColor = "yellow",
             origin = "center"
         },
+        {
+            type = "sfCircleShape",
+            fillColor = "yellow",
+            radius = 30,
+            position = { 40, 140 }
+        },
+        -- {
+        --     type = "sfRectangleShape",
+        --     fillColor = "blue",
+        --     size = { 69, 42 },
+        --     position = {
+        --         Settings.video.resolution.x - 80,
+        --         Settings.video.resolution.y - 50
+        --     }
+        -- },
     }
 }
 
@@ -25,9 +40,9 @@ function Menu:handle_input(event)
     if event.type == "KeyPressed" then
         local kc = event.code
         if kc == Keyboard.Enter then
-            pushState "Game"
+            push_state "Game"
         elseif kc == Keyboard.Escape then
-            popState()
+            pop_state()
         end
     end
 end

@@ -1,9 +1,9 @@
 #pragma once
 
 
-#include <SFML/Window/Event.hpp>
+#include <Util/Script/Script.hpp>
 
-#include <Util/Script.hpp>
+#include <SFML/Window/Event.hpp>
 
 
 namespace util::script

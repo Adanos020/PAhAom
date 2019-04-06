@@ -74,7 +74,8 @@ public:
                 const lua::Table drawables = thisObj["draw"](thisObj);
 
                 drawables.iterate([&](lua::Valref, lua::Valref drawable) {
-                        target.draw(*drawableObjects[int(drawable["index"])]);
+                        const int index = drawable["index"];
+                        target.draw(*drawableObjects[index]);
                 });
         }
 

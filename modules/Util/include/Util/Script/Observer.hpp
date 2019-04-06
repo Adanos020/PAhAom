@@ -3,7 +3,7 @@
 
 #include <Util/ErrorMessages.hpp>
 #include <Util/Observer.hpp>
-#include <Util/Script.hpp>
+#include <Util/Script/Script.hpp>
 
 #include <iostream>
 
