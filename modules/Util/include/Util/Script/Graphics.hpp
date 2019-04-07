@@ -18,28 +18,6 @@
 namespace util::script
 {
 
-/** Transforms a Lua table into an sf::Color object.
- * 
- *  Table syntax:
- *  - r: Number specifying the r component.
- *  - g: Number specifying the g component.
- *  - b: Number specifying the b component.
- *  - a: Number specifying the a component.
- */
-inline sf::Color tableToColor(const lua::Table& obj)
-{
-        const lua::Value r = obj["r"];
-        const lua::Value g = obj["g"];
-        const lua::Value b = obj["b"];
-        const lua::Value a = obj["a"];
-        return {
-                sf::Uint8(r.is<unsigned>() ? r : 0),
-                sf::Uint8(g.is<unsigned>() ? g : 0),
-                sf::Uint8(b.is<unsigned>() ? b : 0),
-                sf::Uint8(a.is<unsigned>() ? a : 255),
-        };
-}
-
 inline sf::Color stringToColor(const std::string& obj)
 {
         static const util::MapStringTo<sf::Color> predefinedColors = {
@@ -61,6 +39,28 @@ inline sf::Color stringToColor(const std::string& obj)
 
         luaContext.error(util::err::badColorName(obj));
         return sf::Color::Transparent;
+}
+
+/** Transforms a Lua table into an sf::Color object.
+ * 
+ *  Table syntax:
+ *  - r: Number specifying the r component.
+ *  - g: Number specifying the g component.
+ *  - b: Number specifying the b component.
+ *  - a: Number specifying the a component.
+ */
+inline sf::Color tableToColor(const lua::Table& obj)
+{
+        const lua::Value r = obj["r"];
+        const lua::Value g = obj["g"];
+        const lua::Value b = obj["b"];
+        const lua::Value a = obj["a"];
+        return {
+                sf::Uint8(r.is<unsigned>() ? r : 0),
+                sf::Uint8(g.is<unsigned>() ? g : 0),
+                sf::Uint8(b.is<unsigned>() ? b : 0),
+                sf::Uint8(a.is<unsigned>() ? a : 255),
+        };
 }
 
 /** Transforms a Lua table into an sf::Vector2<T> object.
@@ -207,15 +207,15 @@ inline std::unique_ptr<sf::Shape> tableToShape(lua::Table& obj)
         std::unique_ptr<sf::Shape> shape { nullptr };
         const lua::Value type = obj["type"];
 
-        if (type == "sfCircleShape")
+        if (type == "circle shape")
         {
                 shape = tableToCircleShape(obj);
         }
-        else if (type == "sfConvexShape")
+        else if (type == "convex shape")
         {
                 shape = tableToConvexShape(obj);
         }
-        else if (type == "sfRectangleShape")
+        else if (type == "rectangle shape")
         {
                 shape = tableToRectangleShape(obj);
         }
@@ -420,12 +420,12 @@ inline std::unique_ptr<sf::Text> tableToText(lua::Table& obj)
  *              center, top-left, top-right, bottom-left, bottom-right)
  * 
  *  Drawable type IDs:
- *  - sfText: sf::Text
- * 
- *  Special property type definitions:
- *  - Vector: Table containing "x" and "y" entries.
- *  - Color:  String representing the color name; or Table containing "r", "g", "b", and "a"
- *            entries.
+ *  - circle shape (sf::CircleShape)
+ *  - convex shape (sf::ConvexShape)
+ *  - rectangle shape (sf::RectangleShape)
+ *  - sprite (sf::Sprite)
+ *  - square tile map (SquareTileMap)
+ *  - text (sf::Text)
  */
 inline std::unique_ptr<sf::Drawable> tableToDrawable(lua::Table& obj)
 {
@@ -439,17 +439,17 @@ inline std::unique_ptr<sf::Drawable> tableToDrawable(lua::Table& obj)
 
         std::unique_ptr<sf::Drawable> drawable{ nullptr };
 
-        if (type == "sfText")
+        if (type == "text")
         {
                 drawable = tableToText(obj);
         }
-        else if (type == "sfSprite")
+        else if (type == "sprite")
         {
                 drawable = tableToSprite(obj);
         }
-        else if (type == "sfCircleShape" ||
-                 type == "sfConvexShape" ||
-                 type == "sfRectangleShape")
+        else if (type == "circle shape" ||
+                 type == "convex shape" ||
+                 type == "rectangle shape")
         {
                 drawable = tableToShape(obj);
         }

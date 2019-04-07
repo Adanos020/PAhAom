@@ -1,7 +1,7 @@
 Game = {
     drawables = {
         {
-            type = "sfText",
+            type = "text",
             content = "Game, press Esc to exit.",
             font = "unifont",
             position = {
@@ -9,7 +9,15 @@ Game = {
                 y = Settings.video.resolution.y / 2,
             },
             fillColor = "red",
-            origin = "center"
+            origin = "center",
+        },
+        {
+            type = "square tile map",
+            size = { x = 37, y = 21 },
+            tileSize = 16,
+            tileIconSize = 16,
+            fill = 16,
+            texture = "tileset"
         }
     }
 }

@@ -1,13 +1,12 @@
 #pragma once
 
 
-#include <Engine/Resources.hpp>
-
 #include <Util/Types.hpp>
 
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
+#include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/Transformable.hpp>
 #include <SFML/Graphics/VertexArray.hpp>
 
@@ -17,11 +16,14 @@ namespace engine::graphics
 
 class SquareTileMap : public sf::Drawable, public sf::Transformable
 {
-public: // Interface.
+public: // Constructors.
 
-        SquareTileMap(size_t columns, size_t rows, float tileSize, size_t tileIconSize)
-        : columns(columns), rows(rows)
-        , tileSize(tileSize), tileIconSize(tileIconSize)
+        SquareTileMap(size_t columns, size_t rows, float tileSize, size_t tileIconSize,
+                      const util::TileID fill = 0)
+        : columns(columns)
+        , rows(rows)
+        , tileSize(tileSize)
+        , tileIconSize(tileIconSize)
         , vertices(sf::Quads)
         {
                 this->tiles.resize(columns);
@@ -29,16 +31,12 @@ public: // Interface.
                         this->tiles.begin(), this->tiles.end(),
                         [=](auto& row) { row.resize(rows); }
                 );
-                this->placeVertices();
-        }
 
-        SquareTileMap(size_t columns, size_t rows, const util::TileID fill, float tileSize, size_t tileIconSize)
-        : SquareTileMap(columns, rows, tileSize, tileIconSize)
-        {
+                this->placeVertices();
                 this->fillArea({
                         0u, 0u,
-                        static_cast<unsigned int>(this->columns),
-                        static_cast<unsigned int>(this->rows)
+                        static_cast<unsigned>(this->columns),
+                        static_cast<unsigned>(this->rows)
                 }, fill);
         }
 
@@ -70,6 +68,8 @@ public: // Interface.
         {
         }
 
+public: // Mutators.
+
         void fillArea(sf::UintRect area, util::TileID fill)
         {
                 for (unsigned x = area.left; x < area.width; ++x)
@@ -78,8 +78,6 @@ public: // Interface.
                         this->setTile({x, y}, fill);
                 }
         }
-
-public: // Mutators.
 
         void setTexture(sf::Texture* const texture)
         {
@@ -96,7 +94,7 @@ public: // Mutators.
                 const size_t texWidth = this->texture->getSize().x;
                 const sf::Vector2f texCoords = {
                         iconIndex % (texWidth / this->tileIconSize) * iconSize,
-                        iconIndex / (texWidth / this->tileIconSize) * iconSize
+                        iconIndex / (texWidth / this->tileIconSize) * iconSize,
                 };
 
                 const sf::Vector2f topLeft     = {0,        0};
@@ -159,17 +157,7 @@ public: // Accessors.
 
 public: // Overloaded operators.
 
-        util::FastVector<util::TileID>& operator[](size_t col)
-        {
-                return this->tiles[col];
-        }
-
-        util::FastVector<util::TileID>& operator[](size_t col) const
-        {
-                return const_cast<util::FastVector<util::TileID>&>(this->tiles[col]);
-        }
-
-        SquareTileMap& operator=(SquareTileMap& other)
+        SquareTileMap& operator=(const SquareTileMap& other)
         {
                 this->columns      = other.columns;
                 this->rows         = other.rows;

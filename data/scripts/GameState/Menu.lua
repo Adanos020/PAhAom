@@ -1,7 +1,7 @@
 Menu = {
     drawables = {
         {
-            type = "sfText",
+            type = "text",
             content = "Menu, press Enter to continue,\nEsc to exit.",
             font = "unifont",
             position = {
@@ -12,13 +12,13 @@ Menu = {
             origin = "center"
         },
         {
-            type = "sfCircleShape",
+            type = "circle shape",
             fillColor = "green",
             radius = 30,
             position = { x = 140, y = 40 }
         },
         {
-            type = "sfRectangleShape",
+            type = "rectangle shape",
             fillColor = "blue",
             size = { x = 69, y = 42 },
             position = {
@@ -27,7 +27,7 @@ Menu = {
             }
         },
         {
-            type = "sfSprite",
+            type = "sprite",
             texture = "tileset",
             textureRect = {
                 left = 0, top = 16,

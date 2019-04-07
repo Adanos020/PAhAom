@@ -37,16 +37,17 @@ public:
                 for (int i = 1, nDrawables = drawables.len(); i <= nDrawables; ++i)
                 {
                         lua::Table drawable = drawables[i];
-                        this->drawableObjects.push_back(util::script::tableToDrawable(drawable));
-                        if (not this->drawableObjects.back().get())
+                        if (std::unique_ptr<sf::Drawable> d = util::script::tableToDrawable(drawable))
                         {
-                                std::cerr << util::err::wrongDrawableDefinition(i) << std::endl;
-                                this->drawableObjects.pop_back();
-                                break;
+                                this->drawableObjects.push_back(std::move(d));
+                                drawable["index"] = i - 1; // Adding an index to the drawable recipe.
                         }
-
-                        // Changing the drawable's recipe to its index.
-                        drawable["index"] = i - 1;
+                        else
+                        {
+                                // Removing a wrongly defined drawable to avoid checking it every frame.
+                                util::luaContext.global["table"]["remove"](drawables, i);
+                                std::cerr << util::err::wrongDrawableDefinition(i) << std::endl;
+                        }
                 }
         }
 
@@ -57,8 +58,8 @@ public:
 
         void handleInput(const sf::Event& event)
         {
-                const lua::Table evt = util::script::eventToTable(event);
                 const lua::Table thisObj = util::luaContext.global[this->stateName];
+                const lua::Table evt = util::script::eventToTable(event);
                 thisObj["handle_input"](thisObj, evt);
         }
 
@@ -72,7 +73,6 @@ public:
         {
                 const lua::Table thisObj = util::luaContext.global[this->stateName];
                 const lua::Table drawables = thisObj["draw"](thisObj);
-
                 drawables.iterate([&](lua::Valref, lua::Valref drawable) {
                         const int index = drawable["index"];
                         target.draw(*drawableObjects[index]);
