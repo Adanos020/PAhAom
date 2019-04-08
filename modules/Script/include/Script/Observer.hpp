@@ -1,12 +1,13 @@
 #pragma once
 
 
+#include <Script/Lua.hpp>
+
 #include <Util/ErrorMessages.hpp>
 #include <Util/Observer.hpp>
-#include <Util/Script/Script.hpp>
 
 
-namespace util::script
+namespace script
 {
 
 /** Broadcasts a PushState message from Lua to the Subject.

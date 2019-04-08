@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include <Util/ErrorMessages.hpp>
 #include <Util/Types.hpp>
 
 #include <SFML/Graphics/Font.hpp>
@@ -14,6 +15,11 @@
 namespace engine
 {
 
+template<typename T> constexpr bool is_resource =
+        std::is_same_v<T, sf::Font> or
+        std::is_same_v<T, sf::Texture>
+;
+
 class Resources
 {
         Resources() = delete;
@@ -23,9 +29,7 @@ public:
         template<typename Resource>
         static bool load(const std::string& id, const std::string& path)
         {
-                static_assert(std::is_same_v<Resource, sf::Font> or
-                              std::is_same_v<Resource, sf::Texture>,
-                              "Resource type is not recognised.");
+                static_assert(is_resource<Resource>, typeNotResource);
 
                 if constexpr (std::is_same_v<Resource, sf::Font>)
                 {
@@ -40,9 +44,7 @@ public:
         template<typename Resource>
         static Resource* get(const std::string& id)
         {
-                static_assert(std::is_same_v<Resource, sf::Font> or
-                              std::is_same_v<Resource, sf::Texture>,
-                              "Resource type is not recognised.");
+                static_assert(is_resource<Resource>, typeNotResource);
 
                 if constexpr (std::is_same_v<Resource, sf::Font>)
                 {
@@ -65,9 +67,7 @@ public:
         template<typename Resource>
         static bool unload(const std::string& id)
         {
-                static_assert(std::is_same_v<Resource, sf::Font> or
-                              std::is_same_v<Resource, sf::Texture>,
-                              "Resource type is not recognised.");
+                static_assert(is_resource<Resource>, typeNotResource);
 
                 if constexpr (std::is_same_v<Resource, sf::Font>)
                 {
@@ -82,9 +82,7 @@ public:
         template<typename Resource>
         static void unloadAll()
         {
-                static_assert(std::is_same_v<Resource, sf::Font> or
-                              std::is_same_v<Resource, sf::Texture>,
-                              "Resource type is not recognised.");
+                static_assert(is_resource<Resource>, typeNotResource);
 
                 if constexpr (std::is_same_v<Resource, sf::Font>)
                 {

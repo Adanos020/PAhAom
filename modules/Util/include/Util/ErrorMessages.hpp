@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include <Util/String.hpp>
 #include <Util/Types.hpp>
 
 #include <string>
@@ -11,6 +12,9 @@ namespace util::err
 
 // Static assertion errors.
 #define typeNotArithmetic "Given type must be arithmetic."
+#define typeNotFloatingPoint "Given type must be a floating point number."
+#define typeNotDrawable "Given class must derive from sf::Drawable."
+#define typeNotResource "Resource type is not recognised."
 
 // Lua type errors.
 static const std::string notATable = "Error: given value was expected to be a table.";
@@ -21,28 +25,27 @@ static const std::string noDrawableTypeId = "Error: drawable type ID was not spe
 
 inline std::string wrongDrawableDefinition(int i)
 {
-        return std::string("Error: drawable object of index ") + std::to_string(i)
-               + " is not correctly defined.";
+        return format("Error: drawable object of index %d is not correctly defined.", i);
 }
 
-inline std::string badColorName(const std::string& cname)
+inline std::string badColorName(const std::string& name)
 {
-        return std::string("Error: color name '") + cname + "' was not recognized.";
+        return format("Error: color name '%s' was not recognized.", name.c_str());
 }
 
-inline std::string badTextStyleName(const std::string& sname)
+inline std::string badTextStyleName(const std::string& name)
 {
-        return std::string("Error: text style '") + sname + "' was not recognized.";
+        return format("Error: text style '%s' was not recognized.", name.c_str());
 }
 
-inline std::string badFontName(const std::string& fname)
+inline std::string badFontName(const std::string& name)
 {
-        return std::string("Error: font '") + fname + "' was not recognized.";
+        return format("Error: font '%s' was not recognized.", name.c_str());
 }
 
-inline std::string badTextureName(const std::string& fname)
+inline std::string badTextureName(const std::string& name)
 {
-        return std::string("Error: texture '") + fname + "' was not recognized.";
+        return format("Error: texture '%s' was not recognized.", name.c_str());
 }
 
 static const std::string noTexture      = "Error: required texture was not specified";

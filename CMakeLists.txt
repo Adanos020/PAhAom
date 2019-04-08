@@ -38,6 +38,28 @@ set_target_properties(
 )
 
 
+# SCRIPT BINDINGS
+
+set(UTIL_SOURCES "modules/Script/src/Script/*.cpp")
+set(UTIL_HEADERS "modules/Script/include/Script/*.hpp")
+
+file(GLOB_RECURSE SOURCES ${UTIL_SOURCES} ${UTIL_HEADERS})
+add_library(Script STATIC ${SOURCES})
+
+target_compile_options(Script PUBLIC -Wall -Wextra)
+target_include_directories(Script PUBLIC "modules/Script/include")
+
+set_target_properties(
+    Script
+        PROPERTIES
+            LINKER_LANGUAGE CXX
+            CXX_STANDARD 17
+            CXX_STANDARD_REQUIRED YES
+            CXX_EXTENSIONS NO
+            INTERPROCEDURAL_OPTIMIZATION true
+)
+
+
 # UTILITIES
 
 set(UTIL_SOURCES "modules/Util/src/Util/*.cpp")
@@ -77,6 +99,7 @@ target_link_libraries(
             sfml-window-d
             sfml-audio-d
             sfml-system-d
+            Script
             LuaPP
             Util
 )

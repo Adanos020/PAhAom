@@ -1,12 +1,12 @@
 #pragma once
 
 
-#include <Util/Script/Script.hpp>
+#include <Script/Lua.hpp>
 
 #include <SFML/Window/Event.hpp>
 
 
-namespace util::script
+namespace script
 {
 
 inline lua::Table eventToTable(const sf::Event& event)

@@ -3,10 +3,10 @@
 
 #include <Engine/Resources.hpp>
 
-#include <Util/Script.hpp>
+#include <Script/Lua.hpp>
 
 
-namespace util::script
+namespace script
 {
 
 template<typename T>

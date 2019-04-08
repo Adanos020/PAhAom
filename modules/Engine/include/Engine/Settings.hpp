@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include <Util/Script.hpp>
+#include <Script/Lua.hpp>
 
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/VideoMode.hpp>
@@ -19,7 +19,7 @@ struct Video
 
         static void load()
         {
-                const lua::Table settings = util::luaContext.global["Settings"];
+                const lua::Table settings = script::luaContext.global["Settings"];
 
                 const lua::Table video = settings["video"];
                 resolution = {

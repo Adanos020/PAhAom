@@ -4,7 +4,7 @@
 #include <lua.hpp>
 
 
-namespace util
+namespace script
 {
 
 inline static lua::State luaState;

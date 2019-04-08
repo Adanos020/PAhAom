@@ -3,9 +3,10 @@
 
 #include <Engine/Resources.hpp>
 
+#include <Script/Lua.hpp>
+
 #include <Util/ErrorMessages.hpp>
 #include <Util/Graphics/RectTileMap.hpp>
-#include <Util/Script/Script.hpp>
 #include <Util/Types.hpp>
 
 #include <SFML/Graphics.hpp>
@@ -16,7 +17,7 @@
 #include <variant>
 
 
-namespace util
+namespace script::experimental
 {
 
 // Compound type for drawable and transformable objects.
@@ -34,12 +35,12 @@ sf::Transformable* asTransformable(GraphicalObject& gObj)
 
 }
 
-namespace util::script
+namespace script
 {
 
 inline sf::Color stringToColor(const std::string& obj)
 {
-        static const MapStringTo<sf::Color> predefinedColors = {
+        static const util::MapStringTo<sf::Color> predefinedColors = {
                 { "black",       sf::Color::Black       },
                 { "white",       sf::Color::White       },
                 { "red",         sf::Color::Red         },
@@ -56,7 +57,7 @@ inline sf::Color stringToColor(const std::string& obj)
                 return c->second;
         }
 
-        luaContext.error(err::badColorName(obj));
+        luaContext.error(util::err::badColorName(obj));
         return sf::Color::Transparent;
 }
 
@@ -129,17 +130,17 @@ inline sf::Rect<T> tableToRectangle(const lua::Table& obj)
 /** Table of tables of numbers, where all inner tables must have equal lengths.
  */
 template<typename T = float>
-inline Matrix<T> tableToMatrix(const lua::Table& obj)
+inline util::Matrix<T> tableToMatrix(const lua::Table& obj)
 {
         static_assert(std::is_arithmetic_v<T>, typeNotArithmetic);
 
-        Matrix<T> mat;
+        util::Matrix<T> mat;
         mat.resize(obj.len().to<unsigned>());
 
         obj.iterate([&](lua::Valref i, lua::Valref row) {
                 if (not row.is<lua::Table>())
                 {
-                        luaContext.error(err::notATable);
+                        luaContext.error(util::err::notATable);
                 }
                 static_cast<lua::Table>(row).iterate([&](lua::Valref, lua::Valref entry) {
                         if (not entry.is<float>())
@@ -154,16 +155,16 @@ inline Matrix<T> tableToMatrix(const lua::Table& obj)
         if (std::any_of(mat.begin(), mat.end(), [&](auto& row)
                 { return row.size() != mat[0].size(); }))
         {
-                luaContext.error(err::matrixNotRegular);
+                luaContext.error(util::err::matrixNotRegular);
         }
 
         return mat;
 }
 
-template<typename T>
+template<class T>
 inline void extractBounds(lua::Table& obj, const std::unique_ptr<T>& drawable)
 {
-        static_assert(std::is_base_of_v<sf::Drawable, T>);
+        static_assert(std::is_base_of_v<sf::Drawable, T>, typeNotDrawable);
 
         const sf::FloatRect globalBounds = drawable->getGlobalBounds();
         obj["globalBounds"] = lua::Table::records(luaContext,
@@ -289,7 +290,7 @@ inline std::optional<std::unique_ptr<sf::Shape>> tableToShape(lua::Table& obj)
                 }
                 else
                 {
-                        luaContext.error(err::badTextureName(texture));
+                        luaContext.error(util::err::badTextureName(texture));
                 }
         }
 
@@ -345,7 +346,7 @@ inline std::unique_ptr<sf::Sprite> tableToSprite(lua::Table& obj)
                 }
                 else
                 {
-                        luaContext.error(err::badTextureName(texture));
+                        luaContext.error(util::err::badTextureName(texture));
                 }
         }
 
@@ -387,7 +388,7 @@ inline std::unique_ptr<sf::Sprite> tableToSprite(lua::Table& obj)
  */
 inline std::unique_ptr<sf::Text> tableToText(lua::Table& obj)
 {
-        static const MapStringTo<sf::Text::Style> styles = {
+        static const util::MapStringTo<sf::Text::Style> styles = {
                 { "regular",       sf::Text::Regular       },
                 { "bold",          sf::Text::Bold          },
                 { "italic",        sf::Text::Italic        },
@@ -405,7 +406,7 @@ inline std::unique_ptr<sf::Text> tableToText(lua::Table& obj)
                 }
                 else
                 {
-                        luaContext.error(err::badTextStyleName(style));
+                        luaContext.error(util::err::badTextStyleName(style));
                         return sf::Text::Style::Regular;
                 }
         };
@@ -423,7 +424,7 @@ inline std::unique_ptr<sf::Text> tableToText(lua::Table& obj)
                 }
                 else
                 {
-                        luaContext.error(err::badFontName(font));
+                        luaContext.error(util::err::badFontName(font));
                 }
         }
 
@@ -495,7 +496,7 @@ inline std::unique_ptr<sf::Text> tableToText(lua::Table& obj)
  *  - fill:         Number specifying the ID of the tile with which the map should be filled.
  *  - texture:      String specifying the ID of the texture. This property is mandatory.
  */
-inline std::unique_ptr<graphics::RectTileMap> tableToRectTileMap(lua::Table& obj)
+inline std::unique_ptr<util::graphics::RectTileMap> tableToRectTileMap(lua::Table& obj)
 {
         sf::Vector2f tSize = {16.f, 16.f};
         sf::Vector2u tIconSize = {16u, 16u};
@@ -512,7 +513,7 @@ inline std::unique_ptr<graphics::RectTileMap> tableToRectTileMap(lua::Table& obj
         }
         else
         {
-                luaContext.error(err::noTileSize);
+                luaContext.error(util::err::noTileSize);
         }
 
         prop (tileIconSize, lua::Table)
@@ -526,32 +527,32 @@ inline std::unique_ptr<graphics::RectTileMap> tableToRectTileMap(lua::Table& obj
         }
         else
         {
-                luaContext.error(err::noTileIconSize);
+                luaContext.error(util::err::noTileIconSize);
         }
 
         prop (texture, std::string)
         {
                 if (not (tex = engine::Resources::get<sf::Texture>(texture)))
                 {
-                        luaContext.error(err::badTextureName(texture));
+                        luaContext.error(util::err::badTextureName(texture));
                 } 
         }
         else
         {
-                luaContext.error(err::noTexture);
+                luaContext.error(util::err::noTexture);
         }
 
         prop (tiles, lua::Table)
         {
-                auto tileMatrix = tableToMatrix<TileID>(tiles);
-                auto tmap = std::make_unique<graphics::RectTileMap>(tileMatrix, tSize, tIconSize, tex);
+                auto tileMatrix = tableToMatrix<util::TileID>(tiles);
+                auto tmap = std::make_unique<util::graphics::RectTileMap>(tileMatrix, tSize, tIconSize, tex);
                 extractBounds(obj, tmap);
                 return tmap;
         }
 
         // If the `tiles` property is specified, the following ones are discarded:
         sf::Vector2u siz = {3u, 3u};
-        TileID filling = 0;
+        util::TileID filling = 0;
 
         prop (size, lua::Table)
         {
@@ -568,7 +569,7 @@ inline std::unique_ptr<graphics::RectTileMap> tableToRectTileMap(lua::Table& obj
                 filling = fill.to<unsigned>();
         }
 
-        auto tmap = std::make_unique<graphics::RectTileMap>(siz, tSize, tIconSize, tex, filling);
+        auto tmap = std::make_unique<util::graphics::RectTileMap>(siz, tSize, tIconSize, tex, filling);
         extractBounds(obj, tmap);
         return tmap;
 }
@@ -599,7 +600,7 @@ inline std::optional<std::unique_ptr<sf::Drawable>> tableToDrawable(lua::Table& 
 
         if (not type)
         {
-                luaContext.error(err::noDrawableTypeId);
+                luaContext.error(util::err::noDrawableTypeId);
                 return {};
         }
 

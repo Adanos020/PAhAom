@@ -6,6 +6,8 @@
 #include <Util/Random.hpp>
 #include <Util/Types.hpp>
 
+#include <Script.hpp>
+
 #include <SFML/Window/Event.hpp>
 #include <SFML/System/Clock.hpp>
 
@@ -22,14 +24,10 @@ Engine::Engine()
         util::Subject::addObserver(this);
 
         // RNG.
-        util::Random::rng.seed(std::chrono::system_clock::now().time_since_epoch().count());
+        util::rng.seed(std::chrono::system_clock::now().time_since_epoch().count());
 
         // Scripts.
-        util::luaContext.global["push_state"]   = util::script::pushState;
-        util::luaContext.global["pop_state"]    = util::script::popState;
-        util::luaContext.global["load_font"]    = util::script::load<sf::Font>;
-        util::luaContext.global["load_texture"] = util::script::load<sf::Texture>;
-        util::luaState.runFile("data/scripts/init.lua");
+        script::init();
 
         // Run if appropriate.
         if ((running = not states.empty()))
@@ -47,6 +45,10 @@ Engine::Engine()
                 this->screenTexture.create(screenRes.x, screenRes.y);
                 this->screen.setSize(sf::Vector2f(Settings::Video::windowSize));
                 this->screen.setTexture(&this->screenTexture.getTexture());
+        }
+        else
+        {
+                std::cerr << "" << std::endl;
         }
 }
 
