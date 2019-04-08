@@ -21,7 +21,7 @@ inline lua::Retval pushState(lua::Context& context)
         }
         else
         {
-                context.error(util::err::noPushStateName());
+                context.error(util::err::noPushStateName);
         }
 
         return context.ret();

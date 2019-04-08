@@ -37,9 +37,9 @@ public:
                 for (int i = 1, nDrawables = drawables.len(); i <= nDrawables; ++i)
                 {
                         lua::Table drawable = drawables[i];
-                        if (std::unique_ptr<sf::Drawable> d = util::script::tableToDrawable(drawable))
+                        if (auto d = util::script::tableToDrawable(drawable))
                         {
-                                this->drawableObjects.push_back(std::move(d));
+                                this->drawableObjects.push_back(std::move(d.value()));
                                 drawable["index"] = i - 1; // Adding an index to the drawable recipe.
                         }
                         else

@@ -1,7 +1,9 @@
 #pragma once
 
 
+#include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/Rect.hpp>
+#include <SFML/Graphics/Transformable.hpp>
 
 #include <cstdint>
 #include <memory>
@@ -36,6 +38,6 @@ template<typename T>
 using MapStringTo = std::unordered_map<std::string, T>;
 
 template<typename T>
-using Matrix = FastVector<FastVector<T>>;
+using Matrix = std::vector<std::vector<T>>;
 
 }

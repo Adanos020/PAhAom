@@ -18,11 +18,11 @@ inline lua::Retval load(lua::Context& context)
                 {
                         return context.ret(engine::Resources::load<T>(resource, path));
                 }
-                context.error(util::err::noResourcePath());
+                context.error(util::err::noResourcePath);
                 return context.ret(false);
         }
 
-        context.error(util::err::noResourceName());
+        context.error(util::err::noResourceName);
         return context.ret(false);
 }
 

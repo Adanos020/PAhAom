@@ -1,10 +1,10 @@
 #pragma once
 
 
-#include <Engine/Graphics/SquareTileMap.hpp>
 #include <Engine/Resources.hpp>
 
 #include <Util/ErrorMessages.hpp>
+#include <Util/Graphics/RectTileMap.hpp>
 #include <Util/Script/Script.hpp>
 #include <Util/Types.hpp>
 
@@ -13,14 +13,33 @@
 #include <memory>
 #include <type_traits>
 #include <unordered_map>
+#include <variant>
 
+
+namespace util
+{
+
+// Compound type for drawable and transformable objects.
+using GraphicalObject = std::variant<sf::Drawable*, sf::Transformable*>;
+
+sf::Drawable* asDrawable(GraphicalObject& gObj)
+{
+        return std::get<sf::Drawable*>(gObj);
+}
+
+sf::Transformable* asTransformable(GraphicalObject& gObj)
+{
+        return std::get<sf::Transformable*>(gObj);
+}
+
+}
 
 namespace util::script
 {
 
 inline sf::Color stringToColor(const std::string& obj)
 {
-        static const util::MapStringTo<sf::Color> predefinedColors = {
+        static const MapStringTo<sf::Color> predefinedColors = {
                 { "black",       sf::Color::Black       },
                 { "white",       sf::Color::White       },
                 { "red",         sf::Color::Red         },
@@ -37,7 +56,7 @@ inline sf::Color stringToColor(const std::string& obj)
                 return c->second;
         }
 
-        luaContext.error(util::err::badColorName(obj));
+        luaContext.error(err::badColorName(obj));
         return sf::Color::Transparent;
 }
 
@@ -72,6 +91,8 @@ inline sf::Color tableToColor(const lua::Table& obj)
 template<typename T = float>
 inline sf::Vector2<T> tableToVector(const lua::Table& obj)
 {
+        static_assert(std::is_arithmetic_v<T>, typeNotArithmetic);
+
         const lua::Value x = obj["x"];
         const lua::Value y = obj["y"];
         return {
@@ -91,6 +112,8 @@ inline sf::Vector2<T> tableToVector(const lua::Table& obj)
 template<typename T = float>
 inline sf::Rect<T> tableToRectangle(const lua::Table& obj)
 {
+        static_assert(std::is_arithmetic_v<T>, typeNotArithmetic);
+
         const lua::Value lft = obj["left"];
         const lua::Value top = obj["top"];
         const lua::Value wdh = obj["width"];
@@ -101,6 +124,40 @@ inline sf::Rect<T> tableToRectangle(const lua::Table& obj)
                 T(wdh.is<T>() ? wdh : 0),
                 T(hgt.is<T>() ? hgt : 0),
         };
+}
+
+/** Table of tables of numbers, where all inner tables must have equal lengths.
+ */
+template<typename T = float>
+inline Matrix<T> tableToMatrix(const lua::Table& obj)
+{
+        static_assert(std::is_arithmetic_v<T>, typeNotArithmetic);
+
+        Matrix<T> mat;
+        mat.resize(obj.len().to<unsigned>());
+
+        obj.iterate([&](lua::Valref i, lua::Valref row) {
+                if (not row.is<lua::Table>())
+                {
+                        luaContext.error(err::notATable);
+                }
+                static_cast<lua::Table>(row).iterate([&](lua::Valref, lua::Valref entry) {
+                        if (not entry.is<float>())
+                        {
+                                luaContext.error(typeNotArithmetic);
+                        }
+                        mat[int(i - 1)].push_back(T(entry.to<float>()));
+                });
+        });
+
+        // All columns must have equal numbers of rows.
+        if (std::any_of(mat.begin(), mat.end(), [&](auto& row)
+                { return row.size() != mat[0].size(); }))
+        {
+                luaContext.error(err::matrixNotRegular);
+        }
+
+        return mat;
 }
 
 template<typename T>
@@ -202,9 +259,9 @@ inline std::unique_ptr<sf::RectangleShape> tableToRectangleShape(lua::Table& obj
  *  - outlineColor:     Color of the text outline.
  *  - outlineThickness: Number representing width of the text outline.
  */
-inline std::unique_ptr<sf::Shape> tableToShape(lua::Table& obj)
+inline std::optional<std::unique_ptr<sf::Shape>> tableToShape(lua::Table& obj)
 {
-        std::unique_ptr<sf::Shape> shape { nullptr };
+        std::unique_ptr<sf::Shape> shape = {nullptr};
         const lua::Value type = obj["type"];
 
         if (type == "circle shape")
@@ -219,6 +276,10 @@ inline std::unique_ptr<sf::Shape> tableToShape(lua::Table& obj)
         {
                 shape = tableToRectangleShape(obj);
         }
+        else
+        {
+                return {};
+        }
 
         prop (texture, std::string)
         {
@@ -228,29 +289,33 @@ inline std::unique_ptr<sf::Shape> tableToShape(lua::Table& obj)
                 }
                 else
                 {
-                        luaContext.error(util::err::badTextureName(texture));
+                        luaContext.error(err::badTextureName(texture));
                 }
         }
+
         prop (textureRect, lua::Table)
         {
                 shape->setTextureRect(tableToRectangle<int>(textureRect));
         }
+
         prop (fillColor, std::string)
         {
                 shape->setFillColor(stringToColor(fillColor));
         }
-        prop (fillColor, lua::Table)
+        else prop (fillColor, lua::Table)
         {
                 shape->setFillColor(tableToColor(fillColor));
         }
+
         prop (outlineColor, std::string)
         {
                 shape->setOutlineColor(stringToColor(outlineColor));
         }
-        prop (outlineColor, lua::Table)
+        else prop (outlineColor, lua::Table)
         {
                 shape->setOutlineColor(tableToColor(outlineColor));
         }
+
         prop (outlineThickness, float)
         {
                 shape->setOutlineThickness(outlineThickness);
@@ -280,13 +345,15 @@ inline std::unique_ptr<sf::Sprite> tableToSprite(lua::Table& obj)
                 }
                 else
                 {
-                        luaContext.error(util::err::badTextureName(texture));
+                        luaContext.error(err::badTextureName(texture));
                 }
         }
+
         prop (textureRect, lua::Table)
         {
                 sprite->setTextureRect(tableToRectangle<int>(textureRect));
         }
+
         prop (color, std::string)
         {
                 sprite->setColor(stringToColor(color));
@@ -320,7 +387,7 @@ inline std::unique_ptr<sf::Sprite> tableToSprite(lua::Table& obj)
  */
 inline std::unique_ptr<sf::Text> tableToText(lua::Table& obj)
 {
-        static const util::MapStringTo<sf::Text::Style> styles = {
+        static const MapStringTo<sf::Text::Style> styles = {
                 { "regular",       sf::Text::Regular       },
                 { "bold",          sf::Text::Bold          },
                 { "italic",        sf::Text::Italic        },
@@ -338,7 +405,7 @@ inline std::unique_ptr<sf::Text> tableToText(lua::Table& obj)
                 }
                 else
                 {
-                        luaContext.error(util::err::badTextStyleName(style));
+                        luaContext.error(err::badTextStyleName(style));
                         return sf::Text::Style::Regular;
                 }
         };
@@ -347,6 +414,7 @@ inline std::unique_ptr<sf::Text> tableToText(lua::Table& obj)
         {
                 text->setString(std::string(content));
         }
+
         prop (font, std::string)
         {
                 if (auto fptr = engine::Resources::get<sf::Font>(font))
@@ -355,48 +423,55 @@ inline std::unique_ptr<sf::Text> tableToText(lua::Table& obj)
                 }
                 else
                 {
-                        luaContext.error(util::err::badFontName(font));
+                        luaContext.error(err::badFontName(font));
                 }
         }
+
         prop (characterSize, unsigned)
         {
                 text->setCharacterSize(characterSize);
         }
+
         prop (lineSpacing, float)
         {
                 text->setLineSpacing(lineSpacing);
         }
+
         prop (letterSpacing, float)
         {
                 text->setLetterSpacing(letterSpacing);
         }
+
         prop (style, std::string)
         {
                 text->setStyle(getStyle(style));
         }
-        prop (style, lua::Table)
+        else prop (style, lua::Table)
         {
                 int compound = sf::Text::Style::Regular;
                 static_cast<lua::Table>(style).iterate(
                         [&](lua::Valref, lua::Valref s) { compound |= getStyle(s); });
                 text->setStyle(compound);
         }
+
         prop (fillColor, std::string)
         {
                 text->setFillColor(stringToColor(fillColor));
         }
-        prop (fillColor, lua::Table)
+        else prop (fillColor, lua::Table)
         {
                 text->setFillColor(tableToColor(fillColor));
         }
+
         prop (outlineColor, std::string)
         {
                 text->setOutlineColor(stringToColor(outlineColor));
         }
-        prop (outlineColor, lua::Table)
+        else prop (outlineColor, lua::Table)
         {
                 text->setOutlineColor(tableToColor(outlineColor));
         }
+
         prop (outlineThickness, float)
         {
                 text->setOutlineThickness(outlineThickness);
@@ -405,6 +480,97 @@ inline std::unique_ptr<sf::Text> tableToText(lua::Table& obj)
         extractBounds(obj, text);
         
         return text;
+}
+
+/** Transforms a Lua table into a RectTileMap object.
+ * 
+ *  Table syntax:
+ *  - size:         Vector or number (for a square) specifying the number of rows and columns
+ *                  in the tile matrix.
+ *  - tileSize:     Vector or number (for a square) specifying the visual size of one tile.
+ *                  This property is mandatory.
+ *  - tileIconSize: Vector or number (for a square) specifying the size of a tile saved in the
+ *                  texture. This property is mandatory.
+ *  - tiles:        Matrix specifying IDs of every single tile in the map.
+ *  - fill:         Number specifying the ID of the tile with which the map should be filled.
+ *  - texture:      String specifying the ID of the texture. This property is mandatory.
+ */
+inline std::unique_ptr<graphics::RectTileMap> tableToRectTileMap(lua::Table& obj)
+{
+        sf::Vector2f tSize = {16.f, 16.f};
+        sf::Vector2u tIconSize = {16u, 16u};
+        sf::Texture* tex = {nullptr};
+
+        prop (tileSize, lua::Table)
+        {
+                tSize = tableToVector(tileSize);
+        }
+        else prop (tileSize, float)
+        {
+                const float s = tileSize;
+                tSize = {s, s};
+        }
+        else
+        {
+                luaContext.error(err::noTileSize);
+        }
+
+        prop (tileIconSize, lua::Table)
+        {
+                tIconSize = tableToVector<unsigned>(tileIconSize);
+        }
+        else prop (tileIconSize, unsigned)
+        {
+                const unsigned s = tileIconSize;
+                tIconSize = {s, s};
+        }
+        else
+        {
+                luaContext.error(err::noTileIconSize);
+        }
+
+        prop (texture, std::string)
+        {
+                if (not (tex = engine::Resources::get<sf::Texture>(texture)))
+                {
+                        luaContext.error(err::badTextureName(texture));
+                } 
+        }
+        else
+        {
+                luaContext.error(err::noTexture);
+        }
+
+        prop (tiles, lua::Table)
+        {
+                auto tileMatrix = tableToMatrix<TileID>(tiles);
+                auto tmap = std::make_unique<graphics::RectTileMap>(tileMatrix, tSize, tIconSize, tex);
+                extractBounds(obj, tmap);
+                return tmap;
+        }
+
+        // If the `tiles` property is specified, the following ones are discarded:
+        sf::Vector2u siz = {3u, 3u};
+        TileID filling = 0;
+
+        prop (size, lua::Table)
+        {
+                siz = tableToVector<unsigned>(size);                
+        }
+        else prop (size, unsigned)
+        {
+                const unsigned s = size;
+                siz = {s, s};
+        }
+
+        prop (fill, unsigned)
+        {
+                filling = fill.to<unsigned>();
+        }
+
+        auto tmap = std::make_unique<graphics::RectTileMap>(siz, tSize, tIconSize, tex, filling);
+        extractBounds(obj, tmap);
+        return tmap;
 }
 
 /** Transforms a Lua table into a sf::Drawable object.
@@ -424,20 +590,20 @@ inline std::unique_ptr<sf::Text> tableToText(lua::Table& obj)
  *  - convex shape (sf::ConvexShape)
  *  - rectangle shape (sf::RectangleShape)
  *  - sprite (sf::Sprite)
- *  - square tile map (SquareTileMap)
+ *  - rect tile map (RectTileMap)
  *  - text (sf::Text)
  */
-inline std::unique_ptr<sf::Drawable> tableToDrawable(lua::Table& obj)
+inline std::optional<std::unique_ptr<sf::Drawable>> tableToDrawable(lua::Table& obj)
 {
         const lua::Value type = obj["type"];
 
         if (not type)
         {
-                luaContext.error(util::err::noDrawableTypeId());
-                return nullptr;
+                luaContext.error(err::noDrawableTypeId);
+                return {};
         }
 
-        std::unique_ptr<sf::Drawable> drawable{ nullptr };
+        std::unique_ptr<sf::Drawable> drawable = {nullptr};
 
         if (type == "text")
         {
@@ -451,11 +617,17 @@ inline std::unique_ptr<sf::Drawable> tableToDrawable(lua::Table& obj)
                  type == "convex shape" ||
                  type == "rectangle shape")
         {
-                drawable = tableToShape(obj);
+                // Here we can assume that the value is correct,
+                // as we pass only the accepted type IDs.
+                drawable = tableToShape(obj).value();
+        }
+        else if (type == "rect tile map")
+        {
+                drawable = tableToRectTileMap(obj);
         }
         else
         {
-                return nullptr;
+                return {};
         }
 
         auto transformable = dynamic_cast<sf::Transformable*>(drawable.get());
@@ -463,18 +635,21 @@ inline std::unique_ptr<sf::Drawable> tableToDrawable(lua::Table& obj)
         {
                 transformable->setPosition(tableToVector(position));
         }
+
         prop (rotation, float)
         {
                 transformable->setRotation(rotation);
         }
+
         prop (scale, lua::Table)
         {
                 transformable->setScale(tableToVector(scale));
         }
-        prop (scale, float)
+        else prop (scale, float)
         {
                 transformable->setScale(scale, scale);
         }
+
         prop (origin, std::string)
         {
                 prop (globalBounds, lua::Table)
@@ -493,7 +668,7 @@ inline std::unique_ptr<sf::Drawable> tableToDrawable(lua::Table& obj)
                         );
                 }
         }
-        prop (origin, lua::Table)
+        else prop (origin, lua::Table)
         {
                 transformable->setOrigin(tableToVector(origin));
         }

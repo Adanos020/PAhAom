@@ -17,7 +17,6 @@ namespace engine
 {
 
 Engine::Engine()
-: running(true)
 {
         // Observer.
         util::Subject::addObserver(this);
@@ -32,19 +31,23 @@ Engine::Engine()
         util::luaContext.global["load_texture"] = util::script::load<sf::Texture>;
         util::luaState.runFile("data/scripts/init.lua");
 
-        // Settings.
-        Settings::Video::load();
+        // Run if appropriate.
+        if ((running = not states.empty()))
+        {
+                // Settings.
+                Settings::Video::load();
 
-        // Window setup.
-        this->window.create(Settings::Video::videoMode(), "PAhAom", sf::Style::Close);
-        this->window.setFramerateLimit(60);
-        this->window.setKeyRepeatEnabled(false);
+                // Window setup.
+                this->window.create(Settings::Video::videoMode(), "PAhAom", sf::Style::Close);
+                this->window.setFramerateLimit(60);
+                this->window.setKeyRepeatEnabled(false);
 
-        // Render texture setup.
-        const sf::Vector2u screenRes = Settings::Video::resolution;
-        this->screenTexture.create(screenRes.x, screenRes.y);
-        this->screen.setSize(sf::Vector2f(Settings::Video::windowSize));
-        this->screen.setTexture(&this->screenTexture.getTexture());
+                // Render texture setup.
+                const sf::Vector2u screenRes = Settings::Video::resolution;
+                this->screenTexture.create(screenRes.x, screenRes.y);
+                this->screen.setSize(sf::Vector2f(Settings::Video::windowSize));
+                this->screen.setTexture(&this->screenTexture.getTexture());
+        }
 }
 
 int Engine::run()

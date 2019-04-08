@@ -6,18 +6,30 @@ Game = {
             font = "unifont",
             position = {
                 x = Settings.video.resolution.x / 2,
-                y = Settings.video.resolution.y / 2,
+                y = 20,
             },
             fillColor = "red",
             origin = "center",
         },
         {
-            type = "square tile map",
-            size = { x = 37, y = 21 },
+            type = "rect tile map",
+            tiles = {
+                {  1,  1, 16,  1,  1 },
+                {  1, 16, 16, 16,  1 },
+                {  1, 16, 16, 16,  1 },
+                {  1, 16, 16, 16,  1 },
+                { 64, 64, 64, 64, 64 },
+                { 64, 64, 64, 64, 64 },
+            },
             tileSize = 16,
             tileIconSize = 16,
-            fill = 16,
-            texture = "tileset"
+            texture = "tileset",
+            scale = 2,
+            origin = "center",
+            position = {
+                x = Settings.video.resolution.x / 2,
+                y = Settings.video.resolution.y / 2,
+            },
         }
     }
 }
