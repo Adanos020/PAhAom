@@ -1,30 +1,11 @@
 Game = {
     drawables = {
         {
-            type = "text",
-            content = "Game, press Esc to exit.",
-            font = "unifont",
-            position = {
-                x = Settings.video.resolution.x / 2,
-                y = 20,
-            },
-            fillColor = "red",
-            origin = "center",
-        },
-        {
             type = "rect tile map",
-            tiles = {
-                {  1,  1, 16,  1,  1 },
-                {  1, 16, 16, 16,  1 },
-                {  1, 16, 16, 16,  1 },
-                {  1, 16, 16, 16,  1 },
-                { 64, 64, 64, 64, 64 },
-                { 64, 64, 64, 64, 64 },
-            },
+            tiles = {},
             tileSize = 16,
             tileIconSize = 16,
             texture = "tileset",
-            scale = 2,
             origin = "center",
             position = {
                 x = Settings.video.resolution.x / 2,
@@ -38,6 +19,7 @@ function Game:new(o)
     o = o or {}
     setmetatable(o, self)
     self.__index = self
+    self.drawables[1].tiles = generate_dungeon {x = 37, y = 21}
     return o
 end
 

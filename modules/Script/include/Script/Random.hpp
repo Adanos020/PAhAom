@@ -10,7 +10,7 @@
 namespace script
 {
 
-lua::Retval chance(lua::Context& context)
+inline lua::Retval chance(lua::Context& context)
 {
         if (const lua::Value prob = context.args[0]; prob.is<double>())
         {
@@ -21,7 +21,7 @@ lua::Retval chance(lua::Context& context)
         return context.ret();
 }
 
-lua::Retval uniform(lua::Context& context)
+inline lua::Retval uniform(lua::Context& context)
 {
         const lua::Value lo = context.args[0];
         const lua::Value hi = context.args[1];
@@ -39,7 +39,7 @@ lua::Retval uniform(lua::Context& context)
         return context.ret();
 }
 
-lua::Retval normal(lua::Context& context)
+inline lua::Retval normal(lua::Context& context)
 {
         if (context.args.empty())
         {

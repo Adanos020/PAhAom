@@ -1,10 +1,10 @@
 dofile "data/scripts/scripts.lua"
 
-for _,path in ipairs(scripts) do
+for _, path in ipairs(scripts) do
     dofile("data/scripts/" .. path)
 end
 
-for _,font in ipairs(Resources.fonts) do
+for _, font in ipairs(Resources.fonts) do
     local id = font[1]
     local path = "data/fonts/" .. font[2]
     if not load_font(id, path) then
@@ -12,7 +12,7 @@ for _,font in ipairs(Resources.fonts) do
     end
 end
 
-for _,texture in ipairs(Resources.textures) do
+for _, texture in ipairs(Resources.textures) do
     local id = texture[1]
     local path = "data/textures/" .. texture[2]
     if not load_texture(id, path) then

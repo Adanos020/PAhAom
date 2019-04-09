@@ -15,12 +15,12 @@ Menu = {
             type = "circle shape",
             fillColor = "green",
             radius = 30,
-            position = { x = 140, y = 40 }
+            position = {x = 140, y = 40}
         },
         {
             type = "rectangle shape",
             fillColor = "blue",
-            size = { x = 69, y = 42 },
+            size = {x = 69, y = 42},
             position = {
                 x = Settings.video.resolution.x - 80,
                 y = Settings.video.resolution.y - 50
@@ -34,7 +34,7 @@ Menu = {
                 width = 16, height = 16
             },
             scale = 4,
-            position = { x = 10, y = 10 }
+            position = {x = 10, y = 10}
         }
     }
 }

@@ -18,6 +18,7 @@ namespace util::err
 
 // Lua type errors.
 static const std::string notATable = "Error: given value was expected to be a table.";
+static const std::string notAFunction = "Error: given value was expected to be a function.";
 
 // Lua graphics-related errors.
 static const std::string matrixNotRegular = "Error: all columns in a matrix must have equal lengths.";
