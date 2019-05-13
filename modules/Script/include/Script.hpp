@@ -15,13 +15,16 @@ namespace script
 void init()
 {
         // Math.
-        luaContext.global["is_vector"]            = isVector;
-        luaContext.global["vectors_equal"]        = vectorsEqual;
-        luaContext.global["is_rectangle"]         = isRectangle;
-        luaContext.global["rectangles_intersect"] = rectanglesIntersect;
-        luaContext.global["rectangle_contains"]   = rectangleContains;
-        luaContext.global["math"]["clamp"]        = clamp;
-        luaContext.global["math"]["lerp"]         = lerp;
+        lua::Table math = luaContext.global["math"];
+        math["is_vector"]            = isVector;
+        math["vectors_equal"]        = vectorsEqual;
+        math["is_rectangle"]         = isRectangle;
+        math["rectangles_intersect"] = rectanglesIntersect;
+        math["rectangle_contains"]   = rectangleContains;
+        math["clamp"]                = clamp;
+        math["lerp_number"]          = lerpNumber;
+        math["map_number"]           = mapNumber;
+        math["normalize_number"]     = normalizeNumber;
 
         // Messages.
         luaContext.global["pop_state"]  = popState;
@@ -32,9 +35,11 @@ void init()
         luaContext.global["load_texture"] = load<sf::Texture>;
 
         // Random.
-        luaContext.global["chance"]  = chance;
-        luaContext.global["uniform"] = uniform;
-        luaContext.global["normal"]  = normal;
+        lua::Table random(luaContext);
+        random["chance"]  = chance;
+        random["uniform"] = uniform;
+        random["normal"]  = normal;
+        luaContext.global["random"] = random;
 
         luaState.runFile("data/scripts/init.lua");
 }

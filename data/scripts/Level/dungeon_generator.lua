@@ -28,7 +28,7 @@ local directions = {
 }
 
 local function fill_area(area, tile)
-    assert(is_rectangle(area))
+    assert(math.is_rectangle(area))
     assert(math.type(tile) == "integer")
 
     for x = area.position.x, area.position.x + area.size.x - 1 do
@@ -47,7 +47,7 @@ local function init_map()
 end
 
 local function left_is(pos, tile, distance)
-    assert(is_vector(pos))
+    assert(math.is_vector(pos))
     assert(math.type(tile) == "integer")
     assert(math.type(distance) == "integer")
 
@@ -55,7 +55,7 @@ local function left_is(pos, tile, distance)
 end
 
 local function right_is(pos, tile, distance)
-    assert(is_vector(pos))
+    assert(math.is_vector(pos))
     assert(math.type(tile) == "integer")
     assert(math.type(distance) == "integer")
 
@@ -63,7 +63,7 @@ local function right_is(pos, tile, distance)
 end
 
 local function up_is(pos, tile, distance)
-    assert(is_vector(pos))
+    assert(math.is_vector(pos))
     assert(math.type(tile) == "integer")
     assert(math.type(distance) == "integer")
 
@@ -71,7 +71,7 @@ local function up_is(pos, tile, distance)
 end
 
 local function down_is(pos, tile, distance)
-    assert(is_vector(pos))
+    assert(math.is_vector(pos))
     assert(math.type(tile) == "integer")
     assert(math.type(distance) == "integer")
 
@@ -95,7 +95,7 @@ local function count_neighbours(neighbours)
 end
 
 local function count_close_neighbours(pos, tile)
-    assert(is_vector(pos))
+    assert(math.is_vector(pos))
     assert(math.type(tile) == "integer")
 
     return count_neighbours(find_neighbours(pos, tile, 1))
@@ -117,17 +117,17 @@ local function pick_direction(neighbours)
     if neighbours then
         assert(math.type(neighbours) == "integer")
         local inds, n = neighbours_indices(neighbours)
-        return directions[inds[uniform(1, n)]]
+        return directions[inds[random.uniform(1, n)]]
     end
 
-    return directions[uniform(1, #directions)]
+    return directions[random.uniform(1, #directions)]
 end
 
 local function generate_maze()
     local cells = {
         { -- Picking a random first cell with odd coordinates.
-            x = ~1 & uniform(2, map_size.x),
-            y = ~1 & uniform(2, map_size.y),
+            x = ~1 & random.uniform(2, map_size.x),
+            y = ~1 & random.uniform(2, map_size.y),
         }
     }
 
@@ -150,9 +150,9 @@ local function generate_maze()
             }
 
             -- Decide on whether make a turn.
-            while not rectangle_contains(map_area, next_cell)
+            while not math.rectangle_contains(map_area, next_cell)
                 or tiles[next_cell.y][next_cell.x] == Tile.HALLWAY
-                or chance(0.1)
+                or random.chance(0.1)
             do
                 curr_dir = pick_direction(neighbours)
                 next_cell = {
@@ -177,19 +177,19 @@ local function spread_rooms()
     rooms = {}
     for i = 1, max_room_tries do
         local room_size = {
-            x = 1 | uniform(min_room_size.x, max_room_size.x),
-            y = 1 | uniform(min_room_size.y, max_room_size.y),
+            x = 1 | random.uniform(min_room_size.x, max_room_size.x),
+            y = 1 | random.uniform(min_room_size.y, max_room_size.y),
         }
         local room_pos = {
-            x = ~1 & uniform(2, map_size.x - room_size.x),
-            y = ~1 & uniform(2, map_size.y - room_size.y),
+            x = ~1 & random.uniform(2, map_size.x - room_size.x),
+            y = ~1 & random.uniform(2, map_size.y - room_size.y),
         }
 
         local new_room = {position = room_pos, size = room_size}
 
         if table.none(rooms,
             function(room)
-                return rectangles_intersect(room, new_room)
+                return math.rectangles_intersect(room, new_room)
             end)
         then
             table.insert(rooms, new_room)
@@ -202,7 +202,7 @@ local function spread_rooms()
 end
 
 local function is_dead_end(pos)
-    assert(is_vector(pos))
+    assert(math.is_vector(pos))
 
     return tiles[pos.y][pos.x] == Tile.HALLWAY
        and count_close_neighbours(pos, Tile.WALL) == 3
@@ -237,7 +237,7 @@ local function remove_dead_ends()
 end
 
 function generate_dungeon(size)
-    assert(is_vector(size), "Size must be a vector.")
+    assert(math.is_vector(size), "Size must be a vector.")
 
     map_size = {
         x = math.tointeger(size.x),
