@@ -1,9 +1,3 @@
--- Mathematical.
-
-function math.clamp(v, l, h)
-    return math.min(math.max(v, l), h)
-end
-
 -- Functional.
 
 function table.all(array, pred)

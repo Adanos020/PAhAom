@@ -1,10 +1,10 @@
-local map_size -- vector
-local tiles    -- matrix of numbers
-local rooms    -- array of rects
-local max_room_tries = 100
-local min_room_size  = {x = 3, y = 3}
+local map_size      -- vector
+local tiles         -- matrix of numbers
+local rooms         -- array of rects
+local map_area      -- rectangle
 local max_room_size -- vector
-local map_area -- rectangle
+local min_room_size  = {x = 3, y = 3}
+local max_room_tries = 100
 
 local Tile = {
     VOID    = 0,

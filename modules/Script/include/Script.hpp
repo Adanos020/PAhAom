@@ -20,6 +20,8 @@ void init()
         luaContext.global["is_rectangle"]         = isRectangle;
         luaContext.global["rectangles_intersect"] = rectanglesIntersect;
         luaContext.global["rectangle_contains"]   = rectangleContains;
+        luaContext.global["math"]["clamp"]        = clamp;
+        luaContext.global["math"]["lerp"]         = lerp;
 
         // Messages.
         luaContext.global["pop_state"]  = popState;
