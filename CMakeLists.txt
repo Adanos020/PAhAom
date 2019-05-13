@@ -15,16 +15,16 @@ project(
 
 # Lua API++
 
-include_directories("modules/lua-api-pp/luapp")
-file(GLOB_RECURSE HEADERS "modules/lua-api-pp/luapp/lua.hpp")
+include_directories("modules/luapp/luapp")
+file(GLOB_RECURSE HEADERS "modules/luapp/luapp/luapp.hpp")
 
-set(LUAPP_SOURCES "modules/lua-api-pp/luapp/impl.cpp")
-set(LUAPP_HEADERS "modules/lua-api-pp/luapp/*.{h,hpp,hxx}")
+set(LUAPP_SOURCES "modules/luapp/luapp/luapp_impl.cpp")
+set(LUAPP_HEADERS "modules/luapp/luapp/*.{h,hpp,hxx}")
 
 file(GLOB_RECURSE SOURCES ${LUAPP_SOURCES} ${LUAPP_HEADERS})
 add_library(LuaPP STATIC ${SOURCES})
 
-target_include_directories(LuaPP PUBLIC "modules/lua-api-pp/luapp")
+target_include_directories(LuaPP PUBLIC "modules/luapp/luapp")
 target_link_libraries(LuaPP PUBLIC lua)
 
 set_target_properties(
@@ -84,7 +84,7 @@ set_target_properties(
 
 # MAIN EXEC
 
-set(PAHAOM_SOURCES "modules/Engine/src/Engine/Engine.cpp")
+set(PAHAOM_SOURCES "modules/Engine/src/Engine/*.cpp")
 set(PAHAOM_HEADERS "modules/Engine/include/Engine/*.hpp")
 
 file(GLOB_RECURSE SOURCES ${PAHAOM_SOURCES} ${PAHAOM_HEADERS})

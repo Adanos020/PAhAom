@@ -37,7 +37,7 @@ Engine::Engine()
 
                 // Window setup.
                 this->window.create(Settings::Video::videoMode(), "PAhAom", sf::Style::Close);
-                this->window.setFramerateLimit(60);
+                this->window.setFramerateLimit(util::FPS);
                 this->window.setKeyRepeatEnabled(false);
 
                 // Render texture setup.
@@ -48,12 +48,17 @@ Engine::Engine()
         }
         else
         {
-                std::cerr << "" << std::endl;
+                std::cerr << util::err::noInitialState << std::endl;
         }
 }
 
 int Engine::run()
 {
+        if (not this->running)
+        {
+                return 1;
+        }
+
         util::DeltaTime lag = 0.0;
 
         sf::Clock timer;

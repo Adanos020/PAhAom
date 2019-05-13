@@ -3,6 +3,7 @@
 
 #include <Script/Graphics.hpp>
 #include <Script/Observer.hpp>
+#include <Script/Math.hpp>
 #include <Script/Random.hpp>
 #include <Script/Resources.hpp>
 #include <Script/Window.hpp>
@@ -13,9 +14,16 @@ namespace script
 
 void init()
 {
+        // Math.
+        luaContext.global["is_vector"]            = isVector;
+        luaContext.global["vectors_equal"]        = vectorsEqual;
+        luaContext.global["is_rectangle"]         = isRectangle;
+        luaContext.global["rectangles_intersect"] = rectanglesIntersect;
+        luaContext.global["rectangle_contains"]   = rectangleContains;
+
         // Messages.
-        luaContext.global["push_state"] = pushState;
         luaContext.global["pop_state"]  = popState;
+        luaContext.global["push_state"] = pushState;
 
         // Resources.
         luaContext.global["load_font"]    = load<sf::Font>;

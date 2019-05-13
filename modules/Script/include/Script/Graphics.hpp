@@ -17,28 +17,10 @@
 #include <variant>
 
 
-namespace script::experimental
-{
-
-// Compound type for drawable and transformable objects.
-using GraphicalObject = std::variant<sf::Drawable*, sf::Transformable*>;
-
-sf::Drawable* asDrawable(GraphicalObject& gObj)
-{
-        return std::get<sf::Drawable*>(gObj);
-}
-
-sf::Transformable* asTransformable(GraphicalObject& gObj)
-{
-        return std::get<sf::Transformable*>(gObj);
-}
-
-}
-
 namespace script
 {
 
-inline sf::Color stringToColor(const std::string& obj)
+inline sf::Color stringToColor(const std::string& str)
 {
         static const util::MapStringTo<sf::Color> predefinedColors = {
                 { "black",       sf::Color::Black       },
@@ -52,12 +34,12 @@ inline sf::Color stringToColor(const std::string& obj)
                 { "transparent", sf::Color::Transparent },
         };
 
-        if (auto c = predefinedColors.find(obj); c != predefinedColors.end())
+        if (auto c = predefinedColors.find(str); c != predefinedColors.end())
         {
                 return c->second;
         }
 
-        luaContext.error(util::err::badColorName(obj));
+        luaContext.error(util::err::badColorName(str));
         return sf::Color::Transparent;
 }
 

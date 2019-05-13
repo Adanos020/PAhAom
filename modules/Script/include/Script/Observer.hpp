@@ -12,19 +12,13 @@ namespace script
 
 /** Broadcasts a PushState message from Lua to the Subject.
  * 
- *  Its sole argument is a table containing a string containing the name of the state to push.
+ *  Params:
+ *      state = Table. Contains a string with the name of the state to push.
  */
 inline lua::Retval pushState(lua::Context& context)
 {
-        if (lua::Value state = context.args[0]; state.is<std::string>())
-        {
-                util::Subject::send({ util::Message::PushState{ state } });
-        }
-        else
-        {
-                context.error(util::err::noPushStateName);
-        }
-
+        context.requireArgs<std::string>(1);
+        util::Subject::send({ util::Message::PushState{ context.args[0] } });
         return context.ret();
 }
 

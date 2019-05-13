@@ -10,19 +10,24 @@
 namespace util::err
 {
 
+#define ErrMsg static const std::string
+
 // Static assertion errors.
 #define typeNotArithmetic "Given type must be arithmetic."
 #define typeNotFloatingPoint "Given type must be a floating point number."
 #define typeNotDrawable "Given class must derive from sf::Drawable."
 #define typeNotResource "Resource type is not recognised."
 
+// Engine errors.
+ErrMsg noInitialState = "Error: no initial state was pushed.";
+
 // Lua type errors.
-static const std::string notATable = "Error: given value was expected to be a table.";
-static const std::string notAFunction = "Error: given value was expected to be a function.";
+ErrMsg notATable = "Error: given value was expected to be a table.";
+ErrMsg notAFunction = "Error: given value was expected to be a function.";
 
 // Lua graphics-related errors.
-static const std::string matrixNotRegular = "Error: all columns in a matrix must have equal lengths.";
-static const std::string noDrawableTypeId = "Error: drawable type ID was not specified.";
+ErrMsg matrixNotRegular = "Error: all columns in a matrix must have equal lengths.";
+ErrMsg noDrawableTypeId = "Error: drawable type ID was not specified.";
 
 inline std::string wrongDrawableDefinition(int i)
 {
@@ -49,16 +54,18 @@ inline std::string badTextureName(const std::string& name)
         return format("Error: texture '%s' was not recognized.", name.c_str());
 }
 
-static const std::string noTexture      = "Error: required texture was not specified";
-static const std::string noTileSize     = "Error: required tile size was not specified";
-static const std::string noTileIconSize = "Error: required tile icon size was not specified";
+ErrMsg noTexture      = "Error: required texture was not specified";
+ErrMsg noTileSize     = "Error: required tile size was not specified";
+ErrMsg noTileIconSize = "Error: required tile icon size was not specified";
 
 // Lua messages errors.
-static const std::string noMessageTypeId = "Error: message type ID was not specified.";
-static const std::string noPushStateName = "Error: name of the state to push was not specified.";
+ErrMsg noMessageTypeId = "Error: message type ID was not specified.";
+ErrMsg noPushStateName = "Error: name of the state to push was not specified.";
 
 // Lua resources errors.
-static const std::string noResourceName = "Error: required resource name was not specified.";
-static const std::string noResourcePath = "Error: required resource path was not specified.";
+ErrMsg noResourceName = "Error: required resource name was not specified.";
+ErrMsg noResourcePath = "Error: required resource path was not specified.";
+
+#undef ErrMsg
 
 }

@@ -79,10 +79,6 @@ local function down_is(pos, tile, distance)
 end
 
 local function find_neighbours(pos, tile, distance)
-    assert(is_vector(pos))
-    assert(math.type(tile) == "integer")
-    assert(math.type(distance) == "integer")
-
     return (left_is (pos, tile, distance) and Neighbours.LEFT  or 0)
          | (right_is(pos, tile, distance) and Neighbours.RIGHT or 0)
          | (up_is   (pos, tile, distance) and Neighbours.UP    or 0)
@@ -107,6 +103,7 @@ end
 
 local function neighbours_indices(neighbours)
     assert(math.type(neighbours) == "integer")
+
     local indices = {}
     for i = 0, 3 do
         if ((neighbours >> i) & 1) == 1 then
@@ -117,9 +114,8 @@ local function neighbours_indices(neighbours)
 end
 
 local function pick_direction(neighbours)
-    assert(math.type(neighbours) == "integer")
-
     if neighbours then
+        assert(math.type(neighbours) == "integer")
         local inds, n = neighbours_indices(neighbours)
         return directions[inds[uniform(1, n)]]
     end
@@ -249,7 +245,7 @@ function generate_dungeon(size)
     }
     map_area = {
         position = {x = 1, y = 1},
-        size = map_size
+        size = map_size,
     }
     max_room_size = {
         x = math.clamp(map_size.x // 2, 3, 13),

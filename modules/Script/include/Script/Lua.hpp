@@ -1,7 +1,8 @@
 #pragma once
 
 
-#include <lua.hpp>
+// #include <lua.hpp>
+#include <luapp.hpp>
 
 
 namespace script
