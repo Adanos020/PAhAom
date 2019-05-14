@@ -47,34 +47,18 @@ local function init_map()
 end
 
 local function left_is(pos, tile, distance)
-    assert(math.is_vector(pos))
-    assert(math.type(tile) == "integer")
-    assert(math.type(distance) == "integer")
-
     return pos.x > distance and tiles[pos.y][pos.x - distance] == tile
 end
 
 local function right_is(pos, tile, distance)
-    assert(math.is_vector(pos))
-    assert(math.type(tile) == "integer")
-    assert(math.type(distance) == "integer")
-
     return pos.x <= map_size.x - distance and tiles[pos.y][pos.x + distance] == tile
 end
 
 local function up_is(pos, tile, distance)
-    assert(math.is_vector(pos))
-    assert(math.type(tile) == "integer")
-    assert(math.type(distance) == "integer")
-
     return pos.y > distance and tiles[pos.y - distance][pos.x] == tile
 end
 
 local function down_is(pos, tile, distance)
-    assert(math.is_vector(pos))
-    assert(math.type(tile) == "integer")
-    assert(math.type(distance) == "integer")
-
     return pos.y <= map_size.y - distance and tiles[pos.y + distance][pos.x] == tile
 end
 

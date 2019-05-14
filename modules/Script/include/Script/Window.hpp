@@ -11,7 +11,7 @@ namespace script
 
 inline lua::Table eventToTable(const sf::Event& event)
 {
-        lua::Table table { luaContext };
+        lua::Table table = {luaContext};
 
         switch (event.type)
         {

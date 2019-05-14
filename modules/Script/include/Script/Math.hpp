@@ -18,14 +18,14 @@ namespace impl
                 return (1.0 - alpha) * val1 + alpha * val2;
         }
 
-        inline double mapNumber(double val, double lo1, double hi1, double lo2, double hi2)
-        {
-                return val / (hi1 - lo1) * (hi2 - lo2) + lo2;
-        }
-
         inline double normalizeNumber(double val, double lo, double hi)
         {
-                return mapNumber(val, lo, hi, 0, 1);
+                return (val - lo) / (hi - lo);
+        }
+
+        inline double mapNumber(double val, double lo1, double hi1, double lo2, double hi2)
+        {
+                return normalizeNumber(val, lo1, hi1) * (hi2 - lo2) + lo2;
         }
 
         inline bool isVector(const lua::Table& vec)
@@ -66,7 +66,7 @@ namespace impl
 inline lua::Retval clamp(lua::Context& context)
 {
         context.requireArgs<double, double, double>(3);
-        
+
         const lua::Valref val = context.args[0];
         const lua::Valref lo  = context.args[1];
         const lua::Valref hi  = context.args[2];
@@ -97,6 +97,21 @@ inline lua::Retval lerpNumber(lua::Context& context)
  * 
  *  Params:
  *      val = Number. Value to map.
+ *      hi  = Number. Lower bound of the original range.
+ *      lo  = Number. Upper bound of the original range.
+ * 
+ *  Returns: Number - Mapped to range [0, 1]
+ */
+inline lua::Retval normalizeNumber(lua::Context& context)
+{
+        context.requireArgs<double, double, double>(3);
+        return context.ret(impl::normalizeNumber(context.args[0], context.args[1], context.args[2]));
+}
+
+/** Maps a number in given range from hi to lo into a value in range from 0 to 1.
+ * 
+ *  Params:
+ *      val = Number. Value to map.
  *      hi1  = Number. Lower bound of the original range.
  *      lo1  = Number. Upper bound of the original range.
  *      hi2  = Number. Lower bound of the target range.
@@ -111,21 +126,6 @@ inline lua::Retval mapNumber(lua::Context& context)
                                            context.args[3], context.args[4]));
 }
 
-/** Maps a number in given range from hi to lo into a value in range from 0 to 1.
- * 
- *  Params:
- *      val = Number. Value to map.
- *      hi  = Number. Lower bound of the original range.
- *      lo  = Number. Upper bound of the original range.
- * 
- *  Returns: Number - Mapped to range [0, 1]
- */
-inline lua::Retval normalizeNumber(lua::Context& context)
-{
-        context.requireArgs<double, double, double>(3);
-        return context.ret(impl::normalizeNumber(context.args[0], context.args[1], context.args[2]));
-}
-
 /** Checks if given table is a vector, i.e. it has two numbers called "x" and "y".
  * 
  *  Params:
@@ -135,11 +135,8 @@ inline lua::Retval normalizeNumber(lua::Context& context)
  */
 inline lua::Retval isVector(lua::Context& context)
 {
-        if (context.checkArgs<lua::Table>(1))
-        {
-                return context.ret(impl::isVector(context.args[0]));
-        }
-        return context.ret(false);
+        context.requireArgs<lua::Table>(1);
+        return context.ret(impl::isVector(context.args[0]));
 }
 
 /** Checks if given vectors are equal.
