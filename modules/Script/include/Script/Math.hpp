@@ -2,6 +2,7 @@
 
 
 #include <Script/Lua.hpp>
+#include <Util/Math.hpp>
 
 #include <SFML/Graphics/Rect.hpp>
 
@@ -13,44 +14,68 @@ namespace script
 
 namespace impl
 {
-        inline double lerpNumber(double val1, double val2, double alpha)
-        {
-                return (1.0 - alpha) * val1 + alpha * val2;
-        }
+        template<class Type>
+        static constexpr bool isVectorType =
+                std::is_same_v<Type, sf::Vector2f> or std::is_same_v<Type, sf::Vector3f>;
 
-        inline double normalizeNumber(double val, double lo, double hi)
-        {
-                return (val - lo) / (hi - lo);
-        }
+        template<size_t dimensions>
+        static constexpr bool isSupportedDimensionCount =
+                dimensions == 2 or dimensions == 3;
 
-        inline double mapNumber(double val, double lo1, double hi1, double lo2, double hi2)
-        {
-                return normalizeNumber(val, lo1, hi1) * (hi2 - lo2) + lo2;
-        }
-
+        template<size_t dimensions>
         inline bool isVector(const lua::Table& vec)
         {
-                return vec["x"].is<double>() and vec["y"].is<double>();
+                static_assert(isSupportedDimensionCount<dimensions>);
+
+                if constexpr (dimensions == 2)
+                {
+                        return vec["x"].is<double>() and vec["y"].is<double>() and not vec["z"].is<double>();
+                }
+                else // 3D
+                {
+                        return vec["x"].is<double>() and vec["y"].is<double>() and vec["z"].is<double>();
+                }
         }
 
-        inline sf::Vector2f toVector(const lua::Table& vec)
+        template<size_t dimensions>
+        inline auto toVector(const lua::Table& vec)
         {
-                return {vec["x"], vec["y"]};
+                static_assert(isSupportedDimensionCount<dimensions>);
+
+                if constexpr (dimensions == 2)
+                {
+                        return sf::Vector2f{vec["x"], vec["y"]};
+                }
+                else // 3D
+                {
+                        return sf::Vector3f{vec["x"], vec["y"], vec["z"]};
+                }
         }
 
-        inline bool vectorsEqual(const lua::Table& vec1, const lua::Table& vec2)
+        template<class VectorType>
+        inline lua::Table vectorToTable(const VectorType vec)
         {
-                return vec1["x"] == vec2["x"] and vec1["y"] == vec2["y"];
+                static_assert(isVectorType<VectorType>);
+                
+                auto newVec = lua::Table{luaContext};
+                newVec["x"] = vec.x;
+                newVec["y"] = vec.y;
+                if constexpr (std::is_same_v<VectorType, sf::Vector3f>)
+                {
+                        newVec["z"] = vec.z;
+                }
+                
+                return newVec;
         }
 
         inline bool isRectangle(const lua::Table& rect)
         {
-                return isVector(rect["position"]) and isVector(rect["size"]);
+                return isVector<2>(rect["position"]) and isVector<2>(rect["size"]);
         }
 
         inline sf::FloatRect toRectangle(const lua::Table& rect)
         {
-                return {toVector(rect["position"]), toVector(rect["size"])};
+                return {toVector<2>(rect["position"]), toVector<2>(rect["size"])};
         }
 }
 
@@ -90,7 +115,9 @@ inline lua::Retval clamp(lua::Context& context)
 inline lua::Retval lerpNumber(lua::Context& context)
 {
         context.requireArgs<double, double, double>(3);
-        return context.ret(impl::lerpNumber(context.args[0], context.args[1], context.args[2]));
+        return context.ret(util::lerp(context.args[0].to<double>(),
+                                      context.args[1].to<double>(),
+                                      context.args[2].to<double>()));
 }
 
 /** Maps a number in given range from hi to lo into a value in range from 0 to 1.
@@ -105,7 +132,7 @@ inline lua::Retval lerpNumber(lua::Context& context)
 inline lua::Retval normalizeNumber(lua::Context& context)
 {
         context.requireArgs<double, double, double>(3);
-        return context.ret(impl::normalizeNumber(context.args[0], context.args[1], context.args[2]));
+        return context.ret(util::normalize(context.args[0], context.args[1], context.args[2]));
 }
 
 /** Maps a number in given range from hi to lo into a value in range from 0 to 1.
@@ -122,44 +149,78 @@ inline lua::Retval normalizeNumber(lua::Context& context)
 inline lua::Retval mapNumber(lua::Context& context)
 {
         context.requireArgs<double, double, double, double, double>(5);
-        return context.ret(impl::mapNumber(context.args[0], context.args[1], context.args[2],
+        return context.ret(util::mapNumber(context.args[0], context.args[1], context.args[2],
                                            context.args[3], context.args[4]));
 }
 
-/** Checks if given table is a vector, i.e. it has two numbers called "x" and "y".
+/** Checks if given table is an 2D or 3D vector, i.e. it has two numbers called "x" and "y"
+ *  ("x", "y", and "z", if it's 3D).
  * 
  *  Params:
  *      vec = Table.
  * 
  *  Returns: Boolean
  */
+template<size_t dimensions>
 inline lua::Retval isVector(lua::Context& context)
 {
         context.requireArgs<lua::Table>(1);
-        return context.ret(impl::isVector(context.args[0]));
+        return context.ret(impl::isVector<dimensions>(context.args[0]));
 }
 
-/** Checks if given vectors are equal.
+/** Checks if given 2D or 3D vectors are equal.
  * 
  *  Params:
- *      vec1 = Table. Presumably a vector.
- *      vec2 = Table. Presumably a vector.
+ *      vec1 = Table. Presumably a 2D or 3D vector.
+ *      vec2 = Table. Presumably a 2D or 3D vector.
  * 
  *  Returns: Boolean
  */
+template<size_t dimensions>
 inline lua::Retval vectorsEqual(lua::Context& context)
 {
         context.requireArgs<lua::Table, lua::Table>(2);
+        return context.ret(impl::toVector<dimensions>(context.args[0]) == impl::toVector<dimensions>(context.args[1]));
+}
 
-        const lua::Table vec1 = context.args[0];
-        const lua::Table vec2 = context.args[1];
+template<size_t dimensions>
+inline lua::Retval vectorLerp(lua::Context& context)
+{
+        context.requireArgs<lua::Table, lua::Table, lua::Table>(3);
+        const auto newVec = util::lerp(impl::toVector<dimensions>(context.args[0]),
+                                       impl::toVector<dimensions>(context.args[1]),
+                                       impl::toVector<dimensions>(context.args[2]));
+        return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
+}
 
-        if (impl::isVector(vec1) and impl::isVector(vec2))
-        {
-                return context.ret(impl::vectorsEqual(vec1, vec2));
-        }
+template<size_t dimensions>
+inline lua::Retval vectorLengthSquared(lua::Context& context)
+{
+        context.requireArgs<lua::Table>(1);
+        return context.ret(util::vecLengthSquared(impl::toVector<dimensions>(context.args[0])));
+}
 
-        return context.ret(false);
+template<size_t dimensions>
+inline lua::Retval vectorLength(lua::Context& context)
+{
+        context.requireArgs<lua::Table>(1);
+        return context.ret(util::vecLength(impl::toVector<dimensions>(context.args[0])));
+}
+
+template<size_t dimensions>
+inline lua::Retval vectorNormalize(lua::Context& context)
+{
+        context.requireArgs<lua::Table>(1);
+        const auto newVec = util::normalize(impl::toVector<dimensions>(context.args[0]));
+        return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
+}
+
+template<size_t dimensions>
+inline lua::Retval vectorSetLength(lua::Context& context)
+{
+        context.requireArgs<lua::Table, double>(2);
+        const auto newVec = util::vecSetLength(impl::toVector<dimensions>(context.args[0]), context.args[1]);
+        return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
 }
 
 /** Checks if given table is a rectangle, i.e. it has two vectors called
@@ -187,18 +248,8 @@ inline lua::Retval isRectangle(lua::Context& context)
 inline lua::Retval rectanglesIntersect(lua::Context& context)
 {
         context.requireArgs<lua::Table, lua::Table>(2);
-
-        const lua::Table t1 = context.args[0];
-        const lua::Table t2 = context.args[1];
-
-        if (impl::isRectangle(t1) and impl::isRectangle(t2))
-        {
-                const sf::FloatRect rect1 = impl::toRectangle(t1);
-                const sf::FloatRect rect2 = impl::toRectangle(t2);
-                return context.ret(rect1.intersects(rect2));
-        }
-        
-        return context.ret();
+        return context.ret(impl::toRectangle(context.args[0])
+               .intersects(impl::toRectangle(context.args[1])));
 }
 
 /** Checks if given rectangle contains a point expressed by given vector.
@@ -212,18 +263,8 @@ inline lua::Retval rectanglesIntersect(lua::Context& context)
 inline lua::Retval rectangleContains(lua::Context& context)
 {
         context.requireArgs<lua::Table, lua::Table>(2);
-
-        const lua::Table t1 = context.args[0];
-        const lua::Table t2 = context.args[1];
-
-        if (impl::isRectangle(t1) and impl::isVector(t2))
-        {
-                const sf::FloatRect rect = impl::toRectangle(t1);
-                const sf::Vector2f vec = impl::toVector(t2);
-                return context.ret(rect.contains(vec));
-        }
-
-        return context.ret();
+        return context.ret(impl::toRectangle(context.args[0])
+                .contains(impl::toVector<2>(context.args[1])));
 }
 
 }

@@ -24,14 +24,14 @@ public: // Constructors.
         : size(size)
         , tileSize(tileSize)
         , tileIconSize(tileIconSize)
+        , tiles(size.y)
         , vertices(sf::Quads)
         , texture(texture)
         {
-                this->tiles.resize(size.y);
-                std::for_each(
-                        this->tiles.begin(), this->tiles.end(),
-                        [=](auto& row) { row.resize(size.x); }
-                );
+                for (auto& row : this->tiles)
+                {
+                        row.resize(size.x);
+                }
 
                 this->placeVertices();
                 this->fillArea(fill, {{0u, 0u}, size});
@@ -45,7 +45,7 @@ public: // Constructors.
                 this->setMap(tiles);
         }
 
-        RectTileMap(RectTileMap& other)
+        RectTileMap(const RectTileMap& other)
         : size        (other.size)
         , tileSize    (other.tileSize)
         , tileIconSize(other.tileIconSize)

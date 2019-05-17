@@ -30,11 +30,9 @@ target_link_libraries(LuaPP PUBLIC lua)
 set_target_properties(
     LuaPP
         PROPERTIES
-            LINKER_LANGUAGE CXX
             CXX_STANDARD 17
             CXX_STANDARD_REQUIRED YES
             CXX_EXTENSIONS NO
-            INTERPROCEDURAL_OPTIMIZATION true
 )
 
 
@@ -56,7 +54,6 @@ set_target_properties(
             CXX_STANDARD 17
             CXX_STANDARD_REQUIRED YES
             CXX_EXTENSIONS NO
-            INTERPROCEDURAL_OPTIMIZATION true
 )
 
 
@@ -78,7 +75,6 @@ set_target_properties(
             CXX_STANDARD 17
             CXX_STANDARD_REQUIRED YES
             CXX_EXTENSIONS NO
-            INTERPROCEDURAL_OPTIMIZATION true
 )
 
 
@@ -110,5 +106,4 @@ set_target_properties(
             CXX_STANDARD 17
             CXX_STANDARD_REQUIRED YES
             CXX_EXTENSIONS NO
-            INTERPROCEDURAL_OPTIMIZATION true
 )
