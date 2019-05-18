@@ -6,8 +6,7 @@
 #include <Script/Lua.hpp>
 
 #include <Util/ErrorMessages.hpp>
-#include <Util/Graphics/RectTileMap.hpp>
-#include <Util/Graphics/Graphical.hpp>
+#include <Util/Graphics.hpp>
 #include <Util/Types.hpp>
 
 #include <memory>
