@@ -153,7 +153,7 @@ inline lua::Retval mapNumber(lua::Context& context)
                                            context.args[3], context.args[4]));
 }
 
-/** Checks if given table is an 2D or 3D vector, i.e. it has two numbers called "x" and "y"
+/** Checks if given table is an vector, i.e. it has two numbers called "x" and "y"
  *  ("x", "y", and "z", if it's 3D).
  * 
  *  Params:
@@ -168,11 +168,11 @@ inline lua::Retval isVector(lua::Context& context)
         return context.ret(impl::isVector<dimensions>(context.args[0]));
 }
 
-/** Checks if given 2D or 3D vectors are equal.
+/** Checks if given vectors are equal.
  * 
  *  Params:
- *      vec1 = Table. Presumably a 2D or 3D vector.
- *      vec2 = Table. Presumably a 2D or 3D vector.
+ *      vec1 = Table. Presumably a vector.
+ *      vec2 = Table. Presumably a vector.
  * 
  *  Returns: Boolean
  */
@@ -183,6 +183,15 @@ inline lua::Retval vectorsEqual(lua::Context& context)
         return context.ret(impl::toVector<dimensions>(context.args[0]) == impl::toVector<dimensions>(context.args[1]));
 }
 
+/** Linearly interpolates between two given vectors.
+ * 
+ *  Params:
+ *      v1    = Vector. Lower bounds.
+ *      v2    = Vector. Upper bounds.
+ *      alpha = Vector. Alpha values - in range [0, 1].
+ * 
+ *  Returns: Number
+ */
 template<size_t dimensions>
 inline lua::Retval vectorLerp(lua::Context& context)
 {
@@ -193,6 +202,13 @@ inline lua::Retval vectorLerp(lua::Context& context)
         return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
 }
 
+/** Calculates the squared length of a vector.
+ * 
+ *  Params:
+ *      vec = Vector.
+ * 
+ *  Returns: Number
+ */
 template<size_t dimensions>
 inline lua::Retval vectorLengthSquared(lua::Context& context)
 {
@@ -200,6 +216,13 @@ inline lua::Retval vectorLengthSquared(lua::Context& context)
         return context.ret(util::vecLengthSquared(impl::toVector<dimensions>(context.args[0])));
 }
 
+/** Calculates the length of a vector.
+ * 
+ *  Params:
+ *      vec = Vector.
+ * 
+ *  Returns: Number
+ */
 template<size_t dimensions>
 inline lua::Retval vectorLength(lua::Context& context)
 {
@@ -207,6 +230,13 @@ inline lua::Retval vectorLength(lua::Context& context)
         return context.ret(util::vecLength(impl::toVector<dimensions>(context.args[0])));
 }
 
+/** Calculates a unit vector out of an existing vector.
+ * 
+ *  Params:
+ *      vec = Vector.
+ * 
+ *  Returns: Vector
+ */
 template<size_t dimensions>
 inline lua::Retval vectorNormalize(lua::Context& context)
 {
@@ -215,6 +245,14 @@ inline lua::Retval vectorNormalize(lua::Context& context)
         return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
 }
 
+/** Creates a new vector with the same direction as the given vector but with a different length.
+ * 
+ *  Params:
+ *      vec    = Vector.
+ *      length = Number.
+ * 
+ *  Returns: Vector
+ */
 template<size_t dimensions>
 inline lua::Retval vectorSetLength(lua::Context& context)
 {

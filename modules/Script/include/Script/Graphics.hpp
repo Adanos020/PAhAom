@@ -613,7 +613,7 @@ inline std::optional<std::unique_ptr<sf::Drawable>> tableToDrawable(lua::Table& 
                 return {};
         }
 
-        auto transformable = dynamic_cast<sf::Transformable*>(drawable.get());
+        auto transformable = reinterpret_cast<sf::Transformable*>(drawable.get());
         prop (position, lua::Table)
         {
                 transformable->setPosition(tableToVector(position));

@@ -1,9 +1,10 @@
 #pragma once
 
 
+#include <Script/ECS.hpp>
 #include <Script/Graphics.hpp>
-#include <Script/Observer.hpp>
 #include <Script/Math.hpp>
+#include <Script/Observer.hpp>
 #include <Script/Random.hpp>
 #include <Script/Resources.hpp>
 #include <Script/Window.hpp>

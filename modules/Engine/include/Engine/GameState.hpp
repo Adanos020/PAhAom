@@ -1,6 +1,8 @@
 #pragma once
 
 
+#include <Engine/ECS/System.hpp>
+
 #include <Script.hpp>
 
 #include <Util/Constants.hpp>
@@ -33,22 +35,13 @@ public:
                 script::luaContext.global[this->stateName] = classTable["new"](classTable);
 
                 const lua::Table thisObj = script::luaContext.global[this->stateName];
-                const lua::Table drawables = thisObj["drawables"];
+                const lua::Table entities = thisObj["entities"];
                 
-                for (int i = 1, nDrawables = drawables.len(); i <= nDrawables; ++i)
+                for (int i = 1, nDrawables = entities.len(); i <= nDrawables; ++i)
                 {
-                        lua::Table drawable = drawables[i];
-                        if (auto d = script::tableToDrawable(drawable))
-                        {
-                                this->drawables.push_back(std::move(d.value()));
-                                drawable["index"] = i - 1; // Adding an index to the drawable recipe.
-                        }
-                        else
-                        {
-                                // Removing a wrongly defined drawable to avoid checking it every frame.
-                                script::luaContext.global["table"]["remove"](drawables, i);
-                                std::cerr << util::err::wrongDrawableDefinition(i) << std::endl;
-                        }
+                        lua::Table entity = entities[i];
+                        entity["index"] = i - 1; // Adding an index to the drawable recipe.
+                        this->entities.addEntity(std::move(script::tableToEntity(entity)));
                 }
         }
 
@@ -77,14 +70,14 @@ public:
                 const lua::Table drawables = thisObj["draw"](thisObj);
                 drawables.iterate([&](lua::Valref, lua::Valref drawable) {
                         const int index = drawable["index"];
-                        target.draw(*this->drawables[index]);
+                        this->entities.draw(index, target);
                 });
         }
 
 private:
 
         std::string stateName;
-        util::UniquePtrs<sf::Drawable> drawables;
+        ecs::System entities;
 };
 
 }

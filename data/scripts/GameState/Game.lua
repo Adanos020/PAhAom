@@ -1,17 +1,19 @@
 Game = {
-    drawables = {
+    entities = {
         {
-            type = "rect tile map",
-            tiles = {},
-            tileSize = 16,
-            tileIconSize = 16,
-            texture = "tileset",
-            origin = "center",
             position = {
                 x = Settings.video.resolution.x / 2,
                 y = Settings.video.resolution.y / 2,
             },
-        }
+            graphics2D = {
+                type = "rect tile map",
+                tiles = {},
+                tileSize = 16,
+                tileIconSize = 16,
+                texture = "tileset",
+                origin = "center",
+            },
+        },
     }
 }
 
@@ -19,7 +21,7 @@ function Game:new(o)
     o = o or {}
     setmetatable(o, self)
     self.__index = self
-    self.drawables[1].tiles = generate_dungeon {x = 37, y = 21}
+    self.entities[1].graphics2D.tiles = generate_dungeon {x = 37, y = 21}
     return o
 end
 
@@ -36,5 +38,5 @@ function Game:update(dt)
 end
 
 function Game:draw()
-    return self.drawables
+    return self.entities
 end
