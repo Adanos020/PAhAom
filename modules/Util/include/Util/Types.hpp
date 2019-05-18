@@ -9,7 +9,6 @@
 #include <SFML/System/Vector2.hpp>
 #include <SFML/System/Vector3.hpp>
 
-#include <cstdint>
 #include <memory>
 #include <stack>
 #include <string>
@@ -31,7 +30,6 @@ namespace util
 // Aliases
 using CStr = const char*;
 using DeltaTime = float;
-using TileID = std::uint_fast8_t;
 
 template<typename T>
 using FastVector = std::basic_string<T, std::char_traits<T>>;

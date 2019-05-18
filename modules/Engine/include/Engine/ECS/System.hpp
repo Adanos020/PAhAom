@@ -30,9 +30,9 @@ public:
 
         void draw(std::size_t index, sf::RenderTarget& target)
         {
-                if (entities[index].hasComponent<Graphics2DComponent>())
+                if (entities[index].hasComponent<GraphicsComponent>())
                 {
-                        entities[index].getComponent<Graphics2DComponent>().value().get().draw(target);
+                        entities[index].getComponent<GraphicsComponent>().value().get().draw(target);
                 }
         }
 

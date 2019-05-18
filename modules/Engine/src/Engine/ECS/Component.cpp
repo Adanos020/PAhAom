@@ -8,20 +8,15 @@ namespace engine::ecs
 
 std::unique_ptr<Component> Component::copy() const
 {
-        if (this->typeID == getComponentTypeID<Graphics2DComponent>())
+        if (this->typeID == getComponentTypeID<GraphicsComponent>())
         {
-                return std::make_unique<Graphics2DComponent>(
-                        *reinterpret_cast<const Graphics2DComponent*>(this));
+                return std::make_unique<GraphicsComponent>(
+                        *reinterpret_cast<const GraphicsComponent*>(this));
         }
-        if (this->typeID == getComponentTypeID<PositionComponent<sf::Vector2f>>())
+        if (this->typeID == getComponentTypeID<PositionComponent>())
         {
-                return std::make_unique<PositionComponent<sf::Vector2f>>(
-                        *reinterpret_cast<const PositionComponent<sf::Vector2f>*>(this));
-        }
-        if (this->typeID == getComponentTypeID<PositionComponent<sf::Vector3f>>())
-        {
-                return std::make_unique<PositionComponent<sf::Vector3f>>(
-                        *reinterpret_cast<const PositionComponent<sf::Vector3f>*>(this));
+                return std::make_unique<PositionComponent>(
+                        *reinterpret_cast<const PositionComponent*>(this));
         }
         return nullptr;
 }

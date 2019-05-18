@@ -526,7 +526,7 @@ inline std::unique_ptr<util::graphics::RectTileMap> tableToRectTileMap(lua::Tabl
 
         prop (tiles, lua::Table)
         {
-                auto tileMatrix = tableToMatrix<util::TileID>(tiles);
+                auto tileMatrix = tableToMatrix<util::graphics::TileID>(tiles);
                 auto tmap = std::make_unique<util::graphics::RectTileMap>(tileMatrix, tSize, tIconSize, tex);
                 extractBounds(obj, tmap);
                 return tmap;
@@ -534,7 +534,7 @@ inline std::unique_ptr<util::graphics::RectTileMap> tableToRectTileMap(lua::Tabl
 
         // If the `tiles` property is specified, the following ones are discarded:
         sf::Vector2u siz = {3u, 3u};
-        util::TileID filling = 0;
+        util::graphics::TileID filling = 0;
 
         prop (size, lua::Table)
         {

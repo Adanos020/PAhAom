@@ -4,7 +4,7 @@
 #include <Engine/ECS/Component.hpp>
 #include <Engine/ECS/Entity.hpp>
 
-#include <Util/Types.hpp>
+#include <SFML/System/Vector2.hpp>
 
 #include <type_traits>
 
@@ -12,15 +12,12 @@
 namespace engine::ecs
 {
 
-template<class VectorType>
-class PositionComponent : public Component, public VectorType
+class PositionComponent : public Component, public sf::Vector2f
 {
-        static_assert(util::isVectorType<VectorType>);
-
 public:
 
-        PositionComponent(const VectorType pos, Entity* const owner)
-        : VectorType(pos)
+        PositionComponent(const sf::Vector2f pos, Entity* const owner)
+        : sf::Vector2f(pos)
         {
                 this->typeID = getComponentTypeID<PositionComponent>();
                 this->owner = owner;
@@ -31,13 +28,11 @@ public:
                 this->owner = copy.owner;
                 this->x = copy.x;
                 this->y = copy.y;
-                if constexpr (std::is_same_v<VectorType, sf::Vector3f>)
-                {
-                        this->z = copy.z;
-                }
         }
 
-        virtual void update() override {}
+        virtual void update() override
+        {
+        }
 };
 
 }

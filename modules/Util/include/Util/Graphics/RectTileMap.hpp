@@ -10,9 +10,13 @@
 #include <SFML/Graphics/Transformable.hpp>
 #include <SFML/Graphics/VertexArray.hpp>
 
+#include <cstdint>
+
 
 namespace util::graphics
 {
+
+using TileID = std::uint_fast8_t;
 
 class RectTileMap : public sf::Drawable, public sf::Transformable
 {

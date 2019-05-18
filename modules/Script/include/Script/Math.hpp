@@ -14,68 +14,32 @@ namespace script
 
 namespace impl
 {
-        template<class Type>
-        static constexpr bool isVectorType =
-                std::is_same_v<Type, sf::Vector2f> or std::is_same_v<Type, sf::Vector3f>;
-
-        template<size_t dimensions>
-        static constexpr bool isSupportedDimensionCount =
-                dimensions == 2 or dimensions == 3;
-
-        template<size_t dimensions>
         inline bool isVector(const lua::Table& vec)
         {
-                static_assert(isSupportedDimensionCount<dimensions>);
-
-                if constexpr (dimensions == 2)
-                {
-                        return vec["x"].is<double>() and vec["y"].is<double>() and not vec["z"].is<double>();
-                }
-                else // 3D
-                {
-                        return vec["x"].is<double>() and vec["y"].is<double>() and vec["z"].is<double>();
-                }
+                return vec["x"].is<double>() and vec["y"].is<double>();
         }
 
-        template<size_t dimensions>
         inline auto toVector(const lua::Table& vec)
         {
-                static_assert(isSupportedDimensionCount<dimensions>);
-
-                if constexpr (dimensions == 2)
-                {
-                        return sf::Vector2f{vec["x"], vec["y"]};
-                }
-                else // 3D
-                {
-                        return sf::Vector3f{vec["x"], vec["y"], vec["z"]};
-                }
+                return sf::Vector2f{vec["x"], vec["y"]};
         }
 
-        template<class VectorType>
-        inline lua::Table vectorToTable(const VectorType vec)
+        inline lua::Table vectorToTable(const sf::Vector2f vec)
         {
-                static_assert(isVectorType<VectorType>);
-                
                 auto newVec = lua::Table{luaContext};
                 newVec["x"] = vec.x;
                 newVec["y"] = vec.y;
-                if constexpr (std::is_same_v<VectorType, sf::Vector3f>)
-                {
-                        newVec["z"] = vec.z;
-                }
-                
                 return newVec;
         }
 
         inline bool isRectangle(const lua::Table& rect)
         {
-                return isVector<2>(rect["position"]) and isVector<2>(rect["size"]);
+                return isVector(rect["position"]) and isVector(rect["size"]);
         }
 
         inline sf::FloatRect toRectangle(const lua::Table& rect)
         {
-                return {toVector<2>(rect["position"]), toVector<2>(rect["size"])};
+                return {toVector(rect["position"]), toVector(rect["size"])};
         }
 }
 
@@ -161,11 +125,10 @@ inline lua::Retval mapNumber(lua::Context& context)
  * 
  *  Returns: Boolean
  */
-template<size_t dimensions>
 inline lua::Retval isVector(lua::Context& context)
 {
         context.requireArgs<lua::Table>(1);
-        return context.ret(impl::isVector<dimensions>(context.args[0]));
+        return context.ret(impl::isVector(context.args[0]));
 }
 
 /** Checks if given vectors are equal.
@@ -176,11 +139,10 @@ inline lua::Retval isVector(lua::Context& context)
  * 
  *  Returns: Boolean
  */
-template<size_t dimensions>
 inline lua::Retval vectorsEqual(lua::Context& context)
 {
         context.requireArgs<lua::Table, lua::Table>(2);
-        return context.ret(impl::toVector<dimensions>(context.args[0]) == impl::toVector<dimensions>(context.args[1]));
+        return context.ret(impl::toVector(context.args[0]) == impl::toVector(context.args[1]));
 }
 
 /** Linearly interpolates between two given vectors.
@@ -192,13 +154,12 @@ inline lua::Retval vectorsEqual(lua::Context& context)
  * 
  *  Returns: Number
  */
-template<size_t dimensions>
 inline lua::Retval vectorLerp(lua::Context& context)
 {
         context.requireArgs<lua::Table, lua::Table, lua::Table>(3);
-        const auto newVec = util::lerp(impl::toVector<dimensions>(context.args[0]),
-                                       impl::toVector<dimensions>(context.args[1]),
-                                       impl::toVector<dimensions>(context.args[2]));
+        const auto newVec = util::lerp(impl::toVector(context.args[0]),
+                                       impl::toVector(context.args[1]),
+                                       impl::toVector(context.args[2]));
         return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
 }
 
@@ -209,11 +170,10 @@ inline lua::Retval vectorLerp(lua::Context& context)
  * 
  *  Returns: Number
  */
-template<size_t dimensions>
 inline lua::Retval vectorLengthSquared(lua::Context& context)
 {
         context.requireArgs<lua::Table>(1);
-        return context.ret(util::vecLengthSquared(impl::toVector<dimensions>(context.args[0])));
+        return context.ret(util::vecLengthSquared(impl::toVector(context.args[0])));
 }
 
 /** Calculates the length of a vector.
@@ -223,11 +183,10 @@ inline lua::Retval vectorLengthSquared(lua::Context& context)
  * 
  *  Returns: Number
  */
-template<size_t dimensions>
 inline lua::Retval vectorLength(lua::Context& context)
 {
         context.requireArgs<lua::Table>(1);
-        return context.ret(util::vecLength(impl::toVector<dimensions>(context.args[0])));
+        return context.ret(util::vecLength(impl::toVector(context.args[0])));
 }
 
 /** Calculates a unit vector out of an existing vector.
@@ -237,11 +196,10 @@ inline lua::Retval vectorLength(lua::Context& context)
  * 
  *  Returns: Vector
  */
-template<size_t dimensions>
 inline lua::Retval vectorNormalize(lua::Context& context)
 {
         context.requireArgs<lua::Table>(1);
-        const auto newVec = util::normalize(impl::toVector<dimensions>(context.args[0]));
+        const auto newVec = util::normalize(impl::toVector(context.args[0]));
         return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
 }
 
@@ -253,11 +211,10 @@ inline lua::Retval vectorNormalize(lua::Context& context)
  * 
  *  Returns: Vector
  */
-template<size_t dimensions>
 inline lua::Retval vectorSetLength(lua::Context& context)
 {
         context.requireArgs<lua::Table, double>(2);
-        const auto newVec = util::vecSetLength(impl::toVector<dimensions>(context.args[0]), context.args[1]);
+        const auto newVec = util::vecSetLength(impl::toVector(context.args[0]), context.args[1]);
         return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
 }
 
@@ -302,7 +259,7 @@ inline lua::Retval rectangleContains(lua::Context& context)
 {
         context.requireArgs<lua::Table, lua::Table>(2);
         return context.ret(impl::toRectangle(context.args[0])
-                .contains(impl::toVector<2>(context.args[1])));
+                .contains(impl::toVector(context.args[1])));
 }
 
 }

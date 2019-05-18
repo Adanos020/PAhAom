@@ -80,18 +80,18 @@ private:
         template<class CompClass>
         std::size_t findComponentIndex()
         {
-                if (not this->hasComponent<CompClass>())
+                if (this->hasComponent<CompClass>())
                 {
-                        return -1;
-                }
-                static const ComponentTypeID id = getComponentTypeID<CompClass>();
-                for (size_t i = 0; i < this->idIndices.size(); ++i)
-                {
-                        if (this->idIndices[i] == id)
+                        static const ComponentTypeID id = getComponentTypeID<CompClass>();
+                        for (size_t i = 0; i < this->idIndices.size(); ++i)
                         {
-                                return i;
+                                if (this->idIndices[i] == id)
+                                {
+                                        return i;
+                                }
                         }
                 }
+                return -1;
         }
 
 private:

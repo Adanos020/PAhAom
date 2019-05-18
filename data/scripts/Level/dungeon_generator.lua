@@ -79,7 +79,7 @@ local function count_neighbours(neighbours)
 end
 
 local function count_close_neighbours(pos, tile)
-    assert(math.is_vector2(pos))
+    assert(math.is_vector(pos))
     assert(math.type(tile) == "integer")
 
     return count_neighbours(find_neighbours(pos, tile, 1))
@@ -186,7 +186,7 @@ local function spread_rooms()
 end
 
 local function is_dead_end(pos)
-    assert(math.is_vector2(pos))
+    assert(math.is_vector(pos))
 
     return tiles[pos.y][pos.x] == Tile.HALLWAY
        and count_close_neighbours(pos, Tile.WALL) == 3
@@ -221,7 +221,7 @@ local function remove_dead_ends()
 end
 
 function generate_dungeon(size)
-    assert(math.is_vector2(size), "Size must be a vector.")
+    assert(math.is_vector(size), "Size must be a vector.")
 
     map_size = {
         x = math.tointeger(size.x),

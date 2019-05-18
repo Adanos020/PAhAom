@@ -19,28 +19,28 @@
 namespace engine::ecs
 {
 
-class Graphics2DComponent : public Component
+class GraphicsComponent : public Component
 {
 public:
 
-        Graphics2DComponent(std::unique_ptr<sf::Drawable> graphicalObject, Entity* const owner)
+        GraphicsComponent(std::unique_ptr<sf::Drawable> graphicalObject, Entity* const owner)
         : graphicalObject(std::move(graphicalObject))
         {
-                this->typeID = getComponentTypeID<Graphics2DComponent>();
+                this->typeID = getComponentTypeID<GraphicsComponent>();
                 this->owner = owner;
         }
 
-        Graphics2DComponent(const Graphics2DComponent& copy)
+        GraphicsComponent(const GraphicsComponent& copy)
         {
 
         }
 
         virtual void update() override
         {
-                if (this->owner->hasComponent<PositionComponent<sf::Vector2f>>())
+                if (this->owner->hasComponent<PositionComponent>())
                 {
                         auto transformable = reinterpret_cast<sf::Transformable*>(graphicalObject.get());
-                        transformable->setPosition(this->owner->getComponent<PositionComponent<sf::Vector2f>>().value().get());
+                        transformable->setPosition(this->owner->getComponent<PositionComponent>().value().get());
                 }
         }
 

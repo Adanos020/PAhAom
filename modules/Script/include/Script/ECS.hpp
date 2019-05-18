@@ -25,20 +25,16 @@ inline engine::ecs::Entity tableToEntity(const lua::Table& table)
                 lua::Table drawable = table["graphics2D"];
                 if (auto graphicalObject = tableToDrawable(drawable))
                 {
-                        entity.addComponent<Graphics2DComponent>(std::move(graphicalObject.value()));
+                        entity.addComponent<GraphicsComponent>(std::move(graphicalObject.value()));
                 }
         }
 
         if (!table["position"].is<lua::Nil>())
         {
                 lua::Table pos = table["position"];
-                if (impl::isVector<2>(pos))
+                if (impl::isVector(pos))
                 {
-                        entity.addComponent<PositionComponent<sf::Vector2f>>(impl::toVector<2>(pos));
-                }
-                else if (impl::isVector<3>(pos))
-                {
-                        entity.addComponent<PositionComponent<sf::Vector3f>>(impl::toVector<3>(pos));
+                        entity.addComponent<PositionComponent>(impl::toVector(pos));
                 }
         }
 
