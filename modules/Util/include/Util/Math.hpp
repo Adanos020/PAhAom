@@ -13,75 +13,83 @@
 namespace util
 {
 
-template<class Type>
-inline Type lerp(const Type val1, const Type val2, const Type alpha)
+// Numeric
+
+inline float lerp(const float val1, const float val2, const float alpha)
 {
         return (1.0 - alpha) * val1 + alpha * val2;
 }
 
-inline double normalize(const double val, const double lo, const double hi)
+inline float normalize(const float val, const float lo, const float hi)
 {
         return (val - lo) / (hi - lo);
 }
 
-inline double mapNumber(const double val, const double lo1, const double hi1,
-                        const double lo2, const double hi2)
+inline float mapNumber(const float val, const float lo1, const float hi1,
+                       const float lo2, const float hi2)
 {
         return normalize(val, lo1, hi1) * (hi2 - lo2) + lo2;
 }
 
-template <>
-inline sf::Vector2f lerp(const sf::Vector2f vec1, const sf::Vector2f vec2, const sf::Vector2f alpha)
+// Vector
+
+struct Vector : sf::Vector2f
+{
+        Vector(float x, float y)
+        : sf::Vector2f(x, y)
+        {
+        }
+
+        Vector(const Vector& copy)
+        : sf::Vector2f(copy)
+        {
+        }
+
+        static Vector fromPolar(const float radius, const float angle)
+        {
+                return {radius * std::cos(angle), radius * std::sin(angle)};
+        }
+
+        float lengthSquared() const
+        {
+                return this->x * this->x + this->y * this->y;
+        }
+
+        float length() const
+        {
+                return std::sqrt(this->lengthSquared());
+        }
+
+        Vector& length(const float l)
+        {
+                this->normalize();
+                this->x *= l;
+                this->y *= l;
+                return *this;
+        }
+
+        Vector& normalize()
+        {
+                float l = this->length();
+                this->x /= l;
+                this->y /= l;
+                return *this;
+        }
+
+        Vector& clamp(const Vector lo, const Vector hi)
+        {
+                this->x = std::clamp(this->x, lo.x, hi.x);
+                this->y = std::clamp(this->y, lo.y, hi.y);
+                return *this;
+        }
+};
+
+inline Vector lerp(const Vector vec1, const Vector vec2, const Vector alpha)
 {
         return {
                 lerp(vec1.x, vec2.x, alpha.x),
                 lerp(vec1.y, vec2.y, alpha.y),
         };
-}
-
-template <>
-inline sf::Vector3f lerp(const sf::Vector3f vec1, const sf::Vector3f vec2, const sf::Vector3f alpha)
-{
-        return {
-                lerp(vec1.x, vec2.x, alpha.x),
-                lerp(vec1.y, vec2.y, alpha.y),
-                lerp(vec1.y, vec2.y, alpha.z),
-        };
-}
-
-template<class VectorType>
-inline float vecLengthSquared(const VectorType vec)
-{
-        static_assert(util::isVectorType<VectorType>);
-        if constexpr (std::is_same_v<VectorType, sf::Vector2f>)
-        {
-                return vec.x * vec.x + vec.y * vec.y;
-        }
-        else
-        {
-                return vec.x * vec.x + vec.y * vec.y + vec.z * vec.z;
-        }
-}
-
-template<class VectorType>
-inline float vecLength(const VectorType vec)
-{
-        static_assert(util::isVectorType<VectorType>);
-        return std::sqrt(vecLengthSquared(vec));
-}
-
-template<class VectorType>
-inline VectorType normalize(const VectorType vec)
-{
-        static_assert(util::isVectorType<VectorType>);
-        return vec / vecLength(vec);
-}
-
-template<class VectorType>
-inline VectorType vecSetLength(const VectorType vec, const float len)
-{
-        static_assert(util::isVectorType<VectorType>);
-        return normalize(vec) * len;
 }
 
 }

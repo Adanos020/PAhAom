@@ -1,13 +1,12 @@
 #pragma once
 
 
+#include <Util/Graphics/Graphical.hpp>
 #include <Util/Types.hpp>
 
-#include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Texture.hpp>
-#include <SFML/Graphics/Transformable.hpp>
 #include <SFML/Graphics/VertexArray.hpp>
 
 #include <cstdint>
@@ -18,7 +17,7 @@ namespace util::graphics
 
 using TileID = std::uint_fast8_t;
 
-class RectTileMap : public sf::Drawable, public sf::Transformable
+class RectTileMap : public Graphical
 {
 public: // Constructors.
 

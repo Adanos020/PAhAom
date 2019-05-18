@@ -34,7 +34,7 @@ inline engine::ecs::Entity tableToEntity(const lua::Table& table)
                 lua::Table pos = table["position"];
                 if (impl::isVector(pos))
                 {
-                        entity.addComponent<PositionComponent>(impl::toVector(pos));
+                        entity.addComponent<PositionComponent>(impl::tableToVector(pos));
                 }
         }
 

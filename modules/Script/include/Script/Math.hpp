@@ -16,15 +16,15 @@ namespace impl
 {
         inline bool isVector(const lua::Table& vec)
         {
-                return vec["x"].is<double>() and vec["y"].is<double>();
+                return vec["x"].is<float>() and vec["y"].is<float>();
         }
 
-        inline auto toVector(const lua::Table& vec)
+        inline util::Vector tableToVector(const lua::Table& vec)
         {
-                return sf::Vector2f{vec["x"], vec["y"]};
+                return util::Vector{vec["x"], vec["y"]};
         }
 
-        inline lua::Table vectorToTable(const sf::Vector2f vec)
+        inline lua::Table vectorToTable(const util::Vector vec)
         {
                 auto newVec = lua::Table{luaContext};
                 newVec["x"] = vec.x;
@@ -39,7 +39,7 @@ namespace impl
 
         inline sf::FloatRect toRectangle(const lua::Table& rect)
         {
-                return {toVector(rect["position"]), toVector(rect["size"])};
+                return {tableToVector(rect["position"]), tableToVector(rect["size"])};
         }
 }
 
@@ -54,7 +54,7 @@ namespace impl
  */
 inline lua::Retval clamp(lua::Context& context)
 {
-        context.requireArgs<double, double, double>(3);
+        context.requireArgs<float, float, float>(3);
 
         const lua::Valref val = context.args[0];
         const lua::Valref lo  = context.args[1];
@@ -64,7 +64,7 @@ inline lua::Retval clamp(lua::Context& context)
         {
                 return context.ret(std::clamp(val.to<int>(), lo.to<int>(), hi.to<int>()));
         }
-        return context.ret(std::clamp(val.to<double>(), lo.to<double>(), hi.to<double>()));
+        return context.ret(std::clamp(val.to<float>(), lo.to<float>(), hi.to<float>()));
 }
 
 /** Linearly interpolates between two given values.
@@ -78,10 +78,10 @@ inline lua::Retval clamp(lua::Context& context)
  */
 inline lua::Retval lerpNumber(lua::Context& context)
 {
-        context.requireArgs<double, double, double>(3);
-        return context.ret(util::lerp(context.args[0].to<double>(),
-                                      context.args[1].to<double>(),
-                                      context.args[2].to<double>()));
+        context.requireArgs<float, float, float>(3);
+        return context.ret(util::lerp(context.args[0].to<float>(),
+                                      context.args[1].to<float>(),
+                                      context.args[2].to<float>()));
 }
 
 /** Maps a number in given range from hi to lo into a value in range from 0 to 1.
@@ -95,7 +95,7 @@ inline lua::Retval lerpNumber(lua::Context& context)
  */
 inline lua::Retval normalizeNumber(lua::Context& context)
 {
-        context.requireArgs<double, double, double>(3);
+        context.requireArgs<float, float, float>(3);
         return context.ret(util::normalize(context.args[0], context.args[1], context.args[2]));
 }
 
@@ -112,7 +112,7 @@ inline lua::Retval normalizeNumber(lua::Context& context)
  */
 inline lua::Retval mapNumber(lua::Context& context)
 {
-        context.requireArgs<double, double, double, double, double>(5);
+        context.requireArgs<float, float, float, float, float>(5);
         return context.ret(util::mapNumber(context.args[0], context.args[1], context.args[2],
                                            context.args[3], context.args[4]));
 }
@@ -142,7 +142,7 @@ inline lua::Retval isVector(lua::Context& context)
 inline lua::Retval vectorsEqual(lua::Context& context)
 {
         context.requireArgs<lua::Table, lua::Table>(2);
-        return context.ret(impl::toVector(context.args[0]) == impl::toVector(context.args[1]));
+        return context.ret(impl::tableToVector(context.args[0]) == impl::tableToVector(context.args[1]));
 }
 
 /** Linearly interpolates between two given vectors.
@@ -157,9 +157,9 @@ inline lua::Retval vectorsEqual(lua::Context& context)
 inline lua::Retval vectorLerp(lua::Context& context)
 {
         context.requireArgs<lua::Table, lua::Table, lua::Table>(3);
-        const auto newVec = util::lerp(impl::toVector(context.args[0]),
-                                       impl::toVector(context.args[1]),
-                                       impl::toVector(context.args[2]));
+        const auto newVec = util::lerp(impl::tableToVector(context.args[0]),
+                                       impl::tableToVector(context.args[1]),
+                                       impl::tableToVector(context.args[2]));
         return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
 }
 
@@ -173,7 +173,7 @@ inline lua::Retval vectorLerp(lua::Context& context)
 inline lua::Retval vectorLengthSquared(lua::Context& context)
 {
         context.requireArgs<lua::Table>(1);
-        return context.ret(util::vecLengthSquared(impl::toVector(context.args[0])));
+        return context.ret(impl::tableToVector(context.args[0]).lengthSquared());
 }
 
 /** Calculates the length of a vector.
@@ -186,7 +186,7 @@ inline lua::Retval vectorLengthSquared(lua::Context& context)
 inline lua::Retval vectorLength(lua::Context& context)
 {
         context.requireArgs<lua::Table>(1);
-        return context.ret(util::vecLength(impl::toVector(context.args[0])));
+        return context.ret(impl::tableToVector(context.args[0]).length());
 }
 
 /** Calculates a unit vector out of an existing vector.
@@ -199,7 +199,7 @@ inline lua::Retval vectorLength(lua::Context& context)
 inline lua::Retval vectorNormalize(lua::Context& context)
 {
         context.requireArgs<lua::Table>(1);
-        const auto newVec = util::normalize(impl::toVector(context.args[0]));
+        const auto newVec = impl::tableToVector(context.args[0]).normalize();
         return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
 }
 
@@ -213,8 +213,8 @@ inline lua::Retval vectorNormalize(lua::Context& context)
  */
 inline lua::Retval vectorSetLength(lua::Context& context)
 {
-        context.requireArgs<lua::Table, double>(2);
-        const auto newVec = util::vecSetLength(impl::toVector(context.args[0]), context.args[1]);
+        context.requireArgs<lua::Table, float>(2);
+        const auto newVec = impl::tableToVector(context.args[0]).length(context.args[1]);
         return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
 }
 
@@ -259,7 +259,7 @@ inline lua::Retval rectangleContains(lua::Context& context)
 {
         context.requireArgs<lua::Table, lua::Table>(2);
         return context.ret(impl::toRectangle(context.args[0])
-                .contains(impl::toVector(context.args[1])));
+                .contains(impl::tableToVector(context.args[1])));
 }
 
 }
