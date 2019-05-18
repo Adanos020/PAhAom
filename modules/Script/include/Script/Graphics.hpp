@@ -7,9 +7,8 @@
 
 #include <Util/ErrorMessages.hpp>
 #include <Util/Graphics/RectTileMap.hpp>
+#include <Util/Graphics/Graphical.hpp>
 #include <Util/Types.hpp>
-
-#include <SFML/Graphics.hpp>
 
 #include <memory>
 #include <type_traits>
@@ -144,11 +143,11 @@ inline util::Matrix<T> tableToMatrix(const lua::Table& obj)
 }
 
 template<class T>
-inline void extractBounds(lua::Table& obj, const std::unique_ptr<T>& drawable)
+inline void extractBounds(lua::Table& obj, const std::unique_ptr<T>& gobj)
 {
-        static_assert(std::is_base_of_v<sf::Drawable, T>, typeNotDrawable);
+        static_assert(std::is_base_of_v<util::graphics::Graphical, T>, typeNotDrawable);
 
-        const sf::FloatRect globalBounds = drawable->getGlobalBounds();
+        const sf::FloatRect globalBounds = gobj->getGlobalBounds();
         obj["globalBounds"] = lua::Table::records(luaContext,
                 "left",   globalBounds.left,
                 "top",    globalBounds.top,
@@ -156,7 +155,7 @@ inline void extractBounds(lua::Table& obj, const std::unique_ptr<T>& drawable)
                 "height", globalBounds.height
         );
 
-        const sf::FloatRect localBounds = drawable->getLocalBounds();
+        const sf::FloatRect localBounds = gobj->getLocalBounds();
         obj["localBounds"] = lua::Table::records(luaContext,
                 "left",   localBounds.left,
                 "top",    localBounds.top,
@@ -170,16 +169,16 @@ inline void extractBounds(lua::Table& obj, const std::unique_ptr<T>& drawable)
 #define prop(x, CppType) if (lua::Value x = obj[#x]; x.is<CppType>())
 
 
-/** Transforms a Lua table into an sf::CircleShape object.
+/** Transforms a Lua table into an util::graphics::CircleShape object.
  * 
  *  Table syntax:
  *  - radius:     Number representing radius of the circle.
  *  - pointCount: Number representing number of vertices around the center.
  *  - all properties from Shape
  */
-inline std::unique_ptr<sf::CircleShape> tableToCircleShape(lua::Table& obj)
+inline std::unique_ptr<util::graphics::CircleShape> tableToCircleShape(lua::Table& obj)
 {
-        auto circleShape = std::make_unique<sf::CircleShape>();
+        auto circleShape = std::make_unique<util::graphics::CircleShape>();
 
         prop (radius, float)
         {
@@ -193,15 +192,15 @@ inline std::unique_ptr<sf::CircleShape> tableToCircleShape(lua::Table& obj)
         return circleShape;
 }
 
-/** Transforms a Lua table into an sf::ConvexShape object.
+/** Transforms a Lua table into an util::graphics::ConvexShape object.
  * 
  *  Table syntax:
  *  - points: Table of vectors representing positions of all vertices.
  *  - all properties from Shape
  */
-inline std::unique_ptr<sf::ConvexShape> tableToConvexShape(lua::Table& obj)
+inline std::unique_ptr<util::graphics::ConvexShape> tableToConvexShape(lua::Table& obj)
 {
-        auto convShape = std::make_unique<sf::ConvexShape>();
+        auto convShape = std::make_unique<util::graphics::ConvexShape>();
 
         prop (points, lua::Table)
         {
@@ -215,15 +214,15 @@ inline std::unique_ptr<sf::ConvexShape> tableToConvexShape(lua::Table& obj)
         return convShape;
 }
 
-/** Transforms a Lua table into an sf::RectangleShape object.
+/** Transforms a Lua table into an util::graphics::RectangleShape object.
  * 
  *  Table syntax:
  *  - size: Vector representing size of the rectangle.
  *  - all properties from Shape
  */
-inline std::unique_ptr<sf::RectangleShape> tableToRectangleShape(lua::Table& obj)
+inline std::unique_ptr<util::graphics::RectangleShape> tableToRectangleShape(lua::Table& obj)
 {
-        auto rectShape = std::make_unique<sf::RectangleShape>();
+        auto rectShape = std::make_unique<util::graphics::RectangleShape>();
 
         prop (size, lua::Table)
         {
@@ -233,7 +232,7 @@ inline std::unique_ptr<sf::RectangleShape> tableToRectangleShape(lua::Table& obj
         return rectShape;
 }
 
-/** Transforms a Lua table into an sf::Shape object.
+/** Transforms a Lua table into an ShapeClass object.
  * 
  *  Table syntax:
  *  - texture:          String containting the id of the texture.
@@ -242,20 +241,21 @@ inline std::unique_ptr<sf::RectangleShape> tableToRectangleShape(lua::Table& obj
  *  - outlineColor:     Color of the text outline.
  *  - outlineThickness: Number representing width of the text outline.
  */
-inline std::optional<std::unique_ptr<sf::Shape>> tableToShape(lua::Table& obj)
+template<class ShapeClass>
+inline std::optional<std::unique_ptr<ShapeClass>> tableToShape(lua::Table& obj)
 {
-        std::unique_ptr<sf::Shape> shape = {nullptr};
+        std::unique_ptr<ShapeClass> shape = {nullptr};
         const lua::Value type = obj["type"];
 
-        if (type == "circle shape")
+        if constexpr (std::is_same_v<ShapeClass, util::graphics::CircleShape>)
         {
                 shape = tableToCircleShape(obj);
         }
-        else if (type == "convex shape")
+        else if constexpr (std::is_same_v<ShapeClass, util::graphics::ConvexShape>)
         {
                 shape = tableToConvexShape(obj);
         }
-        else if (type == "rectangle shape")
+        else if constexpr (std::is_same_v<ShapeClass, util::graphics::RectangleShape>)
         {
                 shape = tableToRectangleShape(obj);
         }
@@ -309,16 +309,16 @@ inline std::optional<std::unique_ptr<sf::Shape>> tableToShape(lua::Table& obj)
         return shape;
 }
 
-/** Transforms a Lua table into an sf::Sprite object.
+/** Transforms a Lua table into an util::graphics::Sprite object.
  * 
  *  Table syntax:
  *  - texture:     String containting the id of the texture.
  *  - textureRect: Rectangle representing the area of the texture to be displayed.
  *  - color:       Color of the font.
  */
-inline std::unique_ptr<sf::Sprite> tableToSprite(lua::Table& obj)
+inline std::unique_ptr<util::graphics::Sprite> tableToSprite(lua::Table& obj)
 {
-        auto sprite = std::make_unique<sf::Sprite>();
+        auto sprite = std::make_unique<util::graphics::Sprite>();
 
         prop (texture, std::string)
         {
@@ -347,10 +347,10 @@ inline std::unique_ptr<sf::Sprite> tableToSprite(lua::Table& obj)
         return sprite;
 }
 
-/** Transforms a Lua table into an sf::Text object.
+/** Transforms a Lua table into an util::graphics::Text object.
  * 
  *  Table syntax:
- *  - content:          String containing the string content of the sf::Text object.
+ *  - content:          String containing the string content of the util::graphics::Text object.
  *  - font:             String containing the id of the font.
  *  - characterSize:    Number specifying the text's font size.
  *  - lineSpacing:      Number specifying the size of the space between lines.
@@ -368,7 +368,7 @@ inline std::unique_ptr<sf::Sprite> tableToSprite(lua::Table& obj)
  *  - underlined
  *  - strikethrough
  */
-inline std::unique_ptr<sf::Text> tableToText(lua::Table& obj)
+inline std::unique_ptr<util::graphics::Text> tableToText(lua::Table& obj)
 {
         static const util::MapStringTo<sf::Text::Style> styles = {
                 { "regular",       sf::Text::Regular       },
@@ -378,7 +378,7 @@ inline std::unique_ptr<sf::Text> tableToText(lua::Table& obj)
                 { "strikethrough", sf::Text::StrikeThrough },
         };
         
-        auto text = std::make_unique<sf::Text>();
+        auto text = std::make_unique<util::graphics::Text>();
 
         const auto getStyle = [&](const std::string& style) -> sf::Text::Style
         {
@@ -556,11 +556,11 @@ inline std::unique_ptr<util::graphics::RectTileMap> tableToRectTileMap(lua::Tabl
         return tmap;
 }
 
-/** Transforms a Lua table into a sf::Drawable object.
+/** Transforms a Lua table into a util::graphics::Graphical object.
  * 
- *  Table syntax for all sf::Drawable objects:
- *  - type:     String representing drawable type ID (full list of IDs below).
- *  - position: Vector representing the world coordinates of the sf::Text object.
+ *  Table syntax for all util::graphics::Graphical objects:
+ *  - type:     String representing gobj type ID (full list of IDs below).
+ *  - position: Vector representing the world coordinates of the util::graphics::Text object.
  *  - rotation: Number representing the angle (in degrees) by which the object is rotated.
  *  - scale:    Vector representing the factors or a single number also representing the factor
  *              by which the object should be scaled.
@@ -569,14 +569,14 @@ inline std::unique_ptr<util::graphics::RectTileMap> tableToRectTileMap(lua::Tabl
  *              center, top-left, top-right, bottom-left, bottom-right)
  * 
  *  Drawable type IDs:
- *  - circle shape (sf::CircleShape)
- *  - convex shape (sf::ConvexShape)
- *  - rectangle shape (sf::RectangleShape)
- *  - sprite (sf::Sprite)
+ *  - circle shape (util::graphics::CircleShape)
+ *  - convex shape (util::graphics::ConvexShape)
+ *  - rectangle shape (util::graphics::RectangleShape)
+ *  - sprite (util::graphics::Sprite)
  *  - rect tile map (RectTileMap)
- *  - text (sf::Text)
+ *  - text (util::graphics::Text)
  */
-inline std::optional<std::unique_ptr<sf::Drawable>> tableToDrawable(lua::Table& obj)
+inline std::optional<std::unique_ptr<util::graphics::Graphical>> tableToDrawable(lua::Table& obj)
 {
         const lua::Value type = obj["type"];
 
@@ -586,51 +586,54 @@ inline std::optional<std::unique_ptr<sf::Drawable>> tableToDrawable(lua::Table& 
                 return {};
         }
 
-        std::unique_ptr<sf::Drawable> drawable = {nullptr};
+        std::unique_ptr<util::graphics::Graphical> gobj = {nullptr};
 
         if (type == "text")
         {
-                drawable = tableToText(obj);
+                gobj = tableToText(obj);
         }
         else if (type == "sprite")
         {
-                drawable = tableToSprite(obj);
+                gobj = tableToSprite(obj);
         }
-        else if (type == "circle shape" ||
-                 type == "convex shape" ||
-                 type == "rectangle shape")
+        else if (type == "circle shape")
         {
-                // Here we can assume that the value is correct,
-                // as we pass only the accepted type IDs.
-                drawable = tableToShape(obj).value();
+                gobj = tableToShape<util::graphics::CircleShape>(obj).value();
+        }
+        else if (type == "convex shape")
+        {
+                gobj = tableToShape<util::graphics::ConvexShape>(obj).value();
+        }
+        else if (type == "rectangle shape")
+        {
+                gobj = tableToShape<util::graphics::RectangleShape>(obj).value();
         }
         else if (type == "rect tile map")
         {
-                drawable = tableToRectTileMap(obj);
+                gobj = tableToRectTileMap(obj);
         }
         else
         {
                 return {};
         }
 
-        auto transformable = reinterpret_cast<sf::Transformable*>(drawable.get());
         prop (position, lua::Table)
         {
-                transformable->setPosition(tableToVector(position));
+                gobj->setPosition(tableToVector(position));
         }
 
         prop (rotation, float)
         {
-                transformable->setRotation(rotation);
+                gobj->setRotation(rotation);
         }
 
         prop (scale, lua::Table)
         {
-                transformable->setScale(tableToVector(scale));
+                gobj->setScale(tableToVector(scale));
         }
         else prop (scale, float)
         {
-                transformable->setScale(scale, scale);
+                gobj->setScale(scale, scale);
         }
 
         prop (origin, std::string)
@@ -638,7 +641,7 @@ inline std::optional<std::unique_ptr<sf::Drawable>> tableToDrawable(lua::Table& 
                 prop (globalBounds, lua::Table)
                 {
                         sf::FloatRect bounds = tableToRectangle(globalBounds);
-                        transformable->setOrigin(
+                        gobj->setOrigin(
                                 origin == "center"       ? sf::Vector2f(bounds.width / 2, bounds.height / 2) :
                                 origin == "top"          ? sf::Vector2f(bounds.width / 2, 0.f              ) :
                                 origin == "left"         ? sf::Vector2f(0.f,              bounds.height / 2) :
@@ -653,10 +656,10 @@ inline std::optional<std::unique_ptr<sf::Drawable>> tableToDrawable(lua::Table& 
         }
         else prop (origin, lua::Table)
         {
-                transformable->setOrigin(tableToVector(origin));
+                gobj->setOrigin(tableToVector(origin));
         }
 
-        return drawable;
+        return gobj;
 }
 
 #undef prop

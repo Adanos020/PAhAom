@@ -30,9 +30,9 @@ public:
 
         void draw(std::size_t index, sf::RenderTarget& target)
         {
-                if (entities[index].hasComponent<GraphicsComponent>())
+                if (auto optGFX = entities[index].getComponent<GraphicsComponent>())
                 {
-                        entities[index].getComponent<GraphicsComponent>().value().get().draw(target);
+                        optGFX.value().get().draw(target);
                 }
         }
 

@@ -6,6 +6,7 @@
 #include <Engine/ECS/PositionComponent.hpp>
 
 #include <Util/Types.hpp>
+#include <Util/Graphics/Graphical.hpp>
 
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/Transformable.hpp>
@@ -23,7 +24,7 @@ class GraphicsComponent : public Component
 {
 public:
 
-        GraphicsComponent(std::unique_ptr<sf::Drawable> graphicalObject, Entity* const owner)
+        GraphicsComponent(std::unique_ptr<util::graphics::Graphical> graphicalObject, Entity* const owner)
         : graphicalObject(std::move(graphicalObject))
         {
                 this->typeID = getComponentTypeID<GraphicsComponent>();
@@ -31,16 +32,15 @@ public:
         }
 
         GraphicsComponent(const GraphicsComponent& copy)
+        : GraphicsComponent(copy.graphicalObject->copy(), copy.owner)
         {
-
         }
 
         virtual void update() override
         {
                 if (this->owner->hasComponent<PositionComponent>())
                 {
-                        auto transformable = reinterpret_cast<sf::Transformable*>(graphicalObject.get());
-                        transformable->setPosition(this->owner->getComponent<PositionComponent>().value().get());
+                        this->graphicalObject->setPosition(this->owner->getComponent<PositionComponent>().value().get());
                 }
         }
 
@@ -51,7 +51,7 @@ public:
 
 private:
 
-        std::unique_ptr<sf::Drawable> graphicalObject;
+        std::unique_ptr<util::graphics::Graphical> graphicalObject;
 };
 
 }
