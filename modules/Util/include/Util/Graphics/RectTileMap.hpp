@@ -194,6 +194,11 @@ public: // Overloaded operators.
 
 public: // Derived interface.
 
+        virtual std::unique_ptr<Graphical> copy() const override
+        {
+                return std::make_unique<RectTileMap>(*this);
+        }
+
         virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override
         {
                 states.transform *= this->getTransform();

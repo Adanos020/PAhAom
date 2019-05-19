@@ -20,9 +20,9 @@ inline engine::ecs::Entity tableToEntity(const lua::Table& table)
 
         Entity entity;
 
-        if (!table["graphics2D"].is<lua::Nil>())
+        if (!table["graphics"].is<lua::Nil>())
         {
-                lua::Table drawable = table["graphics2D"];
+                lua::Table drawable = table["graphics"];
                 if (auto graphicalObject = tableToDrawable(drawable))
                 {
                         entity.addComponent<GraphicsComponent>(std::move(graphicalObject.value()));

@@ -6,13 +6,6 @@
 #include <cstdio>
 
 
-// Operator overloads.
-
-std::string operator+(util::CStr lhs, const std::string& rhs)
-{
-        return std::string(lhs) + rhs;
-}
-
 // Functions.
 
 namespace util

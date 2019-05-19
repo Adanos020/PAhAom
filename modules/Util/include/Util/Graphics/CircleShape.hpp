@@ -15,6 +15,11 @@ public:
         {
         }
 
+        virtual std::unique_ptr<Graphical> copy() const override
+        {
+                return std::make_unique<CircleShape>(*this);
+        }
+
         virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override
         {
                 target.draw(static_cast<const sf::CircleShape&>(*this), states);

@@ -16,9 +16,14 @@ public:
         {
         }
 
-        Text(const sf::String& string, const sf::Font& font, unsigned int characterSize = 30)
+        Text(const sf::String& string, const sf::Font& font, const unsigned int characterSize = 30)
         : sf::Text(string, font, characterSize)
         {
+        }
+
+        virtual std::unique_ptr<Graphical> copy() const override
+        {
+                return std::make_unique<Text>(*this);
         }
 
         virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override
