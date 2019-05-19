@@ -1,12 +1,13 @@
 #pragma once
 
 
-#include <Util/Graphics/Graphical.hpp>
 #include <Util/Types.hpp>
 
+#include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Texture.hpp>
+#include <SFML/Graphics/Transformable.hpp>
 #include <SFML/Graphics/VertexArray.hpp>
 
 #include <cstdint>
@@ -17,7 +18,7 @@ namespace util::graphics
 
 using TileID = std::uint_fast8_t;
 
-class RectTileMap : public Graphical
+class RectTileMap : public sf::Drawable, public sf::Transformable
 {
 public: // Constructors.
 
@@ -193,11 +194,6 @@ public: // Overloaded operators.
         }
 
 public: // Derived interface.
-
-        virtual std::unique_ptr<Graphical> copy() const override
-        {
-                return std::make_unique<RectTileMap>(*this);
-        }
 
         virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override
         {

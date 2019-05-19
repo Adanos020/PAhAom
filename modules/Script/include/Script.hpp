@@ -1,7 +1,6 @@
 #pragma once
 
 
-#include <Script/ECS.hpp>
 #include <Script/Graphics.hpp>
 #include <Script/Math.hpp>
 #include <Script/Observer.hpp>

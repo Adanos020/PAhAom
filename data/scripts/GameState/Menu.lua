@@ -36,7 +36,3 @@ end
 
 function Menu:update(dt)
 end
-
-function Menu:draw()
-    return self.entities
-end

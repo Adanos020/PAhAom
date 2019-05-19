@@ -1,8 +1,6 @@
 #pragma once
 
 
-#include <Engine/ECS/System.hpp>
-
 #include <Script.hpp>
 
 #include <Util/Constants.hpp>
@@ -41,7 +39,7 @@ public:
                 {
                         lua::Table entity = entities[i];
                         entity["index"] = i - 1; // Adding an index to the drawable recipe.
-                        this->entities.addEntity(script::tableToEntity(entity));
+                        // this->entities.addEntity(script::tableToEntity(entity));
                 }
         }
 
@@ -69,15 +67,15 @@ public:
                 const lua::Table thisObj = script::luaContext.global[this->stateName];
                 const lua::Table drawables = thisObj["draw"](thisObj);
                 drawables.iterate([&](lua::Valref, lua::Valref drawable) {
-                        const int index = drawable["index"];
-                        this->entities.draw(index, target);
+                        // const int index = drawable["index"];
+                        // this->entities.draw(index, target);
                 });
         }
 
 private:
 
         std::string stateName;
-        ecs::System entities;
+        // ecs::System entities;
 };
 
 }

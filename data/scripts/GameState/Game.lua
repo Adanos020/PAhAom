@@ -36,7 +36,3 @@ end
 
 function Game:update(dt)
 end
-
-function Game:draw()
-    return self.entities
-end
