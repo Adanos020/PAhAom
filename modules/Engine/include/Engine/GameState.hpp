@@ -19,9 +19,6 @@
 namespace engine
 {
 
-/**
- * 
- */
 class GameState
 {
 public:
@@ -39,7 +36,7 @@ public:
                 {
                         lua::Table entity = entities[i];
                         entity["index"] = i - 1; // Adding an index to the drawable recipe.
-                        // this->entities.addEntity(script::tableToEntity(entity));
+                        // TODO - add entity
                 }
         }
 
@@ -62,20 +59,14 @@ public:
                 // TODO - apply updates to actual objects.
         }
 
-        void draw(sf::RenderTarget& target)
+        void draw(sf::RenderTarget&)
         {
-                const lua::Table thisObj = script::luaContext.global[this->stateName];
-                const lua::Table drawables = thisObj["draw"](thisObj);
-                drawables.iterate([&](lua::Valref, lua::Valref drawable) {
-                        // const int index = drawable["index"];
-                        // this->entities.draw(index, target);
-                });
+                // TODO - draw
         }
 
 private:
 
         std::string stateName;
-        // ecs::System entities;
 };
 
 }

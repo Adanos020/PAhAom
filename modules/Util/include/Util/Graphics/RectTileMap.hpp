@@ -22,27 +22,22 @@ class RectTileMap : public sf::Drawable, public sf::Transformable
 {
 public: // Constructors.
 
-        RectTileMap(const sf::Vector2u size, const sf::Vector2f tileSize,
-                    const sf::Vector2u tileIconSize, sf::Texture* const texture,
+        RectTileMap(const sf::Vector2u size = {0, 0}, const sf::Vector2f tileSize = {0, 0},
+                    const sf::Vector2u tileIconSize = {0, 0}, sf::Texture* const texture = nullptr,
                     const TileID fill = 0)
         : size(size)
         , tileSize(tileSize)
         , tileIconSize(tileIconSize)
-        , tiles(size.y)
         , vertices(sf::Quads)
         , texture(texture)
         {
-                for (auto& row : this->tiles)
-                {
-                        row.resize(size.x);
-                }
-
+                this->setSize(size);
                 this->placeVertices();
-                this->fillArea(fill, {{0u, 0u}, size});
+                this->fill(fill);
         }
 
-        RectTileMap(const Matrix<TileID>& tiles, const sf::Vector2f tileSize,
-                    const sf::Vector2u tileIconSize, sf::Texture* const texture)
+        RectTileMap(const Matrix<TileID>& tiles, const sf::Vector2f tileSize = {0, 0},
+                    const sf::Vector2u tileIconSize = {0, 0}, sf::Texture* const texture = nullptr)
         : RectTileMap(sf::Vector2u(tiles.size(), tiles.size() ? tiles[0].size() : 0),
                       tileSize, tileIconSize, texture)
         {
@@ -70,6 +65,11 @@ public: // Constructors.
         }
 
 public: // Mutators.
+
+        void fill(const TileID fill)
+        {
+                this->fillArea(fill, {{0u, 0u}, size});
+        }
 
         void fillArea(const TileID fill, const sf::UintRect area)
         {
@@ -117,6 +117,32 @@ public: // Mutators.
                 {
                         this->setTile({x, y}, tiles[y][x]);
                 }
+        }
+
+        void setSize(const sf::Vector2u size)
+        {
+                this->size = size;
+
+                this->tiles.resize(size.y);
+                for (auto& row : this->tiles)
+                {
+                        row.resize(size.x);
+                }
+        }
+
+        void setTexture(sf::Texture* const texture)
+        {
+                this->texture = texture;
+        }
+
+        void setTileSize(const sf::Vector2f tileSize)
+        {
+                this->tileSize = tileSize;
+        }
+
+        void setTileIconSize(const sf::Vector2u tileIconSize)
+        {
+                this->tileIconSize = tileIconSize;
         }
 
 public: // Accessors.

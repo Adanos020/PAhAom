@@ -36,6 +36,29 @@ set_target_properties(
 )
 
 
+# EnTT
+
+include_directories("modules/entt/single_include")
+file(GLOB_RECURSE HEADERS "modules/entt/single_include/entt/entt.hpp")
+
+set(ENTT_HEADERS "modules/entt/src/*.hpp")
+
+file(GLOB_RECURSE SOURCES ${ENTT_HEADERS})
+add_library(EnTT STATIC ${SOURCES})
+
+target_compile_options(EnTT PUBLIC -Wall -Wextra)
+target_include_directories(EnTT PUBLIC "modules/entt/src")
+
+set_target_properties(
+    EnTT
+        PROPERTIES
+            LINKER_LANGUAGE CXX
+            CXX_STANDARD 17
+            CXX_STANDARD_REQUIRED YES
+            CXX_EXTENSIONS NO
+)
+
+
 # SCRIPT BINDINGS
 
 set(UTIL_SOURCES "modules/Script/src/Script/*.cpp")
@@ -95,6 +118,7 @@ target_link_libraries(
             sfml-window-d
             sfml-audio-d
             sfml-system-d
+            EnTT
             Script
             LuaPP
             Util
