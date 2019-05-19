@@ -5,7 +5,7 @@ Game = {
                 x = Settings.video.resolution.x / 2,
                 y = Settings.video.resolution.y / 2,
             },
-            graphics2D = {
+            graphics = {
                 type = "rect tile map",
                 tiles = {},
                 tileSize = 16,
@@ -21,7 +21,7 @@ function Game:new(o)
     o = o or {}
     setmetatable(o, self)
     self.__index = self
-    self.entities[1].graphics2D.tiles = generate_dungeon {x = 37, y = 21}
+    self.entities[1].graphics.tiles = generate_dungeon {x = 37, y = 21}
     return o
 end
 

@@ -41,7 +41,7 @@ public:
                 {
                         lua::Table entity = entities[i];
                         entity["index"] = i - 1; // Adding an index to the drawable recipe.
-                        this->entities.addEntity(std::move(script::tableToEntity(entity)));
+                        this->entities.addEntity(script::tableToEntity(entity));
                 }
         }
 

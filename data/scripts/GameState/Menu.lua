@@ -5,7 +5,7 @@ Menu = {
                 x = Settings.video.resolution.x / 2,
                 y = Settings.video.resolution.y / 2,
             },
-            graphics2D = {
+            graphics = {
                 type = "text",
                 content = "Menu, press Enter to continue,\nEsc to exit.",
                 font = "unifont",

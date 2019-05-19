@@ -17,7 +17,7 @@ public:
 
         void addEntity(const Entity& entity)
         {
-                this->entities.push_back(std::move(entity));
+                this->entities.push_back(entity);
         }
 
         void update()
@@ -30,6 +30,10 @@ public:
 
         void draw(std::size_t index, sf::RenderTarget& target)
         {
+                if (index >= entities.size())
+                {
+                        return;
+                }
                 if (auto optGFX = entities[index].getComponent<GraphicsComponent>())
                 {
                         optGFX.value().get().draw(target);
