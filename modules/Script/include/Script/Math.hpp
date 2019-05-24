@@ -156,10 +156,11 @@ inline lua::Retval vectorsEqual(lua::Context& context)
  */
 inline lua::Retval vectorLerp(lua::Context& context)
 {
-        context.requireArgs<lua::Table, lua::Table, lua::Table>(3);
-        const auto newVec = util::lerp(impl::tableToVector(context.args[0]),
-                                       impl::tableToVector(context.args[1]),
-                                       impl::tableToVector(context.args[2]));
+        context.requireArgs<lua::Table, lua::Table, float>(3);
+        const auto newVec = util::Vector::lerp(
+                impl::tableToVector(context.args[0]),
+                impl::tableToVector(context.args[1]),
+                context.args[2]);
         return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
 }
 

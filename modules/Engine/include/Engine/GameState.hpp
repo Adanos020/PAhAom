@@ -1,6 +1,8 @@
 #pragma once
 
 
+#include <Engine/ECS/System.hpp>
+
 #include <Script.hpp>
 
 #include <Util/Constants.hpp>

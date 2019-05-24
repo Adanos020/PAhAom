@@ -22,7 +22,7 @@ set(LUAPP_SOURCES "modules/luapp/luapp/luapp_impl.cpp")
 set(LUAPP_HEADERS "modules/luapp/luapp/*.{h,hpp,hxx}")
 
 file(GLOB_RECURSE SOURCES ${LUAPP_SOURCES} ${LUAPP_HEADERS})
-add_library(LuaPP STATIC ${SOURCES})
+add_library(LuaPP STATIC ${SOURCES} ${HEADERS})
 
 target_include_directories(LuaPP PUBLIC "modules/luapp/luapp")
 target_link_libraries(LuaPP PUBLIC lua)
@@ -44,7 +44,7 @@ file(GLOB_RECURSE HEADERS "modules/entt/single_include/entt/entt.hpp")
 set(ENTT_HEADERS "modules/entt/src/*.hpp")
 
 file(GLOB_RECURSE SOURCES ${ENTT_HEADERS})
-add_library(EnTT STATIC ${SOURCES})
+add_library(EnTT STATIC ${SOURCES} ${HEADERS})
 
 target_compile_options(EnTT PUBLIC -Wall -Wextra)
 target_include_directories(EnTT PUBLIC "modules/entt/src")
