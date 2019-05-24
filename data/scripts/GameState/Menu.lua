@@ -13,7 +13,7 @@ Menu = {
                 origin = "center"
             },
         },
-    }
+    },
 }
 
 function Menu:new(o)

@@ -579,6 +579,8 @@ inline std::unique_ptr<util::graphics::RectTileMap>& updateRectTileMapFromTable(
         return tmap;
 }
 
+#undef prop
+
 /** Transforms a Lua table into a sf::Drawable object.
  * 
  *  Table syntax for all sf::Drawable objects:
@@ -603,52 +605,39 @@ inline std::optional<std::unique_ptr<sf::Drawable>> tableToDrawable(lua::Table& 
 {
         const lua::Value type = obj["type"];
 
-        if (not type)
-        {
-                luaContext.error(util::err::noDrawableTypeId);
-                return {};
-        }
-
-        std::unique_ptr<sf::Drawable> dobj = {nullptr};
-
         if (type == "text")
         {
                 auto text = std::make_unique<sf::Text>();
-                dobj = std::move(updateTextFromTable(text, obj));
+                return std::move(updateTextFromTable(text, obj));
         }
-        else if (type == "sprite")
+        if (type == "sprite")
         {
                 auto sprite = std::make_unique<sf::Sprite>();
-                dobj = std::move(updateSpriteFromTable(sprite, obj));
+                return std::move(updateSpriteFromTable(sprite, obj));
         }
-        else if (type == "circle shape")
+        if (type == "circle shape")
         {
-                auto circle = std::make_unique<sf::CircleShape>();
-                dobj = std::move(updateCircleShapeFromTable(circle, obj));
+                auto circleShape = std::make_unique<sf::CircleShape>();
+                return std::move(updateCircleShapeFromTable(circleShape, obj));
         }
-        else if (type == "convex shape")
+        if (type == "convex shape")
         {
-                auto convex = std::make_unique<sf::ConvexShape>();
-                dobj = std::move(updateConvexShapeFromTable(convex, obj));
+                auto convexShape = std::make_unique<sf::ConvexShape>();
+                return std::move(updateConvexShapeFromTable(convexShape, obj));
         }
-        else if (type == "rectangle shape")
+        if (type == "rectangle shape")
         {
-                auto rectangle = std::make_unique<sf::RectangleShape>();
-                dobj = std::move(updateRectangleShapeFromTable(rectangle, obj));
+                auto rectangleShape = std::make_unique<sf::RectangleShape>();
+                return std::move(updateRectangleShapeFromTable(rectangleShape, obj));
         }
-        else if (type == "rect tile map")
+        if (type == "rect tile map")
         {
-                auto rtm = std::make_unique<util::graphics::RectTileMap>();
-                dobj = std::move(updateRectTileMapFromTable(rtm, obj));
-        }
-        else
-        {
-                return {};
+                auto rectTileMap = std::make_unique<util::graphics::RectTileMap>();
+                return std::move(updateRectTileMapFromTable(rectTileMap, obj));
         }
 
-        return dobj;
+        luaContext.error(util::err::noDrawableTypeId);
+        return {};
 }
-
-#undef prop
 
 }
