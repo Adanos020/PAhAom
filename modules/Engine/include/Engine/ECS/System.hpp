@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include <Util/Constants.hpp>
+#include <Engine/ECS/Components.hpp>
 
 #include <entt/entity/registry.hpp>
 
@@ -13,11 +13,11 @@ class System
 {
 public:
 
-        virtual void update() = 0;
+
 
 private:
 
-        entt::registry registry;
+        entt::registry reg;
 };
 
 }

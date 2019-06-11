@@ -36,7 +36,7 @@ inline float mapNumber(const float val, const float lo1, const float hi1,
 
 struct Vector : sf::Vector2f
 {
-        Vector(float x, float y)
+        Vector(const float x = 0, const float y = 0)
         : sf::Vector2f(x, y)
         {
         }
@@ -76,6 +76,12 @@ struct Vector : sf::Vector2f
                 return *this;
         }
 
+        Vector length(const float l) const
+        {
+                Vector v = *this;
+                return v.length(l);
+        }
+
         Vector& limit(const float l)
         {
                 if (this->length() > l)
@@ -83,6 +89,12 @@ struct Vector : sf::Vector2f
                         this->length(l);
                 }
                 return *this;
+        }
+
+        Vector limit(const float l) const
+        {
+                Vector v = *this;
+                return v.limit(l);
         }
 
         Vector& normalize()
@@ -93,11 +105,42 @@ struct Vector : sf::Vector2f
                 return *this;
         }
 
+        Vector normalize() const
+        {
+                Vector v = *this;
+                return v.normalize();
+        }
+
         Vector& clamp(const Vector& lo, const Vector& hi)
         {
                 this->x = std::clamp(this->x, lo.x, hi.x);
                 this->y = std::clamp(this->y, lo.y, hi.y);
                 return *this;
+        }
+
+        Vector clamp(const Vector& lo, const Vector& hi) const
+        {
+                Vector v = *this;
+                return v.clamp(lo, hi);
+        }
+
+        Vector& clamp(const float lo, const float hi)
+        {
+                if (this->length() > hi)
+                {
+                        this->length(hi);
+                }
+                else if (this->length() < lo)
+                {
+                        this->length(lo);
+                }
+                return *this;
+        }
+
+        Vector clamp(const float lo, const float hi) const
+        {
+                Vector v = *this;
+                return v.clamp(lo, hi);
         }
 
 public:
@@ -114,7 +157,7 @@ public:
 
         static float angleBetween(const Vector& v1, const Vector& v2)
         {
-                return std::acos(v1.dot(v2) / (v1.length() * v2.length()));
+                return std::acos(v1.dot(v2) / v1.length() / v2.length());
         }
 };
 

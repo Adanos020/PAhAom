@@ -10,7 +10,7 @@ Menu = {
                 content = "Menu, press Enter to continue,\nEsc to exit.",
                 font = "unifont",
                 fillColor = "yellow",
-                origin = "center"
+                origin = "center",
             },
         },
     },
