@@ -16,19 +16,27 @@ void init()
 {
         // Math.
         lua::Table math = luaContext.global["math"];
-        math["clamp"]                  = clamp;
-        math["lerp_number"]            = lerpNumber;
-        math["normalize_number"]       = normalizeNumber;
-        math["map_number"]             = mapNumber;
+        math["clamp"]     = clamp;
+        math["lerp"]      = numberLerp;
+        math["normalize"] = numberNormalize;
+        math["map"]       = numberMap;
+        
         math["is_vector"]              = isVector;
         math["vectors_equal"]          = vectorsEqual;
-        math["vectors_lerp"]           = vectorLerp;
         math["vector_length_squared"]  = vectorLengthSquared;
-        math["vector_length"]          = vectorLength;
-        math["vector_normalize"]       = vectorNormalize;
         math["vector_set_length"]      = vectorSetLength;
+        math["vector_length"]          = vectorLength;
+        math["vector_limit"]           = vectorLimit;
+        math["vector_normalize"]       = vectorNormalize;
+        math["vector_clamp_to_area"]   = vectorClampToArea;
+        math["vector_clamp_to_length"] = vectorClampToLength;
+        math["vector_from_polar"]      = vectorFromPolar;
+        math["vector_dot"]             = vectorDot;
+        math["vector_angle_between"]   = vectorAngleBetween;
+        math["vector_lerp"]            = vectorLerp;
+        
         math["is_rectangle"]           = isRectangle;
-        math["rectangles_intersect"]   = rectanglesIntersect;
+        math["rectangle_intersects"]   = rectangleIntersects;
         math["rectangle_contains"]     = rectangleContains;
 
         // Messages.

@@ -76,7 +76,7 @@ inline lua::Retval clamp(lua::Context& context)
  * 
  *  Returns: Number
  */
-inline lua::Retval lerpNumber(lua::Context& context)
+inline lua::Retval numberLerp(lua::Context& context)
 {
         context.requireArgs<float, float, float>(3);
         return context.ret(util::lerp(context.args[0].to<float>(),
@@ -93,7 +93,7 @@ inline lua::Retval lerpNumber(lua::Context& context)
  * 
  *  Returns: Number - Mapped to range [0, 1]
  */
-inline lua::Retval normalizeNumber(lua::Context& context)
+inline lua::Retval numberNormalize(lua::Context& context)
 {
         context.requireArgs<float, float, float>(3);
         return context.ret(util::normalize(context.args[0], context.args[1], context.args[2]));
@@ -110,7 +110,7 @@ inline lua::Retval normalizeNumber(lua::Context& context)
  * 
  *  Returns: Number - Mapped to range [lo2, hi2]
  */
-inline lua::Retval mapNumber(lua::Context& context)
+inline lua::Retval numberMap(lua::Context& context)
 {
         context.requireArgs<float, float, float, float, float>(5);
         return context.ret(util::mapNumber(context.args[0], context.args[1], context.args[2],
@@ -145,25 +145,6 @@ inline lua::Retval vectorsEqual(lua::Context& context)
         return context.ret(impl::tableToVector(context.args[0]) == impl::tableToVector(context.args[1]));
 }
 
-/** Linearly interpolates between two given vectors.
- * 
- *  Params:
- *      v1    = Vector. Lower bounds.
- *      v2    = Vector. Upper bounds.
- *      alpha = Vector. Alpha values - in range [0, 1].
- * 
- *  Returns: Number
- */
-inline lua::Retval vectorLerp(lua::Context& context)
-{
-        context.requireArgs<lua::Table, lua::Table, float>(3);
-        const auto newVec = util::Vector::lerp(
-                impl::tableToVector(context.args[0]),
-                impl::tableToVector(context.args[1]),
-                context.args[2]);
-        return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
-}
-
 /** Calculates the squared length of a vector.
  * 
  *  Params:
@@ -190,6 +171,50 @@ inline lua::Retval vectorLength(lua::Context& context)
         return context.ret(impl::tableToVector(context.args[0]).length());
 }
 
+/** Creates a new vector with the same direction as the given vector but with a different length.
+ * 
+ *  Params:
+ *      vec    = Vector.
+ *      length = Number.
+ * 
+ *  Returns: Vector
+ */
+inline lua::Retval vectorSetLength(lua::Context& context)
+{
+        context.requireArgs<lua::Table, float>(2);
+        const auto newVec = impl::tableToVector(context.args[0]).length(context.args[1]);
+        return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
+}
+
+/** Calculates the dot product of two vectors.
+ * 
+ *  Params:
+ *      vec1 = Vector.
+ *      vec2 = Vector.
+ * 
+ *  Returns: Number
+ */
+inline lua::Retval vectorDot(lua::Context& context)
+{
+        context.requireArgs<lua::Table, lua::Table>(2);
+        return context.ret(impl::tableToVector(context.args[0]).dot(impl::tableToVector(context.args[1])));
+}
+
+/** Limits a vector's length to a given `len`.
+ * 
+ *  Params:
+ *      vec = Vector.
+ *      len = Number. The length that the vector is limited to.
+ * 
+ *  Returns: Vector
+ */
+inline lua::Retval vectorLimit(lua::Context& context)
+{
+        context.requireArgs<lua::Table, float>(2);
+        const auto newVec = impl::tableToVector(context.args[0]).limit(context.args[1]);
+        return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
+}
+
 /** Calculates a unit vector out of an existing vector.
  * 
  *  Params:
@@ -204,18 +229,93 @@ inline lua::Retval vectorNormalize(lua::Context& context)
         return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
 }
 
-/** Creates a new vector with the same direction as the given vector but with a different length.
+/** Limits a point (expressed by a Vector) to a given area (expressed by two Vectors).
  * 
  *  Params:
- *      vec    = Vector.
- *      length = Number.
+ *      point = Vector. The given point.
+ *      min   = Vector. Top-left corner of the limited area.
+ *      max   = Vector. Bottom-right corner of the limited area.
  * 
  *  Returns: Vector
  */
-inline lua::Retval vectorSetLength(lua::Context& context)
+inline lua::Retval vectorClampToArea(lua::Context& context)
 {
-        context.requireArgs<lua::Table, float>(2);
-        const auto newVec = impl::tableToVector(context.args[0]).length(context.args[1]);
+        context.requireArgs<lua::Table, lua::Table, lua::Table>(3);
+        const auto newVec = impl::tableToVector(context.args[0]).clamp(
+                impl::tableToVector(context.args[1]),
+                impl::tableToVector(context.args[2])
+        );
+        return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
+}
+
+/** Limits a Vector's length to a given range (expressed by two Numbers).
+ * 
+ *  Params:
+ *      vec = Vector. The given point.
+ *      min = Number. Minimum length.
+ *      max = Number. Maximum length.
+ * 
+ *  Returns: Vector
+ */
+inline lua::Retval vectorClampToLength(lua::Context& context)
+{
+        context.requireArgs<lua::Table, float, float>(3);
+        const auto newVec = impl::tableToVector(context.args[0]).clamp(
+                float(context.args[1]),
+                float(context.args[2])
+        );
+        return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
+}
+
+/** Linearly interpolates between two given vectors.
+ * 
+ *  Params:
+ *      v1    = Vector. Lower bounds.
+ *      v2    = Vector. Upper bounds.
+ *      alpha = Vector. Alpha values - in range [0, 1].
+ * 
+ *  Returns: Number
+ */
+inline lua::Retval vectorLerp(lua::Context& context)
+{
+        context.requireArgs<lua::Table, lua::Table, float>(3);
+        const auto newVec = util::Vector::lerp(
+                impl::tableToVector(context.args[0]),
+                impl::tableToVector(context.args[1]),
+                context.args[2]);
+        return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
+}
+
+/** Converts Polar coordinates of a point to Cartesian coordinates.
+ * 
+ *  Params:
+ *      radius = Number. Distance from origin.
+ *      angle  = Number. Angle in radians.
+ * 
+ *  Returns: Vector
+ */
+inline lua::Retval vectorFromPolar(lua::Context& context)
+{
+        context.requireArgs<float, float>(2);
+        const auto newVec = util::Vector::fromPolar(context.args[0], context.args[1]);
+        return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
+}
+
+/** Calculates the angle between two vectors.
+ * 
+ *  Params:
+ *      vec1 = Vector.
+ *      vec2 = Vector.
+ * 
+ *  Returns: Number
+ */
+inline lua::Retval vectorAngleBetween(lua::Context& context)
+{
+        context.requireArgs<lua::Table, lua::Table>(2);
+        const auto newVec = util::Vector::angleBetween(
+                impl::tableToVector(context.args[0]),
+                impl::tableToVector(context.args[1])
+        );
         return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
 }
 
@@ -241,7 +341,7 @@ inline lua::Retval isRectangle(lua::Context& context)
  * 
  *  Returns: Boolean
  */
-inline lua::Retval rectanglesIntersect(lua::Context& context)
+inline lua::Retval rectangleIntersects(lua::Context& context)
 {
         context.requireArgs<lua::Table, lua::Table>(2);
         return context.ret(impl::toRectangle(context.args[0])
