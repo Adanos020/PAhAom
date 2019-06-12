@@ -7,7 +7,7 @@ scripts = {
     "resources.lua",
 
     -- Below here add your own scripts.
-    "GameState/Menu.lua",
-    "GameState/Game.lua",
-    "Level/dungeon_generator.lua",
+    "scenes/Menu.lua",
+    "scenes/Game.lua",
+    "level/dungeon_generator.lua",
 }

@@ -21,11 +21,11 @@
 namespace engine
 {
 
-class GameState
+class Scene
 {
 public:
 
-        GameState(const std::string& stateType)
+        Scene(const std::string& stateType)
         : stateName(stateType + "_state")
         , render(entities)
         {
@@ -53,8 +53,8 @@ public:
                         {
                                 if (auto gfx = script::tableToDrawable(gfxTable))
                                 {
-                                        const std::int32_t z = gfxTable["z"].is<lua::Nil>() ? 0 : gfxTable["z"];
-                                        const bool visible = gfxTable["visible"].is<lua::Nil>() ? true : gfxTable["visible"];
+                                        const std::int32_t z = script::hasOpt(gfxTable, "z", 0);
+                                        const bool visible = script::hasOpt(gfxTable, "visible", true);
                                         this->entities.assign<ecs::Graphics>(entity, std::move(gfx.value()), z, visible);
                                 }
                         }
@@ -63,7 +63,7 @@ public:
                 }
         }
 
-        ~GameState()
+        ~Scene()
         {
                 script::luaContext.global[this->stateName] = lua::nil;
         }

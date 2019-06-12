@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include <Engine/GameState.hpp>
+#include <Engine/Scene.hpp>
 
 #include <algorithm>
 #include <string_view>
