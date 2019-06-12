@@ -5,9 +5,9 @@
 #include <Script/ECS.hpp>
 #include <Script/Graphics.hpp>
 #include <Script/Math.hpp>
-#include <Script/Observer.hpp>
 #include <Script/Random.hpp>
 #include <Script/Resources.hpp>
+#include <Script/Scenes.hpp>
 #include <Script/Window.hpp>
 
 
@@ -16,7 +16,12 @@ namespace script
 
 inline static void init()
 {
-        // Math.
+        // ECS
+        luaContext.global["set_position"] = setPosition;
+        luaContext.global["set_rotation"] = setRotation;
+        luaContext.global["set_scale"]    = setScale;
+
+        // Math
         lua::Table math = luaContext.global["math"];
         math["clamp"]     = clamp;
         math["lerp"]      = numberLerp;
@@ -24,7 +29,8 @@ inline static void init()
         math["map"]       = numberMap;
         
         math["is_vector"]              = isVector;
-        math["vectors_equal"]          = vectorsEqual;
+        math["vector_equal"]           = vectorsEqual;
+        math["vector_add"]             = vectorsAdd;
         math["vector_length_squared"]  = vectorLengthSquared;
         math["vector_set_length"]      = vectorSetLength;
         math["vector_length"]          = vectorLength;
@@ -41,15 +47,15 @@ inline static void init()
         math["rectangle_contains"]   = rectangleContains;
         math["rectangle_intersects"] = rectangleIntersects;
 
-        // Messages.
+        // Messages
         luaContext.global["pop_state"]  = popScene;
         luaContext.global["push_state"] = pushScene;
 
-        // Resources.
+        // Resources
         luaContext.global["load_font"]    = load<sf::Font>;
         luaContext.global["load_texture"] = load<sf::Texture>;
 
-        // Random.
+        // Random
         lua::Table random{luaContext};
         random["chance"]  = chance;
         random["uniform"] = uniform;

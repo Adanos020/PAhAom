@@ -145,6 +145,14 @@ inline lua::Retval vectorsEqual(lua::Context& context)
         return context.ret(impl::tableToVector(context.args[0]) == impl::tableToVector(context.args[1]));
 }
 
+inline lua::Retval vectorsAdd(lua::Context& context)
+{
+        context.requireArgs<lua::Table, lua::Table>(2);
+        util::Vector v1{lua::Table(context.args[0])};
+        util::Vector v2{lua::Table(context.args[1])};
+        return context.ret(static_cast<lua::Valref>(impl::vectorToTable(v1 + v2)));
+}
+
 /** Calculates the squared length of a vector.
  * 
  *  Params:

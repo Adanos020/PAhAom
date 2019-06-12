@@ -3,7 +3,6 @@
 
 #include <Script/Lua.hpp>
 
-#include <Util/ErrorMessages.hpp>
 #include <Util/Observer.hpp>
 
 
@@ -18,7 +17,7 @@ namespace script
 inline lua::Retval pushScene(lua::Context& context)
 {
         context.requireArgs<std::string>(1);
-        util::Subject::send({ util::Message::PushScene{ context.args[0] } });
+        util::Subject::send({util::Message::PushScene{context.args[0]}});
         return context.ret();
 }
 
@@ -26,7 +25,7 @@ inline lua::Retval pushScene(lua::Context& context)
  */
 inline lua::Retval popScene(lua::Context& context)
 {
-        util::Subject::send({ util::Message::PopScene{} });
+        util::Subject::send({util::Message::PopScene{}});
         return context.ret();
 }
 

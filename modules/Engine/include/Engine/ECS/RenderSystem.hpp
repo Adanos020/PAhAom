@@ -21,10 +21,12 @@ public:
         {
         }
 
-        void addGraphics(entt::entity entity, std::unique_ptr<sf::Drawable>&& drawable, std::int32_t z, bool visible)
+        void addGraphics(entt::entity entity, std::unique_ptr<sf::Drawable>&& drawable,
+                         std::int32_t z, bool visible)
         {
                 this->entities.assign<Graphics>(entity, std::move(drawable), z, visible);
-                this->entities.sort<Graphics>([](const Graphics& a, const Graphics& b) { return a.z < b.z; });
+                this->entities.sort<Graphics>(
+                        [](const Graphics& a, const Graphics& b) { return a.z < b.z; });
         }
 
         void draw(sf::RenderTarget& target)

@@ -1,47 +1,33 @@
 #pragma once
 
 
-#include <Engine/ECS/Components.hpp>
+#include <Script/Lua.hpp>
 
-#include <Script/Aux.hpp>
-#include <Script/Graphics.hpp>
-
-#include <entt/entity/registry.hpp>
-
-#include <luapp.hpp>
+#include <Util/Observer.hpp>
 
 
 namespace script
 {
 
-inline static void assignTransform(entt::registry& entities, const entt::entity entity, const lua::Table& entityTable)
+inline static lua::Retval setPosition(lua::Context& context)
 {
-        const util::Vector position = script::hasOpt(entityTable, "position", util::Vector());
-        const util::Vector scale = script::hasOpt(entityTable, "scale", util::Vector(1, 1));
-        const float rotation = script::hasOpt(entityTable, "rotation", 0);
-        entities.assign<engine::ecs::Transform>(entity, position, scale, rotation);
+        context.requireArgs<lua::Table, lua::Table>(2);
+        util::Subject::send({util::Message::SetPosition{context.args[0]["id"], context.args[1]}});
+        return context.ret();
 }
 
-inline static void assignGraphics(entt::registry& entities, const entt::entity entity, const lua::Table& entityTable)
+inline static lua::Retval setRotation(lua::Context& context)
 {
-        if (lua::Table gfxTable = entityTable["graphics"]; gfxTable.len())
-        {
-                if (auto gfx = script::tableToDrawable(gfxTable))
-                {
-                        const std::int32_t z = script::hasOpt(gfxTable, "z", 0);
-                        const bool visible = script::hasOpt(gfxTable, "visible", true);
-                        entities.assign<engine::ecs::Graphics>(entity, std::move(gfx.value()), z, visible);
-                }
-        }
-        entities.sort<engine::ecs::Graphics>(
-                [](const engine::ecs::Graphics& a, const engine::ecs::Graphics& b) { return a.z < b.z; });
+        context.requireArgs<lua::Table, float>(2);
+        util::Subject::send({util::Message::SetRotation{context.args[0]["id"], context.args[1]}});
+        return context.ret();
 }
 
-inline static void addEntity(entt::registry& entities, const lua::Table& entityTable)
+inline static lua::Retval setScale(lua::Context& context)
 {
-        const entt::entity entity = entities.create();
-        assignTransform(entities, entity, entityTable);
-        assignGraphics(entities, entity, entityTable);
+        context.requireArgs<lua::Table, lua::Table>(2);
+        util::Subject::send({util::Message::SetScale{context.args[0]["id"], context.args[1]}});
+        return context.ret();
 }
-
+        
 }
