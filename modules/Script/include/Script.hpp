@@ -1,6 +1,8 @@
 #pragma once
 
 
+#include <Script/Aux.hpp>
+#include <Script/ECS.hpp>
 #include <Script/Graphics.hpp>
 #include <Script/Math.hpp>
 #include <Script/Observer.hpp>
@@ -40,8 +42,8 @@ inline static void init()
         math["rectangle_intersects"] = rectangleIntersects;
 
         // Messages.
-        luaContext.global["pop_state"]  = popState;
-        luaContext.global["push_state"] = pushState;
+        luaContext.global["pop_state"]  = popScene;
+        luaContext.global["push_state"] = pushScene;
 
         // Resources.
         luaContext.global["load_font"]    = load<sf::Font>;
@@ -55,23 +57,6 @@ inline static void init()
         luaContext.global["random"] = random;
 
         luaState.runFile("data/scripts/init.lua");
-}
-
-template<typename Return>
-inline static Return hasOpt(const lua::Table& v, const std::string& name, const Return rFalse)
-{
-        if (v[name])
-        {
-                if constexpr (std::is_fundamental_v<Return>)
-                {
-                        return v[name].to<Return>();
-                }
-                else
-                {
-                        return Return(lua::Table(v[name]));
-                }
-        }
-        return rFalse;
 }
 
 }

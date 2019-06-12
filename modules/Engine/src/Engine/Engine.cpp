@@ -108,11 +108,11 @@ void Engine::draw()
 
 void Engine::receive(const util::Message& msg)
 {
-        if (auto val = std::get_if<util::Message::PushState>(&msg.msg))
+        if (auto val = std::get_if<util::Message::PushScene>(&msg.msg))
         {
                 this->states.emplace(val->stateName);
         }
-        else if (std::get_if<util::Message::PopState>(&msg.msg))
+        else if (std::get_if<util::Message::PopScene>(&msg.msg))
         {
                 if (this->states.size() > 1)
                 {

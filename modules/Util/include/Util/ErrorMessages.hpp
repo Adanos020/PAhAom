@@ -60,7 +60,7 @@ ErrMsg noTileIconSize = "Error: required tile icon size was not specified";
 
 // Lua messages errors.
 ErrMsg noMessageTypeId = "Error: message type ID was not specified.";
-ErrMsg noPushStateName = "Error: name of the state to push was not specified.";
+ErrMsg noPushSceneName = "Error: name of the state to push was not specified.";
 
 // Lua resources errors.
 ErrMsg noResourceName = "Error: required resource name was not specified.";

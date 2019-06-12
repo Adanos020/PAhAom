@@ -16,16 +16,16 @@ namespace util
 struct Message
 {
         struct None {};
-        struct PopState {};
+        struct PopScene {};
 
-        struct PushState
+        struct PushScene
         {
                 std::string stateName;
         };
 
         std::variant<None,
-                     PopState,
-                     PushState
+                     PopScene,
+                     PushScene
         > msg;
 };
 
