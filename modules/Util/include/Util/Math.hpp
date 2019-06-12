@@ -7,6 +7,8 @@
 #include <SFML/System/Vector2.hpp>
 #include <SFML/System/Vector3.hpp>
 
+#include <luapp.hpp>
+
 #include <cmath>
 #include <type_traits>
 
@@ -51,6 +53,11 @@ struct Vector : sf::Vector2f
         : sf::Vector2f(other)
         {
                 static_assert(std::is_arithmetic_v<T>, typeNotArithmetic);
+        }
+
+        Vector(const lua::Valref vec)
+        : sf::Vector2f(vec["x"], vec["y"])
+        {
         }
 
         float lengthSquared() const

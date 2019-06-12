@@ -19,9 +19,9 @@ namespace impl
                 return vec["x"].is<float>() and vec["y"].is<float>();
         }
 
-        inline util::Vector tableToVector(const lua::Table& vec)
+        inline util::Vector tableToVector(const lua::Table vec)
         {
-                return util::Vector{vec["x"], vec["y"]};
+                return util::Vector(vec);
         }
 
         inline lua::Table vectorToTable(const util::Vector vec)
@@ -39,7 +39,7 @@ namespace impl
 
         inline sf::FloatRect toRectangle(const lua::Table& rect)
         {
-                return {tableToVector(rect["position"]), tableToVector(rect["size"])};
+                return {impl::tableToVector(rect["position"]), impl::tableToVector(rect["size"])};
         }
 }
 
@@ -333,21 +333,6 @@ inline lua::Retval isRectangle(lua::Context& context)
         return context.ret(impl::isRectangle(context.args[0]));
 }
 
-/** Checks if given rectangles intersect.
- * 
- *  Params:
- *      rect1 = Table. Presumably a rectangle.
- *      rect2 = Table. Presumably a rectangle.
- * 
- *  Returns: Boolean
- */
-inline lua::Retval rectangleIntersects(lua::Context& context)
-{
-        context.requireArgs<lua::Table, lua::Table>(2);
-        return context.ret(impl::toRectangle(context.args[0])
-               .intersects(impl::toRectangle(context.args[1])));
-}
-
 /** Checks if given rectangle contains a point expressed by given vector.
  * 
  *  Params:
@@ -361,6 +346,21 @@ inline lua::Retval rectangleContains(lua::Context& context)
         context.requireArgs<lua::Table, lua::Table>(2);
         return context.ret(impl::toRectangle(context.args[0])
                 .contains(impl::tableToVector(context.args[1])));
+}
+
+/** Checks if given rectangles intersect.
+ * 
+ *  Params:
+ *      rect1 = Table. Presumably a rectangle.
+ *      rect2 = Table. Presumably a rectangle.
+ * 
+ *  Returns: Boolean
+ */
+inline lua::Retval rectangleIntersects(lua::Context& context)
+{
+        context.requireArgs<lua::Table, lua::Table>(2);
+        return context.ret(impl::toRectangle(context.args[0])
+               .intersects(impl::toRectangle(context.args[1])));
 }
 
 }

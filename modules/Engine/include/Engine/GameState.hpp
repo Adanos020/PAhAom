@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include <Engine/ECS/System.hpp>
+#include <Engine/ECS/RenderSystem.hpp>
 
 #include <Script.hpp>
 
@@ -27,6 +27,7 @@ public:
 
         GameState(const std::string& stateType)
         : stateName(stateType + "_state")
+        , render(entities)
         {
                 const lua::Table classTable = script::luaContext.global[stateType];
                 script::luaContext.global[this->stateName] = classTable["new"](classTable);
@@ -36,9 +37,29 @@ public:
                 
                 for (int i = 1, nDrawables = entities.len(); i <= nDrawables; ++i)
                 {
-                        lua::Table entity = entities[i];
-                        entity["index"] = i - 1; // Adding an index to the drawable recipe.
-                        // TODO - add entity
+                        lua::Table entityTable = entities[i];
+                        const entt::entity entity = this->entities.create();
+
+                        // Transform
+                        {
+                                const util::Vector position = script::hasOpt(entityTable, "position", util::Vector());
+                                const util::Vector scale = script::hasOpt(entityTable, "scale", util::Vector(1, 1));
+                                const float rotation = script::hasOpt(entityTable, "rotation", 0);
+                                this->entities.assign<ecs::Transform>(entity, position, scale, rotation);
+                        }
+
+                        // Graphics
+                        if (lua::Table gfxTable = entityTable["graphics"]; gfxTable.len())
+                        {
+                                if (auto gfx = script::tableToDrawable(gfxTable))
+                                {
+                                        const std::int32_t z = gfxTable["z"].is<lua::Nil>() ? 0 : gfxTable["z"];
+                                        const bool visible = gfxTable["visible"].is<lua::Nil>() ? true : gfxTable["visible"];
+                                        this->entities.assign<ecs::Graphics>(entity, std::move(gfx.value()), z, visible);
+                                }
+                        }
+                        this->entities.sort<ecs::Graphics>([](const ecs::Graphics& a, const ecs::Graphics& b)
+                                { return a.z < b.z; });
                 }
         }
 
@@ -61,14 +82,16 @@ public:
                 // TODO - apply updates to actual objects.
         }
 
-        void draw(sf::RenderTarget&)
+        void draw(sf::RenderTarget& target)
         {
-                // TODO - draw
+                render.draw(target);
         }
 
 private:
 
         std::string stateName;
+        entt::registry entities;
+        ecs::RenderSystem render;
 };
 
 }

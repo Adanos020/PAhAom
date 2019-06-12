@@ -173,7 +173,7 @@ local function spread_rooms()
 
         if table.none(rooms,
             function(room)
-                return math.rectangles_intersect(room, new_room)
+                return math.rectangle_intersects(room, new_room)
             end)
         then
             table.insert(rooms, new_room)

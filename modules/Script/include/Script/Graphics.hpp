@@ -218,6 +218,7 @@ inline std::unique_ptr<TransformableObj>& updateTransformFromTable(
                 tobj->setOrigin(tableToVector(origin));
         }
 
+        extractBounds(dobj, obj);
         return dobj;
 }
 
@@ -279,8 +280,8 @@ inline std::unique_ptr<ShapeClass>& updateShapeFromTable(
                 shape->setOutlineThickness(outlineThickness);
         }
 
-        updateTransformFromTable(shape, obj);
         extractBounds(shape, obj);
+        updateTransformFromTable(shape, obj);
         return shape;
 }
 
@@ -379,8 +380,8 @@ inline std::unique_ptr<sf::Sprite>& updateSpriteFromTable(
                 sprite->setColor(stringToColor(color));
         }
 
-        updateTransformFromTable(sprite, obj);
         extractBounds(sprite, obj);
+        updateTransformFromTable(sprite, obj);
         return sprite;
 }
 
@@ -496,8 +497,8 @@ inline std::unique_ptr<sf::Text>& updateTextFromTable(
                 text->setOutlineThickness(outlineThickness);
         }
 
-        updateTransformFromTable(text, obj);
         extractBounds(text, obj);
+        updateTransformFromTable(text, obj);
         return text;
 }
 
@@ -574,8 +575,8 @@ inline std::unique_ptr<util::graphics::RectTileMap>& updateRectTileMapFromTable(
                 obj["fill"] = lua::nil;
         }
 
-        updateTransformFromTable(tmap, obj);
         extractBounds(tmap, obj);
+        updateTransformFromTable(tmap, obj);
         return tmap;
 }
 
