@@ -1,19 +1,21 @@
+local level = {
+    position = {
+        x = Settings.video.resolution.x / 2,
+        y = Settings.video.resolution.y / 2,
+    },
+    graphics = {
+        type = "rect tile map",
+        tiles = {},
+        tileSize = 16,
+        tileIconSize = 16,
+        texture = "tileset",
+        origin = "center",
+    },
+}
+
 Game = {
     entities = {
-        {
-            position = {
-                x = Settings.video.resolution.x / 2,
-                y = Settings.video.resolution.y / 2,
-            },
-            graphics = {
-                type = "rect tile map",
-                tiles = {},
-                tileSize = 16,
-                tileIconSize = 16,
-                texture = "tileset",
-                origin = "center",
-            },
-        },
+        level
     }
 }
 

@@ -30,7 +30,7 @@ Engine::Engine()
         script::init();
 
         // Run if appropriate.
-        if ((running = not states.empty()))
+        if ((running = not scenes.empty()))
         {
                 // Settings.
                 Settings::Video::load();
@@ -70,7 +70,7 @@ int Engine::run()
 
                 while (lag >= util::FRAME_TIME)
                 {
-                        this->states.top().update();
+                        this->scenes.top().update();
                         lag -= util::FRAME_TIME;
                 }
 
@@ -90,7 +90,7 @@ void Engine::handleInput()
                 {
                         this->running = false;
                 }
-                this->states.top().handleInput(event);
+                this->scenes.top().handleInput(event);
         }
 }
 
@@ -99,7 +99,7 @@ void Engine::draw()
         this->window.clear();
 
         this->screenTexture.clear();
-        this->states.top().draw(screenTexture);
+        this->scenes.top().draw(screenTexture);
         this->screenTexture.display();
 
         this->window.draw(screen);
@@ -110,13 +110,14 @@ void Engine::receive(const util::Message& msg)
 {
         if (auto val = std::get_if<util::Message::PushScene>(&msg.msg))
         {
-                this->states.emplace(val->stateName);
+                this->scenes.emplace(val->stateName);
         }
         else if (std::get_if<util::Message::PopScene>(&msg.msg))
         {
-                if (this->states.size() > 1)
+                if (this->scenes.size() > 1)
                 {
-                        this->states.pop();
+                        util::Subject::deleteObserver(&this->scenes.top());
+                        this->scenes.pop();
                 }
                 else
                 {

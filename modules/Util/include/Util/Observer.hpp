@@ -75,6 +75,11 @@ public:
                 observers.insert(o);
         }
 
+        static void deleteObserver(Observer* const o)
+        {
+                observers.erase(o);
+        }
+
         static void send(const Message& msg)
         {
                 std::for_each(observers.begin(), observers.end(),

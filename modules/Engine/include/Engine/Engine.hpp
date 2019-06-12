@@ -36,7 +36,7 @@ private:
         sf::RenderTexture screenTexture;
         sf::RectangleShape screen;
 
-        std::stack<Scene> states;
+        std::stack<Scene> scenes;
 
         bool running;
 };

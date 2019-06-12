@@ -1,8 +1,11 @@
+local elapsed = 0
+
+local window_center = {
+    x = Settings.video.resolution.x / 2,
+    y = Settings.video.resolution.y / 2,
+}
+
 local greeting = {
-    position = {
-        x = Settings.video.resolution.x / 2,
-        y = Settings.video.resolution.y / 2,
-    },
     graphics = {
         type = "text",
         content = "Menu, press Enter to continue,\nEsc to exit.",
@@ -36,14 +39,9 @@ function Menu:handle_input(event)
     end
 end
 
-local elapsed = 0
 function Menu:update(dt)
     elapsed = elapsed + dt
-    set_position(greeting, math.vector_add(
-        {
-            x = Settings.video.resolution.x / 2,
-            y = Settings.video.resolution.y / 2,
-        },
-        math.vector_from_polar(100, elapsed)))
+    local polar = math.vector_from_polar(100, elapsed)
+    set_position(greeting, math.vector_add(window_center, polar))
     set_rotation(greeting, elapsed * 20)
 end
