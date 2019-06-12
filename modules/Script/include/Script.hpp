@@ -29,8 +29,12 @@ inline static void init()
         math["map"]       = numberMap;
         
         math["is_vector"]              = isVector;
-        math["vector_equal"]           = vectorsEqual;
-        math["vector_add"]             = vectorsAdd;
+        math["vector_equal"]           = vectorEquals;
+        math["vector_add"]             = vectorAdd;
+        math["vector_subtract"]        = vectorSubtract;
+        math["vector_multiply"]        = vectorMultiply;
+        math["vector_divide"]          = vectorDivide;
+        math["vector_inverse"]         = vectorInverse;
         math["vector_length_squared"]  = vectorLengthSquared;
         math["vector_set_length"]      = vectorSetLength;
         math["vector_length"]          = vectorLength;

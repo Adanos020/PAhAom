@@ -60,21 +60,18 @@ int Engine::run()
         }
 
         util::DeltaTime lag = 0.0;
-
         sf::Clock timer;
 
         while (this->running)
         {
-                lag += timer.restart().asSeconds();
                 this->handleInput();
-
                 while (lag >= util::FRAME_TIME)
                 {
                         this->scenes.top().update();
                         lag -= util::FRAME_TIME;
                 }
-
                 this->draw();
+                lag += timer.restart().asSeconds();
         }
         this->window.close();
 

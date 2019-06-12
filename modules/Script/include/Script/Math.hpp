@@ -134,23 +134,93 @@ inline lua::Retval isVector(lua::Context& context)
 /** Checks if given vectors are equal.
  * 
  *  Params:
- *      vec1 = Table. Presumably a vector.
- *      vec2 = Table. Presumably a vector.
+ *      vec1 = Vector.
+ *      vec2 = Vector.
  * 
  *  Returns: Boolean
  */
-inline lua::Retval vectorsEqual(lua::Context& context)
+inline lua::Retval vectorEquals(lua::Context& context)
 {
         context.requireArgs<lua::Table, lua::Table>(2);
         return context.ret(impl::tableToVector(context.args[0]) == impl::tableToVector(context.args[1]));
 }
 
-inline lua::Retval vectorsAdd(lua::Context& context)
+/** Adds two vectors to each other.
+ * 
+ *  Params:
+ *      vec1 = Vector.
+ *      vec2 = Vector.
+ * 
+ *  Returns: Vector
+ */
+inline lua::Retval vectorAdd(lua::Context& context)
 {
         context.requireArgs<lua::Table, lua::Table>(2);
-        util::Vector v1{lua::Table(context.args[0])};
-        util::Vector v2{lua::Table(context.args[1])};
+        const util::Vector v1{lua::Table(context.args[0])};
+        const util::Vector v2{lua::Table(context.args[1])};
         return context.ret(static_cast<lua::Valref>(impl::vectorToTable(v1 + v2)));
+}
+
+/** Subtracts two vectors from each other.
+ * 
+ *  Params:
+ *      vec1 = Vector.
+ *      vec2 = Vector.
+ * 
+ *  Returns: Vector
+ */
+inline lua::Retval vectorSubtract(lua::Context& context)
+{
+        context.requireArgs<lua::Table, lua::Table>(2);
+        const util::Vector v1{lua::Table(context.args[0])};
+        const util::Vector v2{lua::Table(context.args[1])};
+        return context.ret(static_cast<lua::Valref>(impl::vectorToTable(v1 - v2)));
+}
+
+/** Scales a vector by given factor.
+ * 
+ *  Params:
+ *      vec = Vector.
+ *      fac = Number.
+ * 
+ *  Returns: Vector
+ */
+inline lua::Retval vectorMultiply(lua::Context& context)
+{
+        context.requireArgs<lua::Table, float>(2);
+        const util::Vector v{lua::Table(context.args[0])};
+        const float f = context.args[1];
+        return context.ret(static_cast<lua::Valref>(impl::vectorToTable(v * f)));
+}
+
+/** Scales a vector by the inverse of given factor.
+ * 
+ *  Params:
+ *      vec = Vector.
+ *      fac = Number.
+ * 
+ *  Returns: Vector
+ */
+inline lua::Retval vectorDivide(lua::Context& context)
+{
+        context.requireArgs<lua::Table, float>(2);
+        const util::Vector v{lua::Table(context.args[0])};
+        const float f = context.args[1];
+        return context.ret(static_cast<lua::Valref>(impl::vectorToTable(v / f)));
+}
+
+/** Inverses the direction of given vector.
+ * 
+ *  Params:
+ *      vec = Vector.
+ * 
+ *  Returns: Vector
+ */
+inline lua::Retval vectorInverse(lua::Context& context)
+{
+        context.requireArgs<lua::Table>(1);
+        const util::Vector v{lua::Table(context.args[0])};
+        return context.ret(static_cast<lua::Valref>(impl::vectorToTable(-v)));
 }
 
 /** Calculates the squared length of a vector.
@@ -345,7 +415,7 @@ inline lua::Retval isRectangle(lua::Context& context)
  * 
  *  Params:
  *      rect = Table. Presumably a rectangle.
- *      vec  = Table. Presumably a vector.
+ *      vec  = Vector.
  * 
  *  Returns: Boolean
  */
