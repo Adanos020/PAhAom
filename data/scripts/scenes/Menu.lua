@@ -1,9 +1,9 @@
 local elapsed = 0
 
-local window_center = {
-    x = Settings.video.resolution.x / 2,
-    y = Settings.video.resolution.y / 2,
-}
+local window_center = math.vector(
+    Settings.video.resolution.x / 2,
+    Settings.video.resolution.y / 2
+)
 
 local greeting = {
     graphics = {

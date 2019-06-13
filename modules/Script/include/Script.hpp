@@ -52,6 +52,7 @@ inline static void init()
         math["normalize"] = numberNormalize;
         math["map"]       = numberMap;
         
+        math["vector"]                 = vector;
         math["is_vector"]              = isVector;
         math["vector_equal"]           = vectorEquals;
         math["vector_add"]             = vectorAdd;

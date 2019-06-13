@@ -117,6 +117,23 @@ inline lua::Retval numberMap(lua::Context& context)
                                            context.args[3], context.args[4]));
 }
 
+/** Creates a new Vector out of given x and y coordinates.
+ * 
+ *  Params:
+ *      x = Number.
+ *      y = Number.
+ * 
+ *  Returns: Vector
+ */
+inline lua::Retval vector(lua::Context& context)
+{
+        context.requireArgs<float, float>(2);
+        lua::Table vec{context};
+        vec["x"] = context.args[0];
+        vec["y"] = context.args[1];
+        return context.ret(vec);
+}
+
 /** Checks if given table is an vector, i.e. it has two numbers called "x" and "y"
  *  ("x", "y", and "z", if it's 3D).
  * 
