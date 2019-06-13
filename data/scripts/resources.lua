@@ -8,6 +8,7 @@ Resources = {
     -- All paths originate in "data/textures/".
     textures = {
         { "tileset", "tileset.png" },
+        { "menu bkg", "menubkg.png" },
     },
     -- All paths originate in "data/music/".
     music = {

@@ -21,4 +21,4 @@ for _, texture in ipairs(Resources.textures) do
 end
 
 -- Initial state.
-push_state "Menu"
+push_scene "Menu"

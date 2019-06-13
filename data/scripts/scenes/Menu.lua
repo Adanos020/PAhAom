@@ -8,17 +8,25 @@ local window_center = {
 local greeting = {
     graphics = {
         type = "text",
-        content = "Menu, press Enter to continue,\nEsc to exit.",
+        content = "Enter to continue, Esc to exit.",
         font = "unifont",
         fillColor = "yellow",
         origin = "center",
+        z = 1,
     },
 }
 
-Menu = {
-    entities = {
-        greeting
+local bkg = {
+    graphics = {
+        type = "rectangle shape",
+        texture = "menu bkg",
+        size = Settings.video.resolution,
+        z = 0,
     }
+}
+
+Menu = {
+    entities = {greeting, bkg, }
 }
 
 function Menu:new(o)
@@ -30,9 +38,9 @@ end
 
 function Menu:handle_input(event)
     if key_pressed(event, Keyboard.Enter) then
-        push_state "Game"
+        push_scene "Game"
     elseif key_pressed(event, Keyboard.Escape) then
-        pop_state()
+        pop_scene()
     end
 end
 
@@ -40,5 +48,5 @@ function Menu:update(dt)
     elapsed = elapsed + dt
     local polar = math.vector_from_polar(100, elapsed)
     set_position(greeting, math.vector_add(window_center, polar))
-    set_rotation(greeting, elapsed * 20)
+    set_rotation(greeting, math.sin(elapsed) * 30)
 end

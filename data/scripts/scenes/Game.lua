@@ -14,9 +14,7 @@ local level = {
 }
 
 Game = {
-    entities = {
-        level
-    }
+    entities = {level, }
 }
 
 function Game:new(o)
@@ -29,7 +27,7 @@ end
 
 function Game:handle_input(event)
     if key_pressed(event, Keyboard.Escape) then
-        pop_state()
+        pop_scene()
     end
 end
 

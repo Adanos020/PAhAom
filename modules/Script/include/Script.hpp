@@ -75,10 +75,6 @@ inline static void init()
         math["rectangle_contains"]   = rectangleContains;
         math["rectangle_intersects"] = rectangleIntersects;
 
-        // Messages
-        luaContext.global["pop_state"]  = popScene;
-        luaContext.global["push_state"] = pushScene;
-
         // Resources
         luaContext.global["load_font"]    = load<sf::Font>;
         luaContext.global["load_texture"] = load<sf::Texture>;
@@ -89,6 +85,10 @@ inline static void init()
         random["uniform"] = uniform;
         random["normal"]  = normal;
         luaContext.global["random"] = random;
+
+        // Scenes
+        luaContext.global["pop_scene"]  = popScene;
+        luaContext.global["push_scene"] = pushScene;
 
         luaState.runFile("data/scripts/init.lua");
 }
