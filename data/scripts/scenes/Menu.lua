@@ -29,13 +29,10 @@ function Menu:new(o)
 end
 
 function Menu:handle_input(event)
-    if event.type == "KeyPressed" then
-        local kc = event.code
-        if kc == Keyboard.Enter then
-            push_state "Game"
-        elseif kc == Keyboard.Escape then
-            pop_state()
-        end
+    if key_pressed(event, Keyboard.Enter) then
+        push_state "Game"
+    elseif key_pressed(event, Keyboard.Escape) then
+        pop_state()
     end
 end
 

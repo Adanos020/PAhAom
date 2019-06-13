@@ -20,7 +20,7 @@ namespace util
 
 inline float lerp(const float val1, const float val2, const float alpha)
 {
-        return (1 - alpha) * val1 + alpha * val2;
+        return val1 + alpha * (val2 - val1);
 }
 
 inline float normalize(const float val, const float lo, const float hi)
@@ -77,9 +77,7 @@ struct Vector : sf::Vector2f
 
         Vector& length(const float l)
         {
-                this->normalize();
-                this->x *= l;
-                this->y *= l;
+                this->normalize() *= l;
                 return *this;
         }
 
@@ -106,9 +104,7 @@ struct Vector : sf::Vector2f
 
         Vector& normalize()
         {
-                const float l = this->length();
-                this->x /= l;
-                this->y /= l;
+                *this /= this->length();
                 return *this;
         }
 
@@ -157,9 +153,9 @@ public:
                 return {radius * std::cos(angle), radius * std::sin(angle)};
         }
 
-        static Vector lerp(const Vector& vec1, const Vector& vec2, const float alpha)
+        static Vector lerp(const Vector& v1, const Vector& v2, const float alpha)
         {
-                return (1 - alpha) * vec1 + alpha * vec2;
+                return v1 + alpha * (v2 - v1);
         }
 
         static float angleBetween(const Vector& v1, const Vector& v2)

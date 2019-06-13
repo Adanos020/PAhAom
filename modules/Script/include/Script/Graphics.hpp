@@ -167,7 +167,7 @@ inline void extractBounds(const std::unique_ptr<T>& dobj, lua::Table& obj)
 
 
 // Shorthand for checking table properties.
-#define prop(x, CppType) (lua::Value x = obj[#x]; x.is<CppType>())
+#define prop(X, CPP_TYPE) (lua::Value X = obj[#X]; X.is<CPP_TYPE>())
 
 template<class TransformableObj>
 inline std::unique_ptr<TransformableObj>& updateTransformFromTable(

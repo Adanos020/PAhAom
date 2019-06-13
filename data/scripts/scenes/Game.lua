@@ -28,11 +28,8 @@ function Game:new(o)
 end
 
 function Game:handle_input(event)
-    if event.type == "KeyPressed" then
-        local kc = event.code
-        if kc == Keyboard.Escape then
-            pop_state()
-        end
+    if key_pressed(event, Keyboard.Escape) then
+        pop_state()
     end
 end
 

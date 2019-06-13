@@ -4,11 +4,11 @@
 #include <Script/Aux.hpp>
 #include <Script/ECS.hpp>
 #include <Script/Graphics.hpp>
+#include <Script/Input.hpp>
 #include <Script/Math.hpp>
 #include <Script/Random.hpp>
 #include <Script/Resources.hpp>
 #include <Script/Scenes.hpp>
-#include <Script/Window.hpp>
 
 
 namespace script
@@ -20,6 +20,30 @@ inline static void init()
         luaContext.global["set_position"] = setPosition;
         luaContext.global["set_rotation"] = setRotation;
         luaContext.global["set_scale"]    = setScale;
+
+        // Input
+        luaContext.global["window_closed"]         = windowClosed;
+        luaContext.global["window_resized"]        = windowResized;
+        luaContext.global["window_lost_focus"]     = windowLostFocus;
+        luaContext.global["window_gained_focus"]   = windowGainedFocus;
+        luaContext.global["text_entered"]          = textEntered;
+        luaContext.global["mouse_wheel_moved"]     = mouseWheelMoved;
+        luaContext.global["mouse_wheel_scrolled"]  = mouseWheelScrolled;
+        luaContext.global["mouse_moved"]           = mouseMoved;
+        luaContext.global["mouse_entered"]         = mouseEntered;
+        luaContext.global["mouse_left"]            = mouseLeft;
+        luaContext.global["joystick_connected"]    = joystickConnected;
+        luaContext.global["joystick_disconnected"] = joystickDisconnected;
+        luaContext.global["touch_began"]           = touchBegan;
+        luaContext.global["touch_moved"]           = touchMoved;
+        luaContext.global["touch_ended"]           = touchEnded;
+        luaContext.global["sensorChanged"]         = sensorChanged;
+        luaContext.global["key_pressed"]           = keyPressed;
+        luaContext.global["key_released"]          = keyReleased;
+        luaContext.global["mouse_pressed"]         = mousePressed;
+        luaContext.global["mouse_released"]        = mouseReleased;
+        luaContext.global["joystick_pressed"]      = joystickPressed;
+        luaContext.global["joystick_released"]     = joystickReleased;
 
         // Math
         lua::Table math = luaContext.global["math"];
@@ -36,8 +60,8 @@ inline static void init()
         math["vector_divide"]          = vectorDivide;
         math["vector_inverse"]         = vectorInverse;
         math["vector_length_squared"]  = vectorLengthSquared;
-        math["vector_set_length"]      = vectorSetLength;
         math["vector_length"]          = vectorLength;
+        math["vector_set_length"]      = vectorSetLength;
         math["vector_limit"]           = vectorLimit;
         math["vector_normalize"]       = vectorNormalize;
         math["vector_clamp_to_area"]   = vectorClampToArea;
