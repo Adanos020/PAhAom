@@ -1,9 +1,6 @@
 local elapsed = 0
 
-local window_center = math.vector(
-    Settings.video.resolution.x / 2,
-    Settings.video.resolution.y / 2
-)
+local windowCenter = math.vectorDivide(Settings.video.resolution, 2)
 
 local greeting = {
     graphics = {
@@ -36,17 +33,24 @@ function Menu:new(o)
     return o
 end
 
-function Menu:handle_input(event)
-    if key_pressed(event, Keyboard.Enter) then
-        push_scene "Game"
-    elseif key_pressed(event, Keyboard.Escape) then
-        pop_scene()
+function Menu:onKeyPressed(key)
+    if key == Keyboard.Enter then
+        pushScene "Game"
+    elseif key == Keyboard.Escape then
+        popScene()
     end
 end
 
 function Menu:update(dt)
     elapsed = elapsed + dt
-    local polar = math.vector_from_polar(100, elapsed)
-    set_position(greeting, math.vector_add(window_center, polar))
-    set_rotation(greeting, math.sin(elapsed) * 30)
+    
+    local sinel = math.sin(elapsed)
+    local polar = math.vectorFromPolar(100, elapsed)
+
+    setPosition(greeting, math.vectorAdd(windowCenter, polar))
+    setRotation(greeting, sinel * 30)
+    setScale(greeting, math.vector(
+        sinel * sinel + 0.5,
+        sinel * sinel + 0.5
+    ))
 end

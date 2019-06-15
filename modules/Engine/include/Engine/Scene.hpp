@@ -37,8 +37,19 @@ public:
 
                 const lua::Table classTable = script::luaContext.global[stateType];
                 script::luaContext.global[this->stateName] = classTable["new"](classTable);
-
+                
                 const lua::Table thisObj = script::luaContext.global[this->stateName];
+
+                // Add empty event handlers for unhandled events.
+                for (size_t i = 0; i < sf::Event::Count; ++i)
+                {
+                        const auto emptyHandler = [](lua::Context& c) -> lua::Retval { return c.ret(); };
+                        if (!thisObj[EVENT_HANDLERS[i]].is<lua::LFunction>())
+                        {
+                                thisObj[EVENT_HANDLERS[i]] = emptyHandler;
+                        }
+                }
+
                 const lua::Table entities = thisObj["entities"];
                 
                 for (int i = 1, nDrawables = entities.len(); i <= nDrawables; ++i)
@@ -56,8 +67,8 @@ public:
         void handleInput(const sf::Event& event)
         {
                 const lua::Table thisObj = script::luaContext.global[this->stateName];
-                const lua::Table evt = script::eventToTable(event);
-                thisObj["handle_input"](thisObj, evt);
+                const lua::Valset args = script::eventToHandlerArgs(thisObj, event);
+                thisObj[EVENT_HANDLERS[event.type]](args);
         }
 
         void update()
@@ -96,6 +107,32 @@ private:
         
         ecs::RenderSystem render;
         ecs::TransformSystem transform;
+
+        inline static const std::string EVENT_HANDLERS[] = {
+                "onClosed",
+                "onResized",
+                "onLostFocus",
+                "onGainedFocus",
+                "onTextEntered",
+                "onKeyPressed",
+                "onKeyReleased",
+                "onMouseWheelMoved",
+                "onMouseWheelScrolled",
+                "onMousePressed",
+                "onMouseReleased",
+                "onMouseMoved",
+                "onMouseEntered",
+                "onMouseLeft",
+                "onJoystickPressed",
+                "onJoystickReleased",
+                "onJoystickMoved",
+                "onJoystickConnected",
+                "onJoystickDisconnected",
+                "onTouchBegan",
+                "onTouchMoved",
+                "onTouchEnded",
+                "onSensorChanged",
+        };
 };
 
 }

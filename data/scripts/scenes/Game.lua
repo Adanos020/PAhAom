@@ -1,8 +1,7 @@
+local windowCenter = math.vectorDivide(Settings.video.resolution, 2)
+
 local level = {
-    position = math.vector(
-        Settings.video.resolution.x / 2,
-        Settings.video.resolution.y / 2
-    ),
+    position = windowCenter,
     graphics = {
         type = "rect tile map",
         tiles = {},
@@ -21,13 +20,13 @@ function Game:new(o)
     o = o or {}
     setmetatable(o, self)
     self.__index = self
-    self.entities[1].graphics.tiles = generate_dungeon(math.vector(37, 21))
+    level.graphics.tiles = generateDungeon(math.vector(37, 21))
     return o
 end
 
-function Game:handle_input(event)
-    if key_pressed(event, Keyboard.Escape) then
-        pop_scene()
+function Game:onKeyPressed(key)
+    if key == Keyboard.Escape then
+        popScene()
     end
 end
 
