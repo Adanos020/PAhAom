@@ -595,9 +595,9 @@ inline std::unique_ptr<util::graphics::RectTileMap>& updateRectTileMapFromTable(
  *              center, top-left, top-right, bottom-left, bottom-right)
  * 
  *  Drawable type IDs:
- *  - circle shape (sf::CircleShape)
- *  - convex shape (sf::ConvexShape)
- *  - rectangle shape (sf::RectangleShape)
+ *  - circle (sf::CircleShape)
+ *  - convex (sf::ConvexShape)
+ *  - rectangle (sf::RectangleShape)
  *  - sprite (sf::Sprite)
  *  - rect tile map (RectTileMap)
  *  - text (sf::Text)
@@ -616,17 +616,17 @@ inline std::optional<std::unique_ptr<sf::Drawable>> tableToDrawable(lua::Table& 
                 auto sprite = std::make_unique<sf::Sprite>();
                 return std::move(updateSpriteFromTable(sprite, obj));
         }
-        if (type == "circle shape")
+        if (type == "circle")
         {
                 auto circleShape = std::make_unique<sf::CircleShape>();
                 return std::move(updateCircleShapeFromTable(circleShape, obj));
         }
-        if (type == "convex shape")
+        if (type == "convex")
         {
                 auto convexShape = std::make_unique<sf::ConvexShape>();
                 return std::move(updateConvexShapeFromTable(convexShape, obj));
         }
-        if (type == "rectangle shape")
+        if (type == "rectangle")
         {
                 auto rectangleShape = std::make_unique<sf::RectangleShape>();
                 return std::move(updateRectangleShapeFromTable(rectangleShape, obj));

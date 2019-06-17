@@ -407,11 +407,11 @@ inline lua::Retval vectorFromPolar(lua::Context& context)
 inline lua::Retval vectorAngleBetween(lua::Context& context)
 {
         context.requireArgs<lua::Table, lua::Table>(2);
-        const auto newVec = util::Vector::angleBetween(
+        const float angle = util::Vector::angleBetween(
                 impl::tableToVector(context.args[0]),
                 impl::tableToVector(context.args[1])
         );
-        return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
+        return context.ret(angle);
 }
 
 /** Checks if given table is a rectangle, i.e. it has two vectors called

@@ -35,23 +35,24 @@ public:
         {
                 util::Subject::addObserver(this);
 
+                // Construct the scene object.
                 const lua::Table classTable = script::luaContext.global[stateType];
                 script::luaContext.global[this->stateName] = classTable["new"](classTable);
-                
+
                 const lua::Table thisObj = script::luaContext.global[this->stateName];
 
                 // Add empty event handlers for unhandled events.
                 for (size_t i = 0; i < sf::Event::Count; ++i)
                 {
-                        const auto emptyHandler = [](lua::Context& c) -> lua::Retval { return c.ret(); };
                         if (!thisObj[EVENT_HANDLERS[i]].is<lua::LFunction>())
                         {
+                                const auto emptyHandler = [](lua::Context& c) { return c.ret(); };
                                 thisObj[EVENT_HANDLERS[i]] = emptyHandler;
                         }
                 }
 
+                // Propagate the ECS with predefined entities.
                 const lua::Table entities = thisObj["entities"];
-                
                 for (int i = 1, nDrawables = entities.len(); i <= nDrawables; ++i)
                 {
                         lua::Table entity = entities[i];
@@ -86,7 +87,12 @@ public:
 
         virtual void receive(const util::Message& msg) override
         {
-                if (auto pos = std::get_if<util::Message::SetPosition>(&msg.msg))
+                if (auto pos = std::get_if<util::Message::AddEntity>(&msg.msg))
+                {
+                        lua::Table entity = pos->data;
+                        ecs::addEntity(this->entities, entity);
+                }
+                else if (auto pos = std::get_if<util::Message::SetPosition>(&msg.msg))
                 {
                         this->transform.setPosition(pos->entity, pos->position);
                 }

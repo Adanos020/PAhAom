@@ -32,8 +32,8 @@ public:
         void draw(sf::RenderTarget& target)
         {
                 this->entities.sort<Transform, Graphics>();
-                this->entities.group<Graphics>(entt::get<Transform>).each(
-                        [&target](entt::entity, Graphics& gfx, const Transform& transform)
+                this->entities.view<Graphics, Transform>().each(
+                        [&target](entt::entity, const Graphics& gfx, const Transform& transform)
                         {
                                 if (gfx.visible)
                                 {

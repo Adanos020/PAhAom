@@ -20,11 +20,21 @@ namespace util
 struct Message
 {
         struct None {};
+
+        // Scenes
+
         struct PopScene {};
 
         struct PushScene
         {
                 std::string stateName;
+        };
+
+        // ECS
+
+        struct AddEntity
+        {
+                lua::Table data;
         };
 
         struct SetPosition
@@ -48,6 +58,7 @@ struct Message
         std::variant<
                 None,
                 PopScene, PushScene,
+                AddEntity,
                 SetPosition, SetRotation, SetScale
         > msg;
 };
@@ -78,6 +89,12 @@ public:
         static void deleteObserver(Observer* const o)
         {
                 observers.erase(o);
+        }
+
+        template<class T>
+        static void send(const T& msgType)
+        {
+                send(Message{msgType});
         }
 
         static void send(const Message& msg)

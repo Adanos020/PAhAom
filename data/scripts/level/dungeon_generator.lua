@@ -79,15 +79,12 @@ local function countNeighbours(neighbours)
 end
 
 local function countCloseNeighbours(pos, tile)
-    assert(math.isVector(pos))
     assert(math.type(tile) == "integer")
-
     return countNeighbours(findNeighbours(pos, tile, 1))
 end
 
 local function neighboursIndices(neighbours)
     assert(math.type(neighbours) == "integer")
-
     local indices = {}
     for i = 0, 3 do
         if ((neighbours >> i) & 1) == 1 then
@@ -103,20 +100,19 @@ local function pickDirection(neighbours)
         local inds, n = neighboursIndices(neighbours)
         return directions[inds[random.uniform(1, n)]]
     end
-
     return directions[random.uniform(1, #directions)]
 end
 
 local function generateMaze()
     local cells = {
-        math.vector( -- Picking a random first cell with odd coordinates.
+        math.vector( -- Pick a random first cell with odd coordinates.
             ~1 & random.uniform(2, mapSize.x),
             ~1 & random.uniform(2, mapSize.y))
     }
 
     local currCell = cells[#cells]
     tiles[currCell.y][currCell.x] = Tile.HALLWAY
-    
+
     while #cells > 0 do
         currCell = cells[#cells]
         local neighbours = findNeighbours(currCell, Tile.WALL, 2)
@@ -127,9 +123,7 @@ local function generateMaze()
             table.remove(cells)
         else
             -- Advance to the next cell in current direction.
-            local nextCell = math.vector(
-                currCell.x + currDir.x,
-                currCell.y + currDir.y)
+            local nextCell = math.vectorAdd(currCell, currDir)
 
             -- Decide on whether make a turn.
             while not math.rectangleContains(mapArea, nextCell)
@@ -137,15 +131,11 @@ local function generateMaze()
                 or random.chance(0.1)
             do
                 currDir = pickDirection(neighbours)
-                nextCell = math.vector(
-                    currCell.x + currDir.x,
-                    currCell.y + currDir.y)
+                nextCell = math.vectorAdd(currCell, currDir)
             end
 
             -- Carve the corridor.
-            local midWay = math.vector(
-                currCell.x + currDir.x // 2,
-                currCell.y + currDir.y // 2)
+            local midWay = math.vectorAdd(currCell, math.vectorDivide(currDir, 2))
             tiles[midWay.y][midWay.x] = Tile.HALLWAY
             tiles[nextCell.y][nextCell.x] = Tile.HALLWAY
             table.insert(cells, nextCell)
@@ -157,8 +147,8 @@ local function spreadRooms()
     rooms = {}
     for i = 1, maxRoomTries do
         local roomSize = math.vector(
-            1 | random.uniform(minRoomSize.x, maxRoomSize.x),
-            1 | random.uniform(minRoomSize.y, maxRoomSize.y))
+            1 | random.uniform(minRoomSize.x, math.tointeger(maxRoomSize.x)),
+            1 | random.uniform(minRoomSize.y, math.tointeger(maxRoomSize.y)))
         local roomPos = math.vector(
             ~1 & random.uniform(2, mapSize.x - roomSize.x),
             ~1 & random.uniform(2, mapSize.y - roomSize.y))
@@ -180,14 +170,12 @@ local function spreadRooms()
 end
 
 local function isDeadEnd(pos)
-    assert(math.isVector(pos))
-
     return tiles[pos.y][pos.x] == Tile.HALLWAY
        and countCloseNeighbours(pos, Tile.WALL) == 3
 end
 
 local function removeDeadEnds()
-    -- Searching for dead ends.
+    -- Search for dead ends.
     local deadEnds = {}
     for x = 2, mapSize.x, 2 do
         for y = 2, mapSize.y, 2 do
@@ -198,7 +186,7 @@ local function removeDeadEnds()
         end
     end
 
-    -- Filling all dead ends with walls.
+    -- Fill all dead ends with walls.
     for _, c in ipairs(deadEnds) do
         local cell = c
         while isDeadEnd(cell) do
@@ -208,18 +196,19 @@ local function removeDeadEnds()
 
             tiles[cell.y][cell.x] = Tile.WALL
             tiles[midWay.y][midWay.x] = Tile.WALL
-            
-            cell = math.vector(cell.x + dir.x, cell.y + dir.y)
+
+            cell = math.vectorAdd(cell, dir)
         end
     end
 end
 
 function generateDungeon(size)
-    assert(math.isVector(size), "Size must be a vector.")
+    assert(math.isVector(size))
 
-    mapSize = math.vector(
-        math.tointeger(size.x),
-        math.tointeger(size.y))
+    mapSize = {
+        x = math.tointeger(size.x),
+        y = math.tointeger(size.y)
+    }
     mapArea = {
         position = math.vector(1, 1),
         size = mapSize,

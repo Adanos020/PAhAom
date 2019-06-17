@@ -17,6 +17,7 @@ namespace script
 inline static void init()
 {
         // ECS
+        luaContext.global["addEntity"]   = addEntity;
         luaContext.global["setPosition"] = setPosition;
         luaContext.global["setRotation"] = setRotation;
         luaContext.global["setScale"]    = setScale;
