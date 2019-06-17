@@ -79,7 +79,7 @@ function Menu:update(dt)
     setRotation(greeting, sinel * 30)
     setScale(greeting, sinel * sinel + 0.5)
 
-    for i, 3, #self.entities do
-        
+    for i = 3, #self.entities do
+
     end
 end

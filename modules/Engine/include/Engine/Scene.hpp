@@ -49,11 +49,11 @@ public:
 
                 // Propagate the ECS with predefined entities.
                 const lua::Table entities = thisObj["entities"];
-                for (int i = 1, nDrawables = entities.len(); i <= nDrawables; ++i)
+                entities.iterate([this](lua::Valref, lua::Valref el)
                 {
-                        lua::Table entity = entities[i];
+                        lua::Table entity{el};
                         this->systems.addEntity(entity);
-                }
+                });
         }
 
         ~Scene()
