@@ -45,7 +45,7 @@ public:
                 }
         }
 
-        void draw(sf::RenderTarget& target)
+        void drawTo(sf::RenderTarget& target)
         {
                 this->entities.sort<Transform, Graphics>();
                 this->entities.view<Graphics, Transform>().each(

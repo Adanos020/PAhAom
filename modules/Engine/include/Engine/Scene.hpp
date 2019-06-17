@@ -76,7 +76,7 @@ public:
 
         void draw(sf::RenderTarget& target)
         {
-                this->systems.render.draw(target);
+                this->systems.render.drawTo(target);
         }
 
 public:
