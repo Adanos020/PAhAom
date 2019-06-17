@@ -2,11 +2,10 @@
 
 
 #include <Engine/ECS/Components.hpp>
+#include <Engine/ECS/Systems.hpp>
 
 #include <Script/Aux.hpp>
 #include <Script/Graphics.hpp>
-
-#include <entt/entity/registry.hpp>
 
 #include <luapp.hpp>
 
@@ -16,16 +15,16 @@ namespace engine::ecs
 
 // Entity creation
 
-inline static void assignTransform(entt::registry& entities, const entt::entity entity,
+inline static void assignTransform(Systems& systems, const entt::entity entity,
                                    const lua::Table& entityTable)
 {
         const util::Vector position = script::hasOpt(entityTable, "position", util::Vector());
         const util::Vector scale = script::hasOpt(entityTable, "scale", util::Vector(1, 1));
         const float rotation = script::hasOpt(entityTable, "rotation", 0);
-        entities.assign<engine::ecs::Transform>(entity, position, scale, rotation);
+        systems.transform.assignTransform(entity, position, scale, rotation);
 }
 
-inline static void assignGraphics(entt::registry& entities, const entt::entity entity,
+inline static void assignGraphics(Systems& systems, const entt::entity entity,
                                   const lua::Table& entityTable)
 {
         if (lua::Table gfxTable = entityTable["graphics"]; gfxTable.len())
@@ -34,22 +33,18 @@ inline static void assignGraphics(entt::registry& entities, const entt::entity e
                 {
                         const std::int32_t z = script::hasOpt(gfxTable, "z", 0);
                         const bool visible = script::hasOpt(gfxTable, "visible", true);
-                        entities.assign<engine::ecs::Graphics>(
-                                entity, std::move(gfx.value()), z, visible);
+                        systems.render.addGraphics(entity, std::move(gfx.value()), z, visible);
                 }
         }
-        entities.sort<engine::ecs::Graphics>(
-                [](const engine::ecs::Graphics& a, const engine::ecs::Graphics& b)
-                        { return a.z < b.z; });
 }
 
-inline static void addEntity(entt::registry& entities, lua::Table& entityTable)
+inline static void addEntity(Systems& systems, lua::Table& entityTable)
 {
-        const entt::entity entity = entities.create();
+        const entt::entity entity = systems.create();
         entityTable["id"] = entity;
 
-        assignTransform(entities, entity, entityTable);
-        assignGraphics(entities, entity, entityTable);
+        assignTransform(systems, entity, entityTable);
+        assignGraphics(systems, entity, entityTable);
 }
 
 }

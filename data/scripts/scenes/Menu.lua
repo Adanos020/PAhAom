@@ -22,19 +22,6 @@ local bkg = {
     },
 }
 
-local function newCircle(pos, radius, color)
-    return {
-        position = pos,
-        graphics = {
-            type = "circle",
-            radius = radius,
-            fillColor = color,
-            origin = "center",
-            z = 2,
-        },
-    }
-end
-
 Menu = {
     entities = {greeting, bkg, }
 }
@@ -46,13 +33,28 @@ function Menu:new(o)
     return o
 end
 
+function Menu:newCircle(pos, radius, color)
+    local circle = {
+        position = pos,
+        graphics = {
+            type = "circle",
+            radius = radius,
+            fillColor = color,
+            origin = "center",
+            z = 2,
+        },
+    }
+    table.insert(self.entities, circle)
+    return circle
+end
+
 function Menu:onKeyPressed(key)
     if key == Keyboard.Enter then
         pushScene "Game"
     elseif key == Keyboard.Escape then
         popScene()
     elseif key == Keyboard.Space then
-        addEntity(newCircle(
+        addEntity(self:newCircle(
             math.vector(
                 random.uniform(0, Settings.video.resolution.x),
                 random.uniform(0, Settings.video.resolution.y)

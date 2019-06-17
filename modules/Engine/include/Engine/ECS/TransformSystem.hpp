@@ -17,6 +17,12 @@ public:
         : entities(entities)
         {
         }
+
+        void assignTransform(const entt::entity entity, const util::Vector position,
+                          const util::Vector scale, const float rotation)
+        {
+                entities.assign<Transform>(entity, position, scale, rotation);
+        }
         
         void setPosition(const entt::entity entity, const util::Vector position)
         {

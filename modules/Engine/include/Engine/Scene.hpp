@@ -1,9 +1,8 @@
 #pragma once
 
 
-#include <Engine/ECS/RenderSystem.hpp>
 #include <Engine/ECS/Script.hpp>
-#include <Engine/ECS/TransformSystem.hpp>
+#include <Engine/ECS/Systems.hpp>
 
 #include <Script.hpp>
 
@@ -30,8 +29,6 @@ public:
 
         Scene(const std::string& stateType)
         : stateName(stateType + "_state")
-        , render(entities)
-        , transform(entities)
         {
                 util::Subject::addObserver(this);
 
@@ -56,7 +53,7 @@ public:
                 for (int i = 1, nDrawables = entities.len(); i <= nDrawables; ++i)
                 {
                         lua::Table entity = entities[i];
-                        ecs::addEntity(this->entities, entity);
+                        ecs::addEntity(this->systems, entity);
                 }
         }
 
@@ -80,7 +77,7 @@ public:
 
         void draw(sf::RenderTarget& target)
         {
-                render.draw(target);
+                this->systems.render.draw(target);
         }
 
 public:
@@ -90,31 +87,27 @@ public:
                 if (auto pos = std::get_if<util::Message::AddEntity>(&msg.msg))
                 {
                         lua::Table entity = pos->data;
-                        ecs::addEntity(this->entities, entity);
+                        ecs::addEntity(this->systems, entity);
                 }
                 else if (auto pos = std::get_if<util::Message::SetPosition>(&msg.msg))
                 {
-                        this->transform.setPosition(pos->entity, pos->position);
+                        this->systems.transform.setPosition(pos->entity, pos->position);
                 }
                 else if (auto rot = std::get_if<util::Message::SetRotation>(&msg.msg))
                 {
-                        this->transform.setRotation(rot->entity, rot->rotation);
+                        this->systems.transform.setRotation(rot->entity, rot->rotation);
                 }
                 else if (auto scl = std::get_if<util::Message::SetScale>(&msg.msg))
                 {
-                        this->transform.setScale(scl->entity, scl->scale);
+                        this->systems.transform.setScale(scl->entity, scl->scale);
                 }
         }
 
 private:
 
         std::string stateName;
-        entt::registry entities;
-        
-        ecs::RenderSystem render;
-        ecs::TransformSystem transform;
-
-        inline static const std::string EVENT_HANDLERS[] = {
+        ecs::Systems systems;
+        inline static const std::string EVENT_HANDLERS[sf::Event::Count] = {
                 "onClosed",
                 "onResized",
                 "onLostFocus",
