@@ -1,8 +1,6 @@
 #pragma once
 
 
-#include <Engine/ECS/Script.hpp>
-
 #include <Script/Lua.hpp>
 
 #include <Util/Observer.hpp>

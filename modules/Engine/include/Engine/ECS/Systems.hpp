@@ -20,9 +20,13 @@ public:
         {
         }
 
-        entt::entity create()
+        void addEntity(lua::Table& entityTable)
         {
-                return this->entities.create();
+                const entt::entity entity = this->entities.create();
+                entityTable["id"] = entity;
+
+                this->transform.assignTransform(entity, entityTable);
+                this->render.assignGraphics(entity, entityTable);
         }
 
 public:

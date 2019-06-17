@@ -19,9 +19,17 @@ public:
         }
 
         void assignTransform(const entt::entity entity, const util::Vector position,
-                          const util::Vector scale, const float rotation)
+                             const util::Vector scale, const float rotation)
         {
                 entities.assign<Transform>(entity, position, scale, rotation);
+        }
+
+        void assignTransform(const entt::entity entity, const lua::Table& entityTable)
+        {
+                const util::Vector position = script::hasOpt(entityTable, "position", util::Vector());
+                const util::Vector scale = script::hasOpt(entityTable, "scale", util::Vector(1, 1));
+                const float rotation = script::hasOpt(entityTable, "rotation", 0);
+                this->assignTransform(entity, position, scale, rotation);
         }
         
         void setPosition(const entt::entity entity, const util::Vector position)

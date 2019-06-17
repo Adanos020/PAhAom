@@ -1,7 +1,6 @@
 #pragma once
 
 
-#include <Engine/ECS/Script.hpp>
 #include <Engine/ECS/Systems.hpp>
 
 #include <Script.hpp>
@@ -53,7 +52,7 @@ public:
                 for (int i = 1, nDrawables = entities.len(); i <= nDrawables; ++i)
                 {
                         lua::Table entity = entities[i];
-                        ecs::addEntity(this->systems, entity);
+                        this->systems.addEntity(entity);
                 }
         }
 
@@ -87,7 +86,7 @@ public:
                 if (auto pos = std::get_if<util::Message::AddEntity>(&msg.msg))
                 {
                         lua::Table entity = pos->data;
-                        ecs::addEntity(this->systems, entity);
+                        this->systems.addEntity(entity);
                 }
                 else if (auto pos = std::get_if<util::Message::SetPosition>(&msg.msg))
                 {
