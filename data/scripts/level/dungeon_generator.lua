@@ -71,7 +71,6 @@ end
 
 local function countNeighbours(neighbours)
     assert(math.type(neighbours) == "integer")
-
     return ((neighbours >> 0) & 1)
          + ((neighbours >> 1) & 1)
          + ((neighbours >> 2) & 1)
@@ -205,10 +204,10 @@ end
 function generateDungeon(size)
     assert(math.isVector(size))
 
-    mapSize = {
-        x = math.tointeger(size.x),
-        y = math.tointeger(size.y)
-    }
+    mapSize = math.vector(
+        math.tointeger(size.x),
+        math.tointeger(size.y)
+    )
     mapArea = {
         position = math.vector(1, 1),
         size = mapSize,

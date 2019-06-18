@@ -4,10 +4,10 @@
 #include <Util/ErrorMessages.hpp>
 #include <Util/Types.hpp>
 
+#include <Script/Aux.hpp>
+
 #include <SFML/System/Vector2.hpp>
 #include <SFML/System/Vector3.hpp>
-
-#include <luapp.hpp>
 
 #include <cmath>
 #include <type_traits>
@@ -28,8 +28,8 @@ inline float normalize(const float val, const float lo, const float hi)
         return (val - lo) / (hi - lo);
 }
 
-inline float mapNumber(const float val, const float lo1, const float hi1,
-                       const float lo2, const float hi2)
+inline float map(const float val, const float lo1, const float hi1,
+                 const float lo2, const float hi2)
 {
         return normalize(val, lo1, hi1) * (hi2 - lo2) + lo2;
 }
@@ -39,24 +39,26 @@ inline float mapNumber(const float val, const float lo1, const float hi1,
 struct Vector : sf::Vector2f
 {
         Vector(const float x = 0, const float y = 0)
-        : sf::Vector2f(x, y)
+        : sf::Vector2<float>(x, y)
         {
         }
 
         Vector(const Vector& copy)
-        : sf::Vector2f(copy)
+        : sf::Vector2<float>(copy)
         {
         }
 
         template<typename T>
         Vector(const sf::Vector2<T>& other)
-        : sf::Vector2f(other)
+        : sf::Vector2<float>(other)
         {
                 static_assert(std::is_arithmetic_v<T>, typeNotArithmetic);
         }
 
         Vector(const lua::Valref vec)
-        : sf::Vector2f(vec["x"], vec["y"])
+        : sf::Vector2<float>(
+                script::tableFieldOr(vec, "x", 0),
+                script::tableFieldOr(vec, "y", 0))
         {
         }
 

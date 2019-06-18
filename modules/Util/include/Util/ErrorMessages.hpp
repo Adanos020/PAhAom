@@ -4,6 +4,7 @@
 #include <Util/String.hpp>
 #include <Util/Types.hpp>
 
+#include <cstdint>
 #include <string>
 
 
@@ -29,7 +30,7 @@ ErrMsg notAFunction = "Error: given value was expected to be a function.";
 ErrMsg matrixNotRegular = "Error: all columns in a matrix must have equal lengths.";
 ErrMsg noDrawableTypeId = "Error: drawable type ID was not specified.";
 
-inline std::string wrongDrawableDefinition(int i)
+inline std::string wrongDrawableDefinition(std::int32_t i)
 {
         return format("Error: drawable object of index %d is not correctly defined.", i);
 }

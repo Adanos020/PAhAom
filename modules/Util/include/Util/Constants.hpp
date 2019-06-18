@@ -1,13 +1,15 @@
 #pragma once
 
 
-#include <Util/Types.hpp>
+#include <SFML/System/Time.hpp>
+
+#include <cstdint>
 
 
 namespace util
 {
 
-static constexpr unsigned int FPS = 60;
-static constexpr DeltaTime FRAME_TIME = 1.0 / FPS;
+static constexpr std::uint32_t FPS = 60;
+static const sf::Time FRAME_TIME = sf::seconds(1.0 / FPS);
 
 }

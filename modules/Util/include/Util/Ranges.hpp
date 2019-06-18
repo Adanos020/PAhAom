@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include <cstdint>
 #include <type_traits>
 
 
@@ -14,7 +15,7 @@ inline constexpr bool isInRange(const T& value, const T& lo, const T& hi)
 
         if constexpr (std::is_integral_v<T>)
         {
-                return static_cast<unsigned>(value - lo) >= (hi - lo);
+                return static_cast<std::uint32_t>(value - lo) >= (hi - lo);
         }
         else if constexpr (std::is_floating_point_v<T>)
         {

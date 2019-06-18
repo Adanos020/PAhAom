@@ -38,7 +38,7 @@ public:
                 const lua::Table thisObj = script::luaContext.global[this->stateName];
 
                 // Add empty event handlers for unhandled events.
-                for (size_t i = 0; i < sf::Event::Count; ++i)
+                for (std::size_t i = 0; i < sf::Event::Count; ++i)
                 {
                         if (!thisObj[EVENT_HANDLERS[i]].is<lua::LFunction>())
                         {
@@ -51,13 +51,14 @@ public:
                 const lua::Table entities = thisObj["entities"];
                 entities.iterate([this](lua::Valref, lua::Valref el)
                 {
-                        lua::Table entity{el};
+                        lua::Table entity = el;
                         this->systems.addEntity(entity);
                 });
         }
 
         ~Scene()
         {
+                util::Subject::deleteObserver(this);
                 script::luaContext.global[this->stateName] = lua::nil;
         }
 
@@ -71,7 +72,7 @@ public:
         void update()
         {
                 const lua::Table thisObj = script::luaContext.global[this->stateName];
-                thisObj["update"](thisObj, util::FRAME_TIME);
+                thisObj["update"](thisObj, util::FRAME_TIME.asSeconds());
         }
 
         void draw(sf::RenderTarget& target)
@@ -106,7 +107,7 @@ private:
 
         std::string stateName;
         ecs::Systems systems;
-        inline static const std::string EVENT_HANDLERS[sf::Event::Count] = {
+        inline static constexpr util::CStr EVENT_HANDLERS[sf::Event::Count] = {
                 "onClosed",
                 "onResized",
                 "onLostFocus",

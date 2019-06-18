@@ -54,11 +54,7 @@ inline static lua::Retval setScale(lua::Context& context)
                 // Scalar
                 const float s = context.args[1];
                 util::Subject::send(util::Message::SetScale{entity["id"], {s, s}});
-                
-                lua::Table scale{context};
-                scale["x"] = s;
-                scale["y"] = s;
-                entity["scale"] = scale;
+                entity["scale"] = lua::Table::records(context, "x", s, "y", s);
         }
         return context.ret();
 }

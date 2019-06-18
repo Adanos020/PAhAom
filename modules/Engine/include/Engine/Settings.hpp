@@ -34,7 +34,7 @@ struct Video
 
         static sf::VideoMode videoMode()
         {
-                return { windowSize.x, windowSize.y };
+                return {windowSize.x, windowSize.y};
         }
 
         Video() = delete;

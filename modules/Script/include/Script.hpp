@@ -25,40 +25,40 @@ inline static void init()
 
 
         // Input
-        luaState.runString(
-                "KeyNames = {\n"
-                "        [-1] = 'Unknown', [0] = 'A', 'B', 'C',\n"
-                "        'D', 'E', 'F', 'G',\n"
-                "        'H', 'I', 'J', 'K',\n"
-                "        'L', 'M', 'N', 'O',\n"
-                "        'P', 'Q', 'R', 'S',\n"
-                "        'T', 'U', 'V', 'W',\n"
-                "        'X', 'Y', 'Z', 'Num0',\n"
-                "        'Num1', 'Num2', 'Num3', 'Num4',\n"
-                "        'Num5', 'Num6', 'Num7', 'Num8',\n"
-                "        'Num9', 'Escape', 'LControl', 'LShift',\n"
-                "        'LAlt', 'LSystem', 'RControl', 'RShift',\n"
-                "        'RAlt', 'RSystem', 'Menu', 'LBracket',\n"
-                "        'RBracket', 'Semicolon', 'Comma', 'Period',\n"
-                "        'Quote', 'Slash', 'Backslash', 'Tilde',\n"
-                "        'Equal', 'Hyphen', 'Space', 'Enter',\n"
-                "        'Backspace', 'Tab', 'PageUp', 'PageDown',\n"
-                "        'End', 'Home', 'Insert', 'Delete',\n"
-                "        'Add', 'Subtract', 'Multiply', 'Divide',\n"
-                "        'Left', 'Right', 'Up', 'Down',\n"
-                "        'Numpad0', 'Numpad1', 'Numpad2', 'Numpad3',\n"
-                "        'Numpad4', 'Numpad5', 'Numpad6', 'Numpad7',\n"
-                "        'Numpad8', 'Numpad9', 'F1', 'F2',\n"
-                "        'F3', 'F4', 'F5', 'F6',\n"
-                "        'F7', 'F8', 'F9', 'F10',\n"
-                "        'F11', 'F12', 'F13', 'F14',\n"
-                "        'F15', 'Pause', 'KeyCount'\n"
-                "}\n"
-                "Keyboard = {}\n"
-                "for i = -1, #KeyNames do\n"
-                "        Keyboard[KeyNames[i]] = i\n"
-                "end"
-        );
+        luaState.runString(R"(
+                KeyNames = {
+                        [-1] = "Unknown", [0] = "A", "B", "C",
+                        "D", "E", "F", "G",
+                        "H", "I", "J", "K",
+                        "L", "M", "N", "O",
+                        "P", "Q", "R", "S",
+                        "T", "U", "V", "W",
+                        "X", "Y", "Z", "Num0",
+                        "Num1", "Num2", "Num3", "Num4",
+                        "Num5", "Num6", "Num7", "Num8",
+                        "Num9", "Escape", "LControl", "LShift",
+                        "LAlt", "LSystem", "RControl", "RShift",
+                        "RAlt", "RSystem", "Menu", "LBracket",
+                        "RBracket", "Semicolon", "Comma", "Period",
+                        "Quote", "Slash", "Backslash", "Tilde",
+                        "Equal", "Hyphen", "Space", "Enter",
+                        "Backspace", "Tab", "PageUp", "PageDown",
+                        "End", "Home", "Insert", "Delete",
+                        "Add", "Subtract", "Multiply", "Divide",
+                        "Left", "Right", "Up", "Down",
+                        "Numpad0", "Numpad1", "Numpad2", "Numpad3",
+                        "Numpad4", "Numpad5", "Numpad6", "Numpad7",
+                        "Numpad8", "Numpad9", "F1", "F2",
+                        "F3", "F4", "F5", "F6",
+                        "F7", "F8", "F9", "F10",
+                        "F11", "F12", "F13", "F14",
+                        "F15", "Pause", "KeyCount"
+                }
+                Keyboard = {}
+                for i = -1, #KeyNames do
+                        Keyboard[KeyNames[i]] = i
+                end
+        )");
 
 
         // Math
@@ -99,7 +99,7 @@ inline static void init()
 
 
         // Random
-        lua::Table random{luaContext};
+        auto random = lua::Table{luaContext};
         random["chance"]  = chance;
         random["uniform"] = uniform;
         random["normal"]  = normal;
@@ -118,12 +118,12 @@ inline static void init()
         lua::Table resources = luaContext.global["Resources"];
         static_cast<lua::Table>(resources["fonts"]).iterate([](lua::Valref, lua::Valref res)
         {
-                engine::Resources::load<sf::Font>(res[1], "data/fonts/" & res[2]);
+                engine::Resources<sf::Font>::load(res[1], "data/fonts/" & res[2]);
         });
 
         static_cast<lua::Table>(resources["textures"]).iterate([](lua::Valref, lua::Valref res)
         {
-                engine::Resources::load<sf::Texture>(res[1], "data/textures/" & res[2]);
+                engine::Resources<sf::Texture>::load(res[1], "data/textures/" & res[2]);
         });
 
 

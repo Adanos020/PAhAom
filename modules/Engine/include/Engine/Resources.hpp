@@ -15,84 +15,46 @@
 namespace engine
 {
 
+template<class T> constexpr bool isResource =
+        std::is_same_v<T, sf::Font> or
+        std::is_same_v<T, sf::Texture>
+;
+
+template<class ResourceType>
 class Resources
 {
+        static_assert(isResource<ResourceType>, typeNotResource);
         Resources() = delete;
 
 public:
 
-        template<typename Resource>
         static bool load(const std::string& id, const std::string& path)
         {
-                static_assert(util::isResource<Resource>, typeNotResource);
-
-                if constexpr (std::is_same_v<Resource, sf::Font>)
-                {
-                        return fonts[id].loadFromFile(path);
-                }
-                else if constexpr (std::is_same_v<Resource, sf::Texture>)
-                {
-                        return textures[id].loadFromFile(path);
-                }
+                return resources[id].loadFromFile(path);
         }
 
-        template<typename Resource>
-        static Resource* get(const std::string& id)
+        static util::OptionalRef<ResourceType> get(const std::string& id)
         {
-                static_assert(util::isResource<Resource>, typeNotResource);
-
-                if constexpr (std::is_same_v<Resource, sf::Font>)
+                if (auto search = resources.find(id); search != resources.end())
                 {
-                        if (auto search = fonts.find(id); search != fonts.end())
-                        {
-                                return &search->second;
-                        }
-                        return static_cast<sf::Font*>(nullptr);
+                        return search->second;
                 }
-                else if constexpr (std::is_same_v<Resource, sf::Texture>)
-                {
-                        if (auto search = textures.find(id); search != textures.end())
-                        {
-                                return &search->second;
-                        }
-                        return static_cast<sf::Texture*>(nullptr);
-                }
+                return {};
         }
 
-        template<typename Resource>
         static bool unload(const std::string& id)
         {
-                static_assert(util::isResource<Resource>, typeNotResource);
-
-                if constexpr (std::is_same_v<Resource, sf::Font>)
-                {
-                        return fonts.erase(id);
-                }
-                else if constexpr (std::is_same_v<Resource, sf::Texture>)
-                {
-                        return textures.erase(id);
-                }
+                return resources.erase(id);
         }
 
-        template<typename Resource>
         static void unloadAll()
         {
-                static_assert(util::isResource<Resource>, typeNotResource);
-
-                if constexpr (std::is_same_v<Resource, sf::Font>)
-                {
-                        fonts.clear();
-                }
-                else if constexpr (std::is_same_v<Resource, sf::Texture>)
-                {
-                        textures.clear();
-                }
+                resources.clear();
         }
 
 private:
 
-        inline static util::MapStringTo<sf::Font> fonts;
-        inline static util::MapStringTo<sf::Texture> textures;
+        inline static util::MapStringTo<ResourceType> resources;
 };
 
 }

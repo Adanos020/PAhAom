@@ -16,14 +16,16 @@
 namespace util::graphics
 {
 
-using TileID = std::uint_fast8_t;
+using TileID = std::uint_fast32_t;
 
 class RectTileMap : public sf::Drawable, public sf::Transformable
 {
 public: // Constructors.
 
-        RectTileMap(const sf::Vector2u size = {0, 0}, const sf::Vector2f tileSize = {0, 0},
-                    const sf::Vector2u tileIconSize = {0, 0}, sf::Texture* const texture = nullptr,
+        RectTileMap(const sf::Vector2u size = {0, 0},
+                    const sf::Vector2f tileSize = {0, 0},
+                    const sf::Vector2u tileIconSize = {0, 0},
+                    sf::Texture* const texture = nullptr,
                     const TileID fill = 0)
         : size(size)
         , tileSize(tileSize)
@@ -36,8 +38,10 @@ public: // Constructors.
                 this->fill(fill);
         }
 
-        RectTileMap(const Matrix<TileID>& tiles, const sf::Vector2f tileSize = {0, 0},
-                    const sf::Vector2u tileIconSize = {0, 0}, sf::Texture* const texture = nullptr)
+        RectTileMap(const Matrix<TileID>& tiles,
+                    const sf::Vector2f tileSize = {0, 0},
+                    const sf::Vector2u tileIconSize = {0, 0},
+                    sf::Texture* const texture = nullptr)
         : RectTileMap(sf::Vector2u(tiles.size(), tiles.size() ? tiles[0].size() : 0),
                       tileSize, tileIconSize, texture)
         {
@@ -68,13 +72,13 @@ public: // Mutators.
 
         void fill(const TileID fill)
         {
-                this->fillArea(fill, {{0u, 0u}, size});
+                this->fillArea(fill, {{}, size});
         }
 
         void fillArea(const TileID fill, const sf::UintRect area)
         {
-                for (unsigned x = area.left; x < area.width; ++x)
-                for (unsigned y = area.top; y < area.height; ++y)
+                for (std::uint32_t x = area.left; x < area.width; ++x)
+                for (std::uint32_t y = area.top; y < area.height; ++y)
                 {
                         this->setTile({x, y}, fill);
                 }
@@ -84,10 +88,10 @@ public: // Mutators.
         {
                 this->tiles[pos.y][pos.x] = iconIndex;
 
-                const size_t vertex = 4 * (pos.x + pos.y * this->size.x);
+                const std::size_t vertex = 4 * (pos.x + pos.y * this->size.x);
 
                 const auto iconSize = sf::Vector2f(this->tileIconSize);
-                const size_t texWidth = this->texture->getSize().x;
+                const std::size_t texWidth = this->texture->getSize().x;
                 const sf::Vector2f texCoords = {
                         iconIndex % (texWidth / this->tileIconSize.x) * iconSize.x,
                         iconIndex / (texWidth / this->tileIconSize.x) * iconSize.y,
@@ -112,8 +116,8 @@ public: // Mutators.
 
                 this->placeVertices();
 
-                for (unsigned x = 0; x < this->size.x; ++x)
-                for (unsigned y = 0; y < this->size.y; ++y)
+                for (std::uint32_t x = 0; x < this->size.x; ++x)
+                for (std::uint32_t y = 0; y < this->size.y; ++y)
                 {
                         this->setTile({x, y}, tiles[y][x]);
                 }
@@ -157,7 +161,7 @@ public: // Accessors.
                 return this->tiles[pos.y][pos.x];
         }
 
-        TileID getTile(const unsigned row, const unsigned col) const
+        TileID getTile(const std::size_t row, const std::size_t col) const
         {
                 return this->tiles[col][row];
         }
@@ -240,10 +244,10 @@ private: // Helper functions.
                 const sf::Vector2f bottomRight = {this->tileSize.x, this->tileSize.y};
                 const sf::Vector2f bottomLeft  = {0,                this->tileSize.y};
 
-                for (size_t x = 0; x < this->size.x; ++x)
-                for (size_t y = 0; y < this->size.y; ++y)
+                for (std::size_t x = 0; x < this->size.x; ++x)
+                for (std::size_t y = 0; y < this->size.y; ++y)
                 {
-                        const size_t firstVertex = 4 * (x + y * this->size.x);
+                        const std::size_t firstVertex = 4 * (x + y * this->size.x);
                         const sf::Vector2f position = {
                                 x * this->tileSize.x,
                                 y * this->tileSize.y,

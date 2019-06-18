@@ -25,7 +25,7 @@ public:
         }
 
         void assignGraphics(entt::entity entity, std::unique_ptr<sf::Drawable>&& drawable,
-                            std::int32_t z, bool visible)
+                            const std::int32_t z, const bool visible)
         {
                 this->entities.assign<Graphics>(entity, std::move(drawable), z, visible);
                 this->entities.sort<Graphics>(
@@ -38,8 +38,8 @@ public:
                 {
                         if (auto gfx = script::tableToDrawable(gfxTable))
                         {
-                                const std::int32_t z = script::hasOpt(gfxTable, "z", 0);
-                                const bool visible = script::hasOpt(gfxTable, "visible", true);
+                                const std::int32_t z = script::tableFieldOr(gfxTable, "z", 0);
+                                const bool visible = script::tableFieldOr(gfxTable, "visible", true);
                                 this->assignGraphics(entity, std::move(gfx.value()), z, visible);
                         }
                 }

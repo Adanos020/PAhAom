@@ -19,8 +19,7 @@ inline lua::Valset eventToHandlerArgs(const lua::Table& sceneObj, const sf::Even
         {
                 case sf::Event::Resized:
                 {
-                        args.push_back(event.size.width);
-                        args.push_back(event.size.height);
+                        args.push_back(event.size.width, event.size.height);
                         break;
                 }
 
@@ -32,82 +31,86 @@ inline lua::Valset eventToHandlerArgs(const lua::Table& sceneObj, const sf::Even
 
                 case sf::Event::KeyPressed:
                 {
-                        args.push_back(event.key.code);
-                        args.push_back(event.key.alt);
-                        args.push_back(event.key.control);
-                        args.push_back(event.key.shift);
-                        args.push_back(event.key.system);
+                        args.push_back(
+                                event.key.code,
+                                event.key.alt,
+                                event.key.control,
+                                event.key.shift,
+                                event.key.system);
                         break;
                 }
 
                 case sf::Event::KeyReleased:
                 {
-                        args.push_back(event.key.code);
-                        args.push_back(event.key.alt);
-                        args.push_back(event.key.control);
-                        args.push_back(event.key.shift);
-                        args.push_back(event.key.system);
+                        args.push_back(
+                                event.key.code,
+                                event.key.alt,
+                                event.key.control,
+                                event.key.shift,
+                                event.key.system);
                         break;
                 }
 
                 case sf::Event::MouseWheelMoved:
                 {
-                        args.push_back(event.mouseWheel.delta);
-                        args.push_back(event.mouseWheel.x);
-                        args.push_back(event.mouseWheel.y);
+                        args.push_back(
+                                event.mouseWheel.delta,
+                                event.mouseWheel.x,
+                                event.mouseWheel.y);
                         break;
                 }
 
                 case sf::Event::MouseWheelScrolled:
                 {
-                        args.push_back(event.mouseWheelScroll.delta);
-                        args.push_back(event.mouseWheelScroll.x);
-                        args.push_back(event.mouseWheelScroll.y);
+                        args.push_back(
+                                event.mouseWheelScroll.delta,
+                                event.mouseWheelScroll.x,
+                                event.mouseWheelScroll.y);
                         break;
                 }
 
                 case sf::Event::MouseButtonPressed:
                 {
-                        args.push_back(event.mouseButton.button);
-                        args.push_back(event.mouseButton.x);
-                        args.push_back(event.mouseButton.y);
+                        args.push_back(
+                                event.mouseButton.button,
+                                event.mouseButton.x,
+                                event.mouseButton.y);
                         break;
                 }
 
                 case sf::Event::MouseButtonReleased:
                 {
-                        args.push_back(event.mouseButton.button);
-                        args.push_back(event.mouseButton.x);
-                        args.push_back(event.mouseButton.y);
+                        args.push_back(
+                                event.mouseButton.button,
+                                event.mouseButton.x,
+                                event.mouseButton.y);
                         break;
                 }
 
                 case sf::Event::MouseMoved:
                 {
-                        args.push_back(event.mouseMove.x);
-                        args.push_back(event.mouseMove.y);
+                        args.push_back(event.mouseMove.x, event.mouseMove.y);
                         break;
                 }
 
                 case sf::Event::JoystickButtonPressed:
                 {
-                        args.push_back(event.joystickButton.joystickId);
-                        args.push_back(event.joystickButton.button);
+                        args.push_back(event.joystickButton.joystickId, event.joystickButton.button);
                         break;
                 }
 
                 case sf::Event::JoystickButtonReleased:
                 {
-                        args.push_back(event.joystickButton.joystickId);
-                        args.push_back(event.joystickButton.button);
+                        args.push_back(event.joystickButton.joystickId, event.joystickButton.button);
                         break;
                 }
 
                 case sf::Event::JoystickMoved:
                 {
-                        args.push_back(event.joystickMove.joystickId);
-                        args.push_back(event.joystickMove.axis);
-                        args.push_back(event.joystickMove.position);
+                        args.push_back(
+                                event.joystickMove.joystickId,
+                                event.joystickMove.axis,
+                                event.joystickMove.position);
                         break;
                 }
 
@@ -125,34 +128,38 @@ inline lua::Valset eventToHandlerArgs(const lua::Table& sceneObj, const sf::Even
 
                 case sf::Event::TouchBegan:
                 {
-                        args.push_back(event.touch.finger);
-                        args.push_back(event.touch.x);
-                        args.push_back(event.touch.y);
+                        args.push_back(
+                                event.touch.finger,
+                                event.touch.x,
+                                event.touch.y);
                         break;
                 }
 
                 case sf::Event::TouchMoved:
                 {
-                        args.push_back(event.touch.finger);
-                        args.push_back(event.touch.x);
-                        args.push_back(event.touch.y);
+                        args.push_back(
+                                event.touch.finger,
+                                event.touch.x,
+                                event.touch.y);
                         break;
                 }
 
                 case sf::Event::TouchEnded:
                 {
-                        args.push_back(event.touch.finger);
-                        args.push_back(event.touch.x);
-                        args.push_back(event.touch.y);
+                        args.push_back(
+                                event.touch.finger,
+                                event.touch.x,
+                                event.touch.y);
                         break;
                 }
 
                 case sf::Event::SensorChanged:
                 {
-                        args.push_back(event.sensor.type);
-                        args.push_back(event.sensor.x);
-                        args.push_back(event.sensor.y);
-                        args.push_back(event.sensor.z);
+                        args.push_back(
+                                event.sensor.type,
+                                event.sensor.x,
+                                event.sensor.y,
+                                event.sensor.z);
                         break;
                 }
 

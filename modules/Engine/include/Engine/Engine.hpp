@@ -11,6 +11,7 @@
 #include <SFML/Graphics/RenderTexture.hpp>
 
 #include <chrono>
+#include <cstdint>
 #include <stack>
 
 
@@ -46,7 +47,7 @@ public:
                         // Render texture setup.
                         const sf::Vector2u screenRes = Settings::Video::resolution;
                         this->screenTexture.create(screenRes.x, screenRes.y);
-                        this->screen.setSize(sf::Vector2f(Settings::Video::windowSize));
+                        this->screen.setSize(sf::Vector2f{Settings::Video::windowSize});
                         this->screen.setTexture(&this->screenTexture.getTexture());
                 }
                 else
@@ -55,14 +56,14 @@ public:
                 }
         }
 
-        int run()
+        std::int32_t run()
         {
                 if (not this->running)
                 {
                         return 1;
                 }
 
-                util::DeltaTime lag = 0.0;
+                sf::Time lag;
                 sf::Clock timer;
 
                 while (this->running)
@@ -74,7 +75,7 @@ public:
                                 lag -= util::FRAME_TIME;
                         }
                         this->draw();
-                        lag += timer.restart().asSeconds();
+                        lag += timer.restart();
                 }
                 this->window.close();
 
@@ -118,7 +119,6 @@ private:
                 {
                         if (this->scenes.size() > 1)
                         {
-                                util::Subject::deleteObserver(&this->scenes.top());
                                 this->scenes.pop();
                         }
                         else

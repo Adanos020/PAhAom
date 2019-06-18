@@ -10,6 +10,7 @@
 #include <SFML/System/Vector3.hpp>
 
 #include <memory>
+#include <optional>
 #include <stack>
 #include <string>
 #include <unordered_map>
@@ -27,9 +28,8 @@ using UintRect = Rect<unsigned>;
 namespace util
 {
 
-// Aliases
-using CStr = const char*;
-using DeltaTime = float;
+template<typename T>
+using OptionalRef = std::optional<std::reference_wrapper<T>>;
 
 template<typename T>
 using FastVector = std::basic_string<T, std::char_traits<T>>;
@@ -42,18 +42,5 @@ using MapStringTo = std::unordered_map<std::string, T>;
 
 template<typename T>
 using Matrix = std::vector<std::vector<T>>;
-
-
-// Traits
-template<class Type>
-static constexpr bool isVectorType =
-        std::is_same_v<Type, sf::Vector2f> or
-        std::is_same_v<Type, sf::Vector3f>
-;
-
-template<typename T> constexpr bool isResource =
-        std::is_same_v<T, sf::Font> or
-        std::is_same_v<T, sf::Texture>
-;
 
 }

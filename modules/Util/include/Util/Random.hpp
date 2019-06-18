@@ -3,6 +3,7 @@
 
 #include <Util/ErrorMessages.hpp>
 
+#include <cstdint>
 #include <random>
 #include <type_traits>
 
@@ -51,7 +52,7 @@ inline T normal(const T mean = 0, const T stddev = 1)
 template<typename RandomAccessIterator>
 inline decltype(auto) oneOf(RandomAccessIterator begin, RandomAccessIterator end)
 {
-        return *(begin + uniform(0, int(end - begin)));
+        return *(begin + uniform(0, static_cast<std::int32_t>(end - begin)));
 }
 
 }

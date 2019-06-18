@@ -99,8 +99,10 @@ public:
 
         static void send(const Message& msg)
         {
-                std::for_each(observers.begin(), observers.end(),
-                        [&](Observer* o) { o->receive(msg); });
+                for (Observer* o : observers)
+                {
+                        o->receive(msg);
+                }
         }
 
 private:

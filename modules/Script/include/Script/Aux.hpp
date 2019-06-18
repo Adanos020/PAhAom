@@ -8,7 +8,7 @@ namespace script
 {
 
 template<typename Return>
-inline static Return hasOpt(const lua::Table& v, const std::string& name, const Return rFalse)
+inline static Return tableFieldOr(const lua::Table& v, const std::string& name, const Return rFalse)
 {
         if (v[name])
         {
@@ -18,7 +18,7 @@ inline static Return hasOpt(const lua::Table& v, const std::string& name, const 
                 }
                 else
                 {
-                        return Return(lua::Table(v[name]));
+                        return Return{lua::Table{v[name]}};
                 }
         }
         return rFalse;
