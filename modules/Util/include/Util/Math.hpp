@@ -39,27 +39,34 @@ inline float map(const float val, const float lo1, const float hi1,
 struct Vector : sf::Vector2f
 {
         Vector(const float x = 0, const float y = 0)
-        : sf::Vector2<float>(x, y)
+        : sf::Vector2f(x, y)
         {
         }
 
         Vector(const Vector& copy)
-        : sf::Vector2<float>(copy)
+        : sf::Vector2f(copy)
         {
         }
 
         template<typename T>
         Vector(const sf::Vector2<T>& other)
-        : sf::Vector2<float>(other)
+        : sf::Vector2f(other)
         {
                 static_assert(std::is_arithmetic_v<T>, typeNotArithmetic);
         }
 
         Vector(const lua::Valref vec)
-        : sf::Vector2<float>(
+        : sf::Vector2f(
                 script::tableFieldOr(vec, "x", 0),
                 script::tableFieldOr(vec, "y", 0))
         {
+        }
+
+        Vector& operator=(const Vector& other)
+        {
+                this->x = other.x;
+                this->y = other.y;
+                return *this;
         }
 
         float lengthSquared() const

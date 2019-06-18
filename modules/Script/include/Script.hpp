@@ -94,8 +94,25 @@ inline static void init()
 
 
         // Resources
-        luaContext.global["loadFont"]    = load<sf::Font>;
-        luaContext.global["loadTexture"] = load<sf::Texture>;
+        luaContext.global["loadFont"]          = load<sf::Font>;
+        luaContext.global["loadTexture"]       = load<sf::Texture>;
+        luaContext.global["unloadFont"]        = unload<sf::Font>;
+        luaContext.global["unloadTexture"]     = unload<sf::Texture>;
+        luaContext.global["unloadAllFonts"]    = unloadAll<sf::Font>;
+        luaContext.global["unloadAllTextures"] = unloadAll<sf::Texture>;
+
+        luaState.runFile("data/scripts/resources.lua");
+
+        lua::Table resources = luaContext.global["Resources"];
+        static_cast<lua::Table>(resources["fonts"]).iterate([](lua::Valref, lua::Valref res)
+        {
+                engine::Resources<sf::Font>::load(res[1], "data/fonts/" & res[2]);
+        });
+
+        static_cast<lua::Table>(resources["textures"]).iterate([](lua::Valref, lua::Valref res)
+        {
+                engine::Resources<sf::Texture>::load(res[1], "data/textures/" & res[2]);
+        });
 
 
         // Random
@@ -111,20 +128,8 @@ inline static void init()
         luaContext.global["pushScene"] = pushScene;
 
 
-        // Settings and resources
+        // Settings
         luaState.runFile("data/scripts/settings.lua");
-        luaState.runFile("data/scripts/resources.lua");
-
-        lua::Table resources = luaContext.global["Resources"];
-        static_cast<lua::Table>(resources["fonts"]).iterate([](lua::Valref, lua::Valref res)
-        {
-                engine::Resources<sf::Font>::load(res[1], "data/fonts/" & res[2]);
-        });
-
-        static_cast<lua::Table>(resources["textures"]).iterate([](lua::Valref, lua::Valref res)
-        {
-                engine::Resources<sf::Texture>::load(res[1], "data/textures/" & res[2]);
-        });
 
 
         // Table

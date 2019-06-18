@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <iostream>
 
 
 namespace script
@@ -35,7 +36,13 @@ namespace impl
 
         inline sf::FloatRect toRectangle(const lua::Table& rect)
         {
-                return {util::Vector{rect["position"]}, util::Vector{rect["size"]}};
+                if (isRectangle(rect))
+                {
+                        const lua::Table position = rect["position"];
+                        const lua::Table size = rect["size"];
+                        return {util::Vector{position}, util::Vector{size}};
+                }
+                return {};
         }
 }
 

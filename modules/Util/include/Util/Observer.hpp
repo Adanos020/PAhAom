@@ -19,8 +19,6 @@ namespace util
 
 struct Message
 {
-        struct None {};
-
         // Scenes
 
         struct PopScene {};
@@ -56,7 +54,6 @@ struct Message
         };
 
         std::variant<
-                None,
                 PopScene, PushScene,
                 AddEntity,
                 SetPosition, SetRotation, SetScale

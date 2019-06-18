@@ -206,8 +206,7 @@ function generateDungeon(size)
 
     mapSize = math.vector(
         math.tointeger(size.x),
-        math.tointeger(size.y)
-    )
+        math.tointeger(size.y))
     mapArea = {
         position = math.vector(1, 1),
         size = mapSize,

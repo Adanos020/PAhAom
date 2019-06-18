@@ -32,15 +32,12 @@ template<typename T>
 using OptionalRef = std::optional<std::reference_wrapper<T>>;
 
 template<typename T>
-using FastVector = std::basic_string<T, std::char_traits<T>>;
-
-template<typename T>
-using UniquePtrs = std::vector<std::unique_ptr<T>>;
-
-template<typename T>
 using MapStringTo = std::unordered_map<std::string, T>;
 
 template<typename T>
 using Matrix = std::vector<std::vector<T>>;
+
+template<typename T>
+using UniquePtrs = std::vector<std::unique_ptr<T>>;
 
 }
