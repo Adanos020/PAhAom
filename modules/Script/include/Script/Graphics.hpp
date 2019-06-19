@@ -3,7 +3,6 @@
 
 #include <Engine/Resources.hpp>
 
-#include <Script/Aux.hpp>
 #include <Script/Lua.hpp>
 
 #include <Util/ErrorMessages.hpp>
@@ -20,6 +19,31 @@
 
 namespace script
 {
+
+// Externals
+
+inline lua::Retval rgba(lua::Context& context)
+{
+        context.requireArgs<std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t>(4);
+        return context.ret(lua::Table::records(context,
+                "r", context.args[0].to<std::uint32_t>(),
+                "g", context.args[1].to<std::uint32_t>(),
+                "b", context.args[2].to<std::uint32_t>(),
+                "a", context.args[3].to<std::uint32_t>()
+        ));
+}
+
+inline lua::Retval rgb(lua::Context& context)
+{
+        context.requireArgs<std::uint32_t, std::uint32_t, std::uint32_t>(3);
+        return context.ret(lua::Table::records(context,
+                "r", context.args[0].to<std::uint32_t>(),
+                "g", context.args[1].to<std::uint32_t>(),
+                "b", context.args[2].to<std::uint32_t>()
+        ));
+}
+
+// Internals
 
 inline sf::Color stringToColor(const std::string& str)
 {
@@ -55,10 +79,10 @@ inline sf::Color stringToColor(const std::string& str)
 inline sf::Color tableToColor(const lua::Table& obj)
 {
         return {
-                static_cast<sf::Uint8>(tableFieldOr(obj, "r", 0u)),
-                static_cast<sf::Uint8>(tableFieldOr(obj, "g", 0u)),
-                static_cast<sf::Uint8>(tableFieldOr(obj, "b", 0u)),
-                static_cast<sf::Uint8>(tableFieldOr(obj, "a", 255u)),
+                static_cast<sf::Uint8>(obj["r"].to<std::uint32_t>(0u)),
+                static_cast<sf::Uint8>(obj["g"].to<std::uint32_t>(0u)),
+                static_cast<sf::Uint8>(obj["b"].to<std::uint32_t>(0u)),
+                static_cast<sf::Uint8>(obj["a"].to<std::uint32_t>(255u)),
         };
 }
 
@@ -75,10 +99,10 @@ inline sf::Rect<T> tableToRectangle(const lua::Table& obj)
 {
         static_assert(std::is_arithmetic_v<T>, typeNotArithmetic);
         return {
-                tableFieldOr<T>(obj, "left", 0),
-                tableFieldOr<T>(obj, "top", 0),
-                tableFieldOr<T>(obj, "width", 0),
-                tableFieldOr<T>(obj, "height", 0),
+                obj["left"  ].to<T>(0),
+                obj["top"   ].to<T>(0),
+                obj["width" ].to<T>(0),
+                obj["height"].to<T>(0),
         };
 }
 
@@ -183,15 +207,15 @@ inline std::unique_ptr<TransformableObj>& updateTransformFromTable(
                 {
                         sf::FloatRect bounds = tableToRectangle(localBounds);
                         tobj->setOrigin(
-                                origin == "center"       ? sf::Vector2f(bounds.width / 2, bounds.height / 2) :
-                                origin == "top"          ? sf::Vector2f(bounds.width / 2, 0.f              ) :
-                                origin == "left"         ? sf::Vector2f(0.f,              bounds.height / 2) :
-                                origin == "bottom"       ? sf::Vector2f(bounds.width / 2, bounds.height    ) :
-                                origin == "right"        ? sf::Vector2f(bounds.width,     bounds.height / 2) :
-                                origin == "bottom-left"  ? sf::Vector2f(0.f,              bounds.height    ) :
-                                origin == "top-right"    ? sf::Vector2f(bounds.width,     0.f              ) :
-                                origin == "bottom-right" ? sf::Vector2f(bounds.width,     bounds.height    ) :
-                                /* origin == "top-left" */ sf::Vector2f(0.f,              0.f              )
+                                origin == "center"       ? sf::Vector2f{bounds.width / 2, bounds.height / 2} :
+                                origin == "top"          ? sf::Vector2f{bounds.width / 2, 0.f              } :
+                                origin == "left"         ? sf::Vector2f{0.f,              bounds.height / 2} :
+                                origin == "bottom"       ? sf::Vector2f{bounds.width / 2, bounds.height    } :
+                                origin == "right"        ? sf::Vector2f{bounds.width,     bounds.height / 2} :
+                                origin == "bottom-left"  ? sf::Vector2f{0.f,              bounds.height    } :
+                                origin == "top-right"    ? sf::Vector2f{bounds.width,     0.f              } :
+                                origin == "bottom-right" ? sf::Vector2f{bounds.width,     bounds.height    } :
+                                /* origin == "top-left" */ sf::Vector2f{0.f,              0.f              }
                         );
                 }
         }
@@ -226,7 +250,7 @@ inline std::unique_ptr<ShapeClass>& updateShapeFromTable(
         {
                 if (auto tex = engine::Resources<sf::Texture>::get(texture))
                 {
-                        shape->setTexture(&tex.value().get());
+                        shape->setTexture(&tex->get());
                 }
                 else
                 {
@@ -524,7 +548,7 @@ inline std::unique_ptr<util::graphics::RectTileMap>& updateRectTileMapFromTable(
         {
                 if (auto tex = engine::Resources<sf::Texture>::get(texture))
                 {
-                        tmap->setTexture(&tex.value().get());
+                        tmap->setTexture(&tex->get());
                 }
                 else
                 {

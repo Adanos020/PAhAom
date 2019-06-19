@@ -58,5 +58,48 @@ inline static lua::Retval setScale(lua::Context& context)
         }
         return context.ret();
 }
+
+inline static lua::Retval moveBy(lua::Context& context)
+{
+        context.requireArgs<lua::Table, lua::Table>(2);
+
+        lua::Table entity = context.args[0];
+        util::Subject::send(util::Message::MoveBy{entity["id"], context.args[1]});
+        entity["position"] = context.args[1];
+
+        return context.ret();
+}
+
+inline static lua::Retval rotateBy(lua::Context& context)
+{
+        context.requireArgs<lua::Table, float>(2);
+
+        lua::Table entity = context.args[0];
+        util::Subject::send(util::Message::RotateBy{entity["id"], context.args[1]});
+        entity["rotation"] = context.args[1];
+
+        return context.ret();
+}
+
+inline static lua::Retval scaleBy(lua::Context& context)
+{
+        context.requireArgs<lua::Table>(2);
+
+        lua::Table entity = context.args[0];
+        if (context.args[1].is<lua::Table>())
+        {
+                // Vector
+                util::Subject::send(util::Message::ScaleBy{entity["id"], context.args[1]});
+                entity["scale"] = context.args[1];
+        }
+        else
+        {
+                // Scalar
+                const float s = context.args[1];
+                util::Subject::send(util::Message::ScaleBy{entity["id"], {s, s}});
+                entity["scale"] = lua::Table::records(context, "x", s, "y", s);
+        }
+        return context.ret();
+}
         
 }

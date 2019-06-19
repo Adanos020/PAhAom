@@ -38,15 +38,16 @@ public:
                 {
                         if (auto gfx = script::tableToDrawable(gfxTable))
                         {
-                                const std::int32_t z = script::tableFieldOr(gfxTable, "z", 0);
-                                const bool visible = script::tableFieldOr(gfxTable, "visible", true);
-                                this->assignGraphics(entity, std::move(gfx.value()), z, visible);
+                                const auto z       = gfxTable["z"].to<std::int32_t>(0);
+                                const auto visible = script::tableFieldOr(gfxTable, "visible", true);
+                                this->assignGraphics(entity, std::move(*gfx), z, visible);
                         }
                 }
         }
 
         void drawTo(sf::RenderTarget& target)
         {
+                // Ensure that the transforms be aligned with graphical components.
                 this->entities.sort<Transform, Graphics>();
                 this->entities.view<Graphics, Transform>().each(
                         [&target](entt::entity, const Graphics& gfx, const Transform& transform)

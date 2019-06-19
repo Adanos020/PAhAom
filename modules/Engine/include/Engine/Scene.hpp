@@ -101,6 +101,18 @@ public:
                 {
                         this->systems.transform.setScale(scl->entity, scl->scale);
                 }
+                else if (auto pos = std::get_if<util::Message::MoveBy>(&msg.msg))
+                {
+                        this->systems.transform.move(pos->entity, pos->displacement);
+                }
+                else if (auto rot = std::get_if<util::Message::RotateBy>(&msg.msg))
+                {
+                        this->systems.transform.rotate(rot->entity, rot->rotation);
+                }
+                else if (auto scl = std::get_if<util::Message::ScaleBy>(&msg.msg))
+                {
+                        this->systems.transform.scale(scl->entity, scl->scale);
+                }
         }
 
 private:

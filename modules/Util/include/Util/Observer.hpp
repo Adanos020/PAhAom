@@ -53,10 +53,29 @@ struct Message
                 Vector scale;
         };
 
+        struct MoveBy
+        {
+                entt::entity entity;
+                Vector displacement;
+        };
+
+        struct RotateBy
+        {
+                entt::entity entity;
+                float rotation;
+        };
+
+        struct ScaleBy
+        {
+                entt::entity entity;
+                Vector scale;
+        };
+
         std::variant<
                 PopScene, PushScene,
                 AddEntity,
-                SetPosition, SetRotation, SetScale
+                SetPosition, SetRotation, SetScale,
+                MoveBy, RotateBy, ScaleBy
         > msg;
 };
 

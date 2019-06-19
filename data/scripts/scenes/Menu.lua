@@ -33,8 +33,8 @@ function Menu:new(o)
     return o
 end
 
-function Menu:newCircle(pos, radius, color)
-    local circle = {
+function Menu:newBall(pos, radius, color, velocity)
+    local ball = {
         position = pos,
         graphics = {
             type = "circle",
@@ -43,9 +43,14 @@ function Menu:newCircle(pos, radius, color)
             origin = "center",
             z = 2,
         },
+        circleRigidBody = {
+            velocity = velocity,
+            mass = radius / 10,
+            radius = radius,
+        }
     }
-    table.insert(self.entities, circle)
-    return circle
+    table.insert(self.entities, ball)
+    return ball
 end
 
 function Menu:onKeyPressed(key)
@@ -54,17 +59,17 @@ function Menu:onKeyPressed(key)
     elseif key == Keyboard.Escape then
         popScene()
     elseif key == Keyboard.Space then
-        addEntity(self:newCircle(
+        addEntity(self:newBall(
             math.vector(
                 random.uniform(0, Settings.video.resolution.x),
-                random.uniform(0, Settings.video.resolution.y)
-            ),
+                random.uniform(0, Settings.video.resolution.y)),
             random.uniform(10, 25),
-            {
-                r = random.uniform(0, 255),
-                g = random.uniform(0, 255),
-                b = random.uniform(0, 255),
-            }
+            rgb(random.uniform(0, 255),
+                random.uniform(0, 255),
+                random.uniform(0, 255)),
+            math.vector(
+                random.uniform(-20, 20),
+                random.uniform(-20, 20))
         ))
     end
 end
@@ -79,7 +84,9 @@ function Menu:update(dt)
     setRotation(greeting, sinel * 30)
     setScale(greeting, sinel * sinel + 0.5)
 
+    local toRemove = {}
     for i = 3, #self.entities do
-
+        local ball = self.entities[i]
+        moveBy(ball, math.vectorMultiply(ball.circleRigidBody.velocity, dt))
     end
 end

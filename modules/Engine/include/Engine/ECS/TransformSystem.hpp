@@ -3,6 +3,8 @@
 
 #include <Engine/ECS/Components.hpp>
 
+#include <Script/Aux.hpp>
+
 #include <entt/entity/registry.hpp>
 
 
@@ -21,30 +23,47 @@ public:
         void assignTransform(const entt::entity entity, const util::Vector position,
                              const util::Vector scale, const float rotation)
         {
-                entities.assign<Transform>(entity, position, scale, rotation);
+                this->entities.assign<Transform>(entity, position, scale, rotation);
         }
 
         void assignTransform(const entt::entity entity, const lua::Table& entityTable)
         {
-                const util::Vector position = script::tableFieldOr(entityTable, "position", util::Vector());
-                const util::Vector scale = script::tableFieldOr(entityTable, "scale", util::Vector(1, 1));
-                const float rotation = script::tableFieldOr(entityTable, "rotation", 0.f);
+                const auto position = script::tableFieldOr(entityTable, "position", util::Vector{});
+                const auto scale    = script::tableFieldOr(entityTable, "scale", util::Vector{1, 1});
+                const auto rotation = entityTable["rotation"].to<float>(0);
                 this->assignTransform(entity, position, scale, rotation);
         }
-        
+
         void setPosition(const entt::entity entity, const util::Vector position)
         {
-                entities.get<Transform>(entity).position = position;
+                this->entities.get<Transform>(entity).position = position;
+        }
+
+        void move(const entt::entity entity, const util::Vector displacement)
+        {
+                this->entities.get<Transform>(entity).position += displacement;
         }
 
         void setRotation(const entt::entity entity, const float rotation)
         {
-                entities.get<Transform>(entity).rotation = rotation;
+                this->entities.get<Transform>(entity).rotation = rotation;
+        }
+
+        void rotate(const entt::entity entity, const float rotation)
+        {
+                this->entities.get<Transform>(entity).rotation += rotation;
         }
 
         void setScale(const entt::entity entity, const util::Vector scale)
         {
-                entities.get<Transform>(entity).scale = scale;
+                this->entities.get<Transform>(entity).scale = scale;
+        }
+
+        void scale(const entt::entity entity, const util::Vector scale)
+        {
+                util::Vector& s = this->entities.get<Transform>(entity).scale;
+                s.x *= scale.x;
+                s.y *= scale.y;
         }
 
 private:

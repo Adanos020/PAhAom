@@ -38,9 +38,10 @@ namespace impl
         {
                 if (isRectangle(rect))
                 {
-                        const lua::Table position = rect["position"];
-                        const lua::Table size = rect["size"];
-                        return {util::Vector{position}, util::Vector{size}};
+                        return {
+                                util::Vector{static_cast<lua::Table>(rect["position"])},
+                                util::Vector{static_cast<lua::Table>(rect["size"])}
+                        };
                 }
                 return {};
         }

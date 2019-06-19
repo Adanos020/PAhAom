@@ -4,10 +4,9 @@
 #include <Util/ErrorMessages.hpp>
 #include <Util/Types.hpp>
 
-#include <Script/Aux.hpp>
-
 #include <SFML/System/Vector2.hpp>
-#include <SFML/System/Vector3.hpp>
+
+#include <luapp.hpp>
 
 #include <cmath>
 #include <type_traits>
@@ -38,7 +37,9 @@ inline float map(const float val, const float lo1, const float hi1,
 
 struct Vector : sf::Vector2f
 {
-        Vector(const float x = 0, const float y = 0)
+        Vector() {}
+
+        Vector(const float x, const float y)
         : sf::Vector2f(x, y)
         {
         }
@@ -56,9 +57,7 @@ struct Vector : sf::Vector2f
         }
 
         Vector(const lua::Valref vec)
-        : sf::Vector2f(
-                script::tableFieldOr(vec, "x", 0),
-                script::tableFieldOr(vec, "y", 0))
+        : sf::Vector2f(vec["x"].to<float>(0), vec["y"].to<float>(0))
         {
         }
 

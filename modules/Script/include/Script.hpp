@@ -1,7 +1,6 @@
 #pragma once
 
 
-#include <Script/Aux.hpp>
 #include <Script/ECS.hpp>
 #include <Script/Graphics.hpp>
 #include <Script/Input.hpp>
@@ -22,6 +21,14 @@ inline static void init()
         luaContext.global["setPosition"] = setPosition;
         luaContext.global["setRotation"] = setRotation;
         luaContext.global["setScale"]    = setScale;
+        luaContext.global["moveBy"]      = moveBy;
+        luaContext.global["rotateBy"]    = rotateBy;
+        luaContext.global["scaleBy"]     = scaleBy;
+
+
+        // Graphics
+        luaContext.global["rgba"] = rgba;
+        luaContext.global["rgb"]  = rgb;
 
 
         // Input

@@ -37,7 +37,7 @@ public:
         {
                 if (auto search = resources.find(id); search != resources.end())
                 {
-                        return search->second;
+                        return std::ref(search->second);
                 }
                 return {};
         }
