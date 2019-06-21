@@ -29,6 +29,7 @@ public:
                 entityTable["id"] = entity;
 
                 this->input.assignInput(entityTable);
+                this->physics.assignPhysics(entity, entityTable);
                 this->transform.assignTransform(entity, entityTable);
                 this->render.assignGraphics(entity, entityTable);
         }

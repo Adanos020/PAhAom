@@ -83,9 +83,4 @@ function Menu:update(dt)
     setPosition(greeting, math.vectorAdd(windowCenter, polar))
     setRotation(greeting, sinel * 30)
     setScale(greeting, sinel * sinel + 0.5)
-
-    for i = 3, #self.entities do
-        local ball = self.entities[i]
-        moveBy(ball, math.vectorMultiply(ball.circleRB.velocity, dt))
-    end
 end
