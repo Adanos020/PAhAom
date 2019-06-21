@@ -43,7 +43,7 @@ function Menu:newBall(pos, radius, color, velocity)
             origin = "center",
             z = 2,
         },
-        circleRigidBody = {
+        circleRB = {
             velocity = velocity,
             mass = radius / 10,
             radius = radius,
@@ -84,9 +84,8 @@ function Menu:update(dt)
     setRotation(greeting, sinel * 30)
     setScale(greeting, sinel * sinel + 0.5)
 
-    local toRemove = {}
     for i = 3, #self.entities do
         local ball = self.entities[i]
-        moveBy(ball, math.vectorMultiply(ball.circleRigidBody.velocity, dt))
+        moveBy(ball, math.vectorMultiply(ball.circleRB.velocity, dt))
     end
 end

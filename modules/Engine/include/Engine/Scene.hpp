@@ -27,7 +27,7 @@ class Scene : public util::Observer
 public:
 
         Scene(const std::string& stateType)
-        : stateName(stateType + "_state")
+        : stateName(stateType + "_scene")
         {
                 util::Subject::addObserver(this);
 
@@ -35,24 +35,14 @@ public:
                 const lua::Table classTable = script::luaContext.global[stateType];
                 script::luaContext.global[this->stateName] = classTable["new"](classTable);
 
-                const lua::Table thisObj = script::luaContext.global[this->stateName];
+                lua::Table thisObj = script::luaContext.global[this->stateName];
+                script::assignEmptyInputHandlers(thisObj);
 
-                // Add empty event handlers for unhandled events.
-                for (std::size_t i = 0; i < sf::Event::Count; ++i)
-                {
-                        if (!thisObj[EVENT_HANDLERS[i]].is<lua::LFunction>())
-                        {
-                                const auto emptyHandler = [](lua::Context& c) { return c.ret(); };
-                                thisObj[EVENT_HANDLERS[i]] = emptyHandler;
-                        }
-                }
-
-                // Propagate the ECS with predefined entities.
+                // Add predefined entities.
                 const lua::Table entities = thisObj["entities"];
                 entities.iterate([this](lua::Valref, lua::Valref el)
                 {
-                        lua::Table entity = el;
-                        this->systems.addEntity(entity);
+                        this->systems.addEntity(el);
                 });
         }
 
@@ -65,14 +55,21 @@ public:
         void handleInput(const sf::Event& event)
         {
                 const lua::Table thisObj = script::luaContext.global[this->stateName];
-                const lua::Valset args = script::eventToHandlerArgs(thisObj, event);
-                thisObj[EVENT_HANDLERS[event.type]](args);
+                const std::string which = script::EVENT_HANDLERS[event.type];
+                
+                auto args = lua::Valset{thisObj};
+                script::addInputHandlerArgs(args, event);
+                
+                this->systems.input.handleInput(event, args);
+                args[0] = thisObj;
+                thisObj[which](args);
         }
 
         void update()
         {
                 const lua::Table thisObj = script::luaContext.global[this->stateName];
                 thisObj["update"](thisObj, util::FRAME_TIME.asSeconds());
+                this->systems.physics.update();
         }
 
         void draw(sf::RenderTarget& target)
@@ -119,31 +116,6 @@ private:
 
         std::string stateName;
         ecs::Systems systems;
-        inline static constexpr util::CStr EVENT_HANDLERS[sf::Event::Count] = {
-                "onClosed",
-                "onResized",
-                "onLostFocus",
-                "onGainedFocus",
-                "onTextEntered",
-                "onKeyPressed",
-                "onKeyReleased",
-                "onMouseWheelMoved",
-                "onMouseWheelScrolled",
-                "onMousePressed",
-                "onMouseReleased",
-                "onMouseMoved",
-                "onMouseEntered",
-                "onMouseLeft",
-                "onJoystickPressed",
-                "onJoystickReleased",
-                "onJoystickMoved",
-                "onJoystickConnected",
-                "onJoystickDisconnected",
-                "onTouchBegan",
-                "onTouchMoved",
-                "onTouchEnded",
-                "onSensorChanged",
-        };
 };
 
 }

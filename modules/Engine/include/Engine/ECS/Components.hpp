@@ -5,6 +5,8 @@
 
 #include <SFML/Graphics/Drawable.hpp>
 
+#include <luapp.hpp>
+
 #include <cstdint>
 #include <memory>
 
@@ -20,7 +22,6 @@ struct Transform
         util::Vector scale = {1, 1};
         float rotation = 0;
 };
-
 
 // Graphical components
 
@@ -47,7 +48,7 @@ struct CircleRigidBody : BasicRigidBody
 
 struct RectRigidBody : BasicRigidBody
 {
-        util::Vector halfSize = {0, 0};
+        util::Vector size = {0, 0};
 };
 
 }

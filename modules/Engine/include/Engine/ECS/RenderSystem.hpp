@@ -34,8 +34,9 @@ public:
 
         void assignGraphics(const entt::entity entity, const lua::Table& entityTable)
         {
-                if (lua::Table gfxTable = entityTable["graphics"]; gfxTable.len())
+                if (lua::Value gfx = entityTable["graphics"]; gfx.is<lua::Table>())
                 {
+                        lua::Table gfxTable = gfx;
                         if (auto gfx = script::tableToDrawable(gfxTable))
                         {
                                 const auto z       = gfxTable["z"].to<std::int32_t>(0);

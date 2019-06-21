@@ -358,7 +358,7 @@ inline std::unique_ptr<sf::RectangleShape>& updateRectangleShapeFromTable(
  *  Table syntax:
  *  - texture:     String containting the id of the texture.
  *  - textureRect: Rectangle representing the area of the texture to be displayed.
- *  - color:       Color of the font.
+ *  - color:       Color blended with the texture.
  */
 inline std::unique_ptr<sf::Sprite>& updateSpriteFromTable(
         std::unique_ptr<sf::Sprite>& sprite, lua::Table& obj)

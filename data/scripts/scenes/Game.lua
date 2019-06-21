@@ -9,11 +9,51 @@ local level = {
         tileIconSize = 16,
         texture = "tileset",
         origin = "center",
+        z = 0,
+    },
+}
+
+local player = {
+    position = windowCenter,
+    graphics = {
+        type = "sprite",
+        texture = "player",
+        textureRect = {
+            left = 0,
+            right = 0,
+            width = 16,
+            height = 16,
+        },
+        z = 1,
+    },
+    rectRB = {
+        size = math.vector(16, 16),
+        velocity = math.vector(0, 0)
+    },
+    input = {
+        onKeyPressed = function(self, key)
+            if key == Keyboard.Left then
+                self.rectRB.velocity.x = -30
+            elseif key == Keyboard.Right then
+                self.rectRB.velocity.x = 30
+            elseif key == Keyboard.Up then
+                self.rectRB.velocity.y = -30
+            elseif key == Keyboard.Down then
+                self.rectRB.velocity.y = 30
+            end
+        end,
+        onKeyReleased = function(self, key)
+            if key == Keyboard.Left or key == Keyboard.Right then
+                self.rectRB.velocity.x = 0
+            elseif key == Keyboard.Up or key == Keyboard.Down then
+                self.rectRB.velocity.y = 0
+            end
+        end
     },
 }
 
 Game = {
-    entities = {level, }
+    entities = {level, player, }
 }
 
 function Game:new(o)
@@ -31,4 +71,5 @@ function Game:onKeyPressed(key)
 end
 
 function Game:update(dt)
+    moveBy(player, math.vectorMultiply(player.rectRB.velocity, dt))
 end

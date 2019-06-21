@@ -11,10 +11,47 @@
 namespace script
 {
 
-inline lua::Valset eventToHandlerArgs(const lua::Table& sceneObj, const sf::Event& event)
-{
-        auto args = lua::Valset{sceneObj};
+static constexpr util::CStr EVENT_HANDLERS[sf::Event::Count] = {
+        "onClosed",
+        "onResized",
+        "onLostFocus",
+        "onGainedFocus",
+        "onTextEntered",
+        "onKeyPressed",
+        "onKeyReleased",
+        "onMouseWheelMoved",
+        "onMouseWheelScrolled",
+        "onMousePressed",
+        "onMouseReleased",
+        "onMouseMoved",
+        "onMouseEntered",
+        "onMouseLeft",
+        "onJoystickPressed",
+        "onJoystickReleased",
+        "onJoystickMoved",
+        "onJoystickConnected",
+        "onJoystickDisconnected",
+        "onTouchBegan",
+        "onTouchMoved",
+        "onTouchEnded",
+        "onSensorChanged",
+};
 
+/** Add empty event handlers for unhandled events.
+ */
+inline void assignEmptyInputHandlers(lua::Table& obj)
+{
+        for (std::size_t i = 0; i < sf::Event::Count; ++i)
+        {
+                if (not obj[EVENT_HANDLERS[i]].is<lua::LFunction>())
+                {
+                        obj[EVENT_HANDLERS[i]] = [](lua::Context& c) { return c.ret(); };
+                }
+        }
+}
+
+inline lua::Valset addInputHandlerArgs(lua::Valset& args, const sf::Event& event)
+{
         switch (event.type)
         {
                 case sf::Event::Resized:

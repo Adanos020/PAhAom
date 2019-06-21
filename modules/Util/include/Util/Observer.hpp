@@ -25,7 +25,7 @@ struct Message
 
         struct PushScene
         {
-                std::string stateName;
+                std::string sceneName;
         };
 
         // ECS

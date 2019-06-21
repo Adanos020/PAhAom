@@ -113,7 +113,7 @@ private:
         {
                 if (auto val = std::get_if<util::Message::PushScene>(&msg.msg))
                 {
-                        this->scenes.emplace(val->stateName);
+                        this->scenes.emplace(val->sceneName);
                 }
                 else if (std::get_if<util::Message::PopScene>(&msg.msg))
                 {

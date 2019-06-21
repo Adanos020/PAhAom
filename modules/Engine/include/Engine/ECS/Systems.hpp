@@ -1,6 +1,8 @@
 #pragma once
 
 
+#include <Engine/ECS/InputSystem.hpp>
+#include <Engine/ECS/PhysicsSystem.hpp>
 #include <Engine/ECS/RenderSystem.hpp>
 #include <Engine/ECS/TransformSystem.hpp>
 
@@ -15,22 +17,26 @@ class Systems
 public:
 
         Systems()
-        : render(entities)
+        : physics(entities)
+        , render(entities)
         , transform(entities)
         {
         }
 
-        void addEntity(lua::Table& entityTable)
+        void addEntity(lua::Valref entityTable)
         {
                 const entt::entity entity = this->entities.create();
                 entityTable["id"] = entity;
 
+                this->input.assignInput(entityTable);
                 this->transform.assignTransform(entity, entityTable);
                 this->render.assignGraphics(entity, entityTable);
         }
 
 public:
 
+        InputSystem input;
+        PhysicsSystem physics;
         RenderSystem render;
         TransformSystem transform;
 
