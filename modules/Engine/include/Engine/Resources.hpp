@@ -15,15 +15,14 @@
 namespace engine
 {
 
-template<class T> constexpr bool isResource =
+template<class T>
+concept Resource =
         std::is_same_v<T, sf::Font> or
-        std::is_same_v<T, sf::Texture>
-;
+        std::is_same_v<T, sf::Texture>;
 
 template<class ResourceType>
 class Resources
 {
-        static_assert(isResource<ResourceType>, typeNotResource);
         Resources() = delete;
 
 public:

@@ -1,6 +1,8 @@
 #pragma once
 
 
+#include <Util/Concepts.hpp>
+
 #include <cstdint>
 #include <type_traits>
 
@@ -8,11 +10,9 @@
 namespace util
 {
 
-template<typename T>
+template<Arithmetic T>
 inline constexpr bool isInRange(const T& value, const T& lo, const T& hi)
 {
-        static_assert(std::is_arithmetic_v<T>, "Given type must be arithmetic.");
-
         if constexpr (std::is_integral_v<T>)
         {
                 return static_cast<std::uint32_t>(value - lo) >= (hi - lo);

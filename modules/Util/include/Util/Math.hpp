@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include <Util/Concepts.hpp>
 #include <Util/ErrorMessages.hpp>
 #include <Util/Types.hpp>
 
@@ -49,11 +50,10 @@ struct Vector : sf::Vector2f
         {
         }
 
-        template<typename T>
+        template<Arithmetic T>
         Vector(const sf::Vector2<T>& other)
         : sf::Vector2f(other)
         {
-                static_assert(std::is_arithmetic_v<T>, typeNotArithmetic);
         }
 
         Vector(const lua::Valref vec)

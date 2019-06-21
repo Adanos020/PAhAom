@@ -5,6 +5,7 @@
 
 #include <Script/Lua.hpp>
 
+#include <Util/Concepts.hpp>
 #include <Util/ErrorMessages.hpp>
 #include <Util/Graphics.hpp>
 #include <Util/Types.hpp>
@@ -94,10 +95,9 @@ inline sf::Color tableToColor(const lua::Table& obj)
  *  - width:  Number specifying the rectangle's width.
  *  - height: Number specifying the rectangle's height.
  */
-template<typename T = float>
+template<util::Arithmetic T = float>
 inline sf::Rect<T> tableToRectangle(const lua::Table& obj)
 {
-        static_assert(std::is_arithmetic_v<T>, typeNotArithmetic);
         return {
                 obj["left"  ].to<T>(0),
                 obj["top"   ].to<T>(0),
@@ -108,11 +108,9 @@ inline sf::Rect<T> tableToRectangle(const lua::Table& obj)
 
 /** Table of tables of numbers, where all inner tables must have equal lengths.
  */
-template<typename T = float>
+template<util::Arithmetic T = float>
 inline util::Matrix<T> tableToMatrix(const lua::Table& obj)
 {
-        static_assert(std::is_arithmetic_v<T>, typeNotArithmetic);
-
         util::Matrix<T> mat;
         mat.resize(obj.len().to<std::uint32_t>());
 
@@ -124,7 +122,7 @@ inline util::Matrix<T> tableToMatrix(const lua::Table& obj)
                 static_cast<lua::Table>(row).iterate([&](lua::Valref, lua::Valref entry) {
                         if (not entry.is<float>())
                         {
-                                luaContext.error(typeNotArithmetic);
+                                luaContext.error(util::err::notANumber);
                         }
                         mat[static_cast<std::int32_t>(i - 1)].push_back(
                                 static_cast<T>(entry.to<float>()));
@@ -141,11 +139,9 @@ inline util::Matrix<T> tableToMatrix(const lua::Table& obj)
         return mat;
 }
 
-template<class T>
+template<util::Drawable T>
 inline void extractLocalBounds(const std::unique_ptr<T>& dobj, lua::Table& obj)
 {
-        static_assert(std::is_base_of_v<sf::Drawable, T>, typeNotDrawable);
-
         const sf::FloatRect bounds = dobj->getLocalBounds();
         obj["localBounds"] = lua::Table::records(luaContext,
                 "left",   bounds.left,
@@ -155,11 +151,9 @@ inline void extractLocalBounds(const std::unique_ptr<T>& dobj, lua::Table& obj)
         );
 }
 
-template<class T>
+template<util::Drawable T>
 inline void extractGlobalBounds(const std::unique_ptr<T>& dobj, lua::Table& obj)
 {
-        static_assert(std::is_base_of_v<sf::Drawable, T>, typeNotDrawable);
-
         const sf::FloatRect bounds = dobj->getGlobalBounds();
         obj["globalBounds"] = lua::Table::records(luaContext,
                 "left",   bounds.left,

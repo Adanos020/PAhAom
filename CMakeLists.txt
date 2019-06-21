@@ -7,10 +7,10 @@ endif()
 project(
     PAhAom
         VERSION 0.1
-        DESCRIPTION "My first rogue-like game."
+        DESCRIPTION "2D game engine."
         LANGUAGES CXX
 )
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -37,13 +37,13 @@ include_directories("modules/Script/include")
 include_directories("modules/Util/include")
 
 # MAIN EXEC
-set(PAHAOM_SOURCES "modules/Engine/src/Engine/*.cpp")
+set(PAHAOM_SOURCES "modules/Engine/src/Engine/Engine.cpp")
 set(PAHAOM_HEADERS "modules/Engine/include/Engine/*.hpp")
 
 file(GLOB_RECURSE SOURCES ${PAHAOM_SOURCES} ${PAHAOM_HEADERS})
 add_executable(Pahaom ${SOURCES})
 
-target_compile_options(Pahaom PUBLIC -Wall -Wextra)
+target_compile_options(Pahaom PUBLIC -Wall -Wextra -fconcepts)
 target_include_directories(Pahaom PUBLIC "modules/Engine/include")
 target_link_libraries(
     Pahaom

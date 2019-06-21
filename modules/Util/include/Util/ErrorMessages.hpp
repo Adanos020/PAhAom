@@ -13,18 +13,13 @@ namespace util::err
 
 #define ErrMsg static const std::string
 
-// Static assertion errors.
-#define typeNotArithmetic "Given type must be arithmetic."
-#define typeNotFloatingPoint "Given type must be a floating point number."
-#define typeNotDrawable "Given class must derive from sf::Drawable."
-#define typeNotResource "Resource type is not recognised."
-
 // Engine errors.
 ErrMsg noInitialState = "Error: no initial state was pushed.";
 
 // Lua type errors.
 ErrMsg notATable = "Error: given value was expected to be a table.";
 ErrMsg notAFunction = "Error: given value was expected to be a function.";
+ErrMsg notANumber = "Error: given value was expected to be a number.";
 
 // Lua graphics-related errors.
 ErrMsg matrixNotRegular = "Error: all columns in a matrix must have equal lengths.";
