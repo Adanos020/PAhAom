@@ -75,26 +75,27 @@ inline static void init()
         math["lerp"]      = numberLerp;
         math["normalize"] = numberNormalize;
         math["map"]       = numberMap;
-        
-        math["vector"]              = vector;
-        math["isVector"]            = isVector;
-        math["vectorEquals"]        = vectorEquals;
-        math["vectorAdd"]           = vectorAdd;
-        math["vectorSubtract"]      = vectorSubtract;
-        math["vectorMultiply"]      = vectorMultiply;
-        math["vectorDivide"]        = vectorDivide;
-        math["vectorInverse"]       = vectorInverse;
-        math["vectorLengthSquared"] = vectorLengthSquared;
-        math["vectorLength"]        = vectorLength;
-        math["vectorSetLength"]     = vectorSetLength;
-        math["vectorLimit"]         = vectorLimit;
-        math["vectorNormalize"]     = vectorNormalize;
-        math["vectorClampToArea"]   = vectorClampToArea;
-        math["vectorClampToLength"] = vectorClampToLength;
-        math["vectorFromPolar"]     = vectorFromPolar;
-        math["vectorDot"]           = vectorDot;
-        math["vectorAngleBetween"]  = vectorAngleBetween;
-        math["vectorLerp"]          = vectorLerp;
+
+        luaContext.global["vec"]      = vector;
+        luaContext.global["isVector"] = isVector;
+        luaContext.global["vector"] = lua::Table::records(luaContext,
+                "equals",        vectorEquals,
+                "add",           vectorAdd,
+                "subtract",      vectorSubtract,
+                "multiply",      vectorMultiply,
+                "divide",        vectorDivide,
+                "inverse",       vectorInverse,
+                "lengthSquared", vectorLengthSquared,
+                "length",        vectorLength,
+                "setLength",     vectorSetLength,
+                "limit",         vectorLimit,
+                "normalize",     vectorNormalize,
+                "clampToArea",   vectorClampToArea,
+                "clampToLength", vectorClampToLength,
+                "fromPolar",     vectorFromPolar,
+                "dot",           vectorDot,
+                "angleBetween",  vectorAngleBetween,
+                "lerp",          vectorLerp);
         
         math["isRectangle"]         = isRectangle;
         math["rectangleContains"]   = rectangleContains;

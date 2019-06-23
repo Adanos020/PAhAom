@@ -3,7 +3,7 @@ local tiles        -- matrix of numbers
 local rooms        -- array of rects
 local mapArea      -- rectangle
 local maxRoomSize  -- vector
-local minRoomSize  = math.vector(3, 3)
+local minRoomSize  = vec(3, 3)
 local maxRoomTries = 100
 
 local Tile = {
@@ -21,10 +21,10 @@ local Neighbours = {
 }
 
 local directions = {
-    math.vector(-2,  0), -- LEFT
-    math.vector( 2,  0), -- RIGHT
-    math.vector( 0, -2), -- UP
-    math.vector( 0,  2), -- DOWN
+    vec(-2,  0), -- LEFT
+    vec( 2,  0), -- RIGHT
+    vec( 0, -2), -- UP
+    vec( 0,  2), -- DOWN
 }
 
 local function fillArea(area, tile)
@@ -43,7 +43,7 @@ local function initMap()
     for row = 1, mapSize.y do
         tiles[row] = {}
     end
-    fillArea({position = math.vector(1, 1), size = mapSize}, Tile.WALL)
+    fillArea({position = vec(1, 1), size = mapSize}, Tile.WALL)
 end
 
 local function leftIs(pos, tile, distance)
@@ -104,8 +104,8 @@ end
 
 local function generateMaze()
     local cells = {
-        math.vector( -- Pick a random first cell with odd coordinates.
-            ~1 & random.uniform(2, mapSize.x),
+        -- Pick a random first cell with odd coordinates.
+        vec(~1 & random.uniform(2, mapSize.x),
             ~1 & random.uniform(2, mapSize.y))
     }
 
@@ -122,7 +122,7 @@ local function generateMaze()
             table.remove(cells)
         else
             -- Advance to the next cell in current direction.
-            local nextCell = math.vectorAdd(currCell, currDir)
+            local nextCell = vector.add(currCell, currDir)
 
             -- Decide on whether make a turn.
             while not math.rectangleContains(mapArea, nextCell)
@@ -130,11 +130,11 @@ local function generateMaze()
                 or random.chance(0.1)
             do
                 currDir = pickDirection(neighbours)
-                nextCell = math.vectorAdd(currCell, currDir)
+                nextCell = vector.add(currCell, currDir)
             end
 
             -- Carve the corridor.
-            local midWay = math.vectorAdd(currCell, math.vectorDivide(currDir, 2))
+            local midWay = vector.add(currCell, vector.divide(currDir, 2))
             tiles[midWay.y][midWay.x] = Tile.HALLWAY
             tiles[nextCell.y][nextCell.x] = Tile.HALLWAY
             table.insert(cells, nextCell)
@@ -145,10 +145,10 @@ end
 local function spreadRooms()
     rooms = {}
     for i = 1, maxRoomTries do
-        local roomSize = math.vector(
+        local roomSize = vec(
             1 | random.uniform(minRoomSize.x, math.tointeger(maxRoomSize.x)),
             1 | random.uniform(minRoomSize.y, math.tointeger(maxRoomSize.y)))
-        local roomPos = math.vector(
+        local roomPos = vec(
             ~1 & random.uniform(2, mapSize.x - roomSize.x),
             ~1 & random.uniform(2, mapSize.y - roomSize.y))
 
@@ -178,7 +178,7 @@ local function removeDeadEnds()
     local deadEnds = {}
     for x = 2, mapSize.x, 2 do
         for y = 2, mapSize.y, 2 do
-            local cell = math.vector(x, y)
+            local cell = vec(x, y)
             if isDeadEnd(cell) then
                 table.insert(deadEnds, cell)
             end
@@ -191,27 +191,27 @@ local function removeDeadEnds()
         while isDeadEnd(cell) do
             local neighbours = findNeighbours(cell, Tile.HALLWAY, 1)
             local dir = directions[neighboursIndices(neighbours)[1]]
-            local midWay = math.vector(cell.x + dir.x // 2, cell.y + dir.y // 2)
+            local midWay = vec(cell.x + dir.x // 2, cell.y + dir.y // 2)
 
             tiles[cell.y][cell.x] = Tile.WALL
             tiles[midWay.y][midWay.x] = Tile.WALL
 
-            cell = math.vectorAdd(cell, dir)
+            cell = vector.add(cell, dir)
         end
     end
 end
 
 function generateDungeon(size)
-    assert(math.isVector(size))
+    assert(isVector(size))
 
-    mapSize = math.vector(
+    mapSize = vec(
         math.tointeger(size.x),
         math.tointeger(size.y))
     mapArea = {
-        position = math.vector(1, 1),
+        position = vec(1, 1),
         size = mapSize,
     }
-    maxRoomSize = math.vector(
+    maxRoomSize = vec(
         math.clamp(mapSize.x // 2, 3, 13),
         math.clamp(mapSize.y // 2, 3, 13))
 
