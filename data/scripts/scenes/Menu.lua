@@ -59,7 +59,7 @@ function Menu:onKeyPressed(key)
     elseif key == Keyboard.Escape then
         popScene()
     elseif key == Keyboard.Space then
-        addEntity(self:newBall(
+        entity.add(self:newBall(
             math.vector(
                 random.uniform(0, Settings.video.resolution.x),
                 random.uniform(0, Settings.video.resolution.y)),
@@ -80,7 +80,7 @@ function Menu:update(dt)
     local sinel = math.sin(elapsedTime)
     local polar = math.vectorFromPolar(100, elapsedTime)
 
-    setPosition(greeting, math.vectorAdd(windowCenter, polar))
-    setRotation(greeting, sinel * 30)
-    setScale(greeting, sinel * sinel + 0.5)
+    entity.setPosition(greeting, math.vectorAdd(windowCenter, polar))
+    entity.setRotation(greeting, sinel * 30)
+    entity.setScale(greeting, sinel * sinel + 0.5)
 end

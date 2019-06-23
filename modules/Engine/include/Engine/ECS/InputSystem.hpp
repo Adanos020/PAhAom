@@ -13,6 +13,14 @@ class InputSystem
 {
 public:
 
+        ~InputSystem()
+        {
+                for (const lua::RegistryKey key : this->entityKeys)
+                {
+                        script::luaContext.registry[key] = lua::nil;
+                }
+        }
+
         void assignInput(lua::Valref entityTable)
         {
                 if (entityTable["input"].is<lua::Table>())

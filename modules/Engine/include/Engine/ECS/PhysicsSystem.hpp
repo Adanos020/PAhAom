@@ -68,7 +68,7 @@ public:
 
         void update()
         {
-                auto handle = [&](const entt::entity, Transform& transform, auto& rb)
+                const auto handle = [&](const entt::entity, Transform& transform, const auto& rb)
                 {
                         transform.position += rb.velocity * util::FRAME_TIME.asSeconds();
                 };

@@ -71,5 +71,5 @@ function Game:onKeyPressed(key)
 end
 
 function Game:update(dt)
-    moveBy(player, math.vectorMultiply(player.rectRB.velocity, dt))
+    entity.moveBy(player, math.vectorMultiply(player.rectRB.velocity, dt))
 end

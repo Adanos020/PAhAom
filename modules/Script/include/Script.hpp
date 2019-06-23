@@ -17,13 +17,14 @@ namespace script
 inline static void init()
 {
         // ECS
-        luaContext.global["addEntity"]   = addEntity;
-        luaContext.global["setPosition"] = setPosition;
-        luaContext.global["setRotation"] = setRotation;
-        luaContext.global["setScale"]    = setScale;
-        luaContext.global["moveBy"]      = moveBy;
-        luaContext.global["rotateBy"]    = rotateBy;
-        luaContext.global["scaleBy"]     = scaleBy;
+        luaContext.global["entity"] = lua::Table::records(luaContext,
+                "add", addEntity,
+                "setPosition", setPosition,
+                "setRotation", setRotation,
+                "setScale", setScale,
+                "moveBy", moveBy,
+                "rotateBy", rotateBy,
+                "scaleBy", scaleBy);
 
 
         // Graphics
@@ -101,13 +102,14 @@ inline static void init()
 
 
         // Resources
-        luaContext.global["loadFont"]          = load<sf::Font>;
-        luaContext.global["loadTexture"]       = load<sf::Texture>;
-        luaContext.global["unloadFont"]        = unload<sf::Font>;
-        luaContext.global["unloadTexture"]     = unload<sf::Texture>;
-        luaContext.global["unloadAllFonts"]    = unloadAll<sf::Font>;
-        luaContext.global["unloadAllTextures"] = unloadAll<sf::Texture>;
-
+        luaContext.global["fonts"] = lua::Table::records(luaContext,
+                "load", load<sf::Font>,
+                "unload", unload<sf::Font>,
+                "unloadAll", unloadAll<sf::Font>);
+        luaContext.global["textures"] = lua::Table::records(luaContext,
+                "load", load<sf::Texture>,
+                "unload", unload<sf::Texture>,
+                "unloadAll", unloadAll<sf::Texture>);
         luaState.runFile("data/scripts/resources.lua");
 
         lua::Table resources = luaContext.global["Resources"];
@@ -123,16 +125,21 @@ inline static void init()
 
 
         // Random
-        auto random = lua::Table{luaContext};
-        random["chance"]  = chance;
-        random["uniform"] = uniform;
-        random["normal"]  = normal;
-        luaContext.global["random"] = random;
-
+        luaContext.global["random"] = lua::Table::records(luaContext,
+                "chance", chance,
+                "uniform", uniform,
+                "normal", normal);
 
         // Scenes
-        luaContext.global["popScene"]  = popScene;
-        luaContext.global["pushScene"] = pushScene;
+        luaContext.global["popScene"]  = popScene;  // deprecated
+        luaContext.global["pushScene"] = pushScene; // deprecated
+        luaContext.global["scene"] = lua::Table::records(luaContext,
+                "switchTo", switchScene,
+                "saveAndSwitchTo", saveAndSwitchScene,
+                "load", loadScene,
+                "saveAndLoad", saveAndLoadScene,
+                "quit", quit,
+                "saveAndQuit", saveAndQuit);
 
 
         // Settings

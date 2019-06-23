@@ -21,12 +21,36 @@ struct Message
 {
         // Scenes
 
-        struct PopScene {};
+        struct [[deprecated]] PopScene {};
 
-        struct PushScene
+        struct [[deprecated]] PushScene
         {
                 std::string sceneName;
         };
+
+        struct SwitchScene
+        {
+                std::string sceneName;
+        };
+
+        struct SaveAndSwitchScene
+        {
+                std::string sceneName;
+        };
+
+        struct LoadScene
+        {
+                std::string sceneName;
+        };
+
+        struct SaveAndLoadScene
+        {
+                std::string sceneName;
+        };
+
+        struct Quit {};
+
+        struct SaveAndQuit {};
 
         // ECS
 
@@ -73,6 +97,9 @@ struct Message
 
         std::variant<
                 PopScene, PushScene,
+                SwitchScene, SaveAndSwitchScene,
+                LoadScene, SaveAndLoadScene,
+                Quit, SaveAndQuit,
                 AddEntity,
                 SetPosition, SetRotation, SetScale,
                 MoveBy, RotateBy, ScaleBy
