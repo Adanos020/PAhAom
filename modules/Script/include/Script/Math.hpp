@@ -31,19 +31,27 @@ namespace impl
 
         inline bool isRectangle(const lua::Table& rect)
         {
-                return isVector(rect["position"]) and isVector(rect["size"]);
+                return rect["left"].is<float>() and rect["top"].is<float>()
+                   and rect["width"].is<float>() and rect["height"].is<float>();
         }
 
         inline sf::FloatRect toRectangle(const lua::Table& rect)
         {
                 if (isRectangle(rect))
                 {
-                        return {
-                                util::Vector{static_cast<lua::Table>(rect["position"])},
-                                util::Vector{static_cast<lua::Table>(rect["size"])}
-                        };
+                        return {rect["left"], rect["top"], rect["width"], rect["height"]};
                 }
                 return {};
+        }
+
+        inline lua::Table rectangleToTable(const sf::FloatRect rect)
+        {
+                auto newRect = lua::Table{luaContext};
+                newRect["left"]   = rect.left;
+                newRect["top"]    = rect.top;
+                newRect["width"]  = rect.width;
+                newRect["height"] = rect.height;
+                return newRect;
         }
 }
 
@@ -411,6 +419,31 @@ inline lua::Retval vectorAngleBetween(lua::Context& context)
         const float angle = util::Vector::angleBetween(
                 util::Vector{context.args[0]}, util::Vector{context.args[1]});
         return context.ret(angle);
+}
+
+/** Creates a new Rectangle out of given parameters.
+ * 
+ *  Params:
+ *      left   = Number. X-coordinate of the left side.
+ *      top    = Number. Y-coordinate of the top side.
+ *      width  = Number.
+ *      height = Number.
+ *  Alternatively:
+ *      position = Vector.
+ *      size     = Vector.
+ * 
+ *  Returns: Boolean
+ */
+inline lua::Retval rectangle(lua::Context& context)
+{
+        if (context.checkArgs<lua::Table, lua::Table>(2))
+        {
+                return context.ret(static_cast<lua::Valref>(impl::rectangleToTable(
+                        {util::Vector{context.args[0]}, util::Vector{context.args[1]}})));
+        }
+        context.requireArgs<float, float, float, float>(4);
+        return context.ret(static_cast<lua::Valref>(impl::rectangleToTable(
+                {context.args[0], context.args[1], context.args[2], context.args[3]})));
 }
 
 /** Checks if given table is a rectangle, i.e. it has two vectors called

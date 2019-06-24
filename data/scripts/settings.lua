@@ -1,7 +1,7 @@
 -- Game settings.
 Settings = {
     video = {
-        resolution = vec(640, 360),
-        window_size = vec(640, 360),
+        resolution = vector(640, 360),
+        window_size = vector(640, 360),
     }
 }

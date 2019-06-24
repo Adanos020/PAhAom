@@ -3,7 +3,7 @@ PAhAom is an open-source 2D game engine sans any graphical editor - everything i
 
 # Build
 To build the project you'll need:
-- any C++ compiler that supports C++20 standard
+- any C++ compiler that supports concepts from the upcoming C++20 standard
 - [SFML](https://github.com/SFML/SFML) and [Lua](https://github.com/lua/lua)
 - CMake 3.1 or newer
 - Make

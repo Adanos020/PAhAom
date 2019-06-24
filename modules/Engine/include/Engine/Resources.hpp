@@ -20,7 +20,7 @@ concept Resource =
         std::is_same_v<T, sf::Font> or
         std::is_same_v<T, sf::Texture>;
 
-template<class ResourceType>
+template<Resource Type>
 class Resources
 {
         Resources() = delete;
@@ -32,7 +32,7 @@ public:
                 return resources[id].loadFromFile(path);
         }
 
-        static util::OptionalRef<ResourceType> get(const std::string& id)
+        static util::OptionalRef<Type> get(const std::string& id)
         {
                 if (auto search = resources.find(id); search != resources.end())
                 {
@@ -53,7 +53,7 @@ public:
 
 private:
 
-        inline static util::MapStringTo<ResourceType> resources;
+        inline static util::MapStringTo<Type> resources;
 };
 
 }

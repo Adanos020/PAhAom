@@ -1,6 +1,6 @@
 local elapsedTime = 0
 
-local windowCenter = vector.divide(Settings.video.resolution, 2)
+local windowCenter = vec.divide(Settings.video.resolution, 2)
 
 local greeting = {
     graphics = {
@@ -60,14 +60,14 @@ function Menu:onKeyPressed(key)
         popScene()
     elseif key == Keyboard.Space then
         entity.add(self:newBall(
-            vec(random.uniform(0, Settings.video.resolution.x),
-                random.uniform(0, Settings.video.resolution.y)),
+            vector(random.uniform(0, Settings.video.resolution.x),
+                   random.uniform(0, Settings.video.resolution.y)),
             random.uniform(10, 25),
             rgb(random.uniform(0, 255),
                 random.uniform(0, 255),
                 random.uniform(0, 255)),
-            vec(random.uniform(-20, 20),
-                random.uniform(-20, 20))
+            vector(random.uniform(-20, 20),
+                   random.uniform(-20, 20))
         ))
     end
 end
@@ -76,9 +76,9 @@ function Menu:update(dt)
     elapsedTime = elapsedTime + dt
 
     local sinel = math.sin(elapsedTime)
-    local polar = vector.fromPolar(100, elapsedTime)
+    local polar = vec.fromPolar(100, elapsedTime)
 
-    entity.setPosition(greeting, vector.add(windowCenter, polar))
+    entity.setPosition(greeting, vec.add(windowCenter, polar))
     entity.setRotation(greeting, sinel * 30)
     entity.setScale(greeting, sinel * sinel + 0.5)
 end

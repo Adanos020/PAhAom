@@ -18,13 +18,13 @@ inline static void init()
 {
         // ECS
         luaContext.global["entity"] = lua::Table::records(luaContext,
-                "add", addEntity,
+                "add",         addEntity,
                 "setPosition", setPosition,
                 "setRotation", setRotation,
-                "setScale", setScale,
-                "moveBy", moveBy,
-                "rotateBy", rotateBy,
-                "scaleBy", scaleBy);
+                "setScale",    setScale,
+                "moveBy",      moveBy,
+                "rotateBy",    rotateBy,
+                "scaleBy",     scaleBy);
 
 
         // Graphics
@@ -76,41 +76,43 @@ inline static void init()
         math["normalize"] = numberNormalize;
         math["map"]       = numberMap;
 
-        luaContext.global["vec"]      = vector;
+        luaContext.global["vector"]   = vector;
         luaContext.global["isVector"] = isVector;
-        luaContext.global["vector"] = lua::Table::records(luaContext,
-                "equals",        vectorEquals,
-                "add",           vectorAdd,
-                "subtract",      vectorSubtract,
-                "multiply",      vectorMultiply,
-                "divide",        vectorDivide,
-                "inverse",       vectorInverse,
-                "lengthSquared", vectorLengthSquared,
-                "length",        vectorLength,
-                "setLength",     vectorSetLength,
-                "limit",         vectorLimit,
-                "normalize",     vectorNormalize,
-                "clampToArea",   vectorClampToArea,
-                "clampToLength", vectorClampToLength,
-                "fromPolar",     vectorFromPolar,
-                "dot",           vectorDot,
-                "angleBetween",  vectorAngleBetween,
-                "lerp",          vectorLerp);
         
-        math["isRectangle"]         = isRectangle;
-        math["rectangleContains"]   = rectangleContains;
-        math["rectangleIntersects"] = rectangleIntersects;
+        // Would've used lua::Table::records for this table, however
+        // it seems that it's too many arguments for this case and
+        // the memory for this table is allocated inappropriately,
+        // resulting in segmentation faults on exit. Just fucking wow.
+        auto vec = lua::Table{luaContext};
+        vec["equals"]        = vectorEquals;
+        vec["add"]           = vectorAdd;
+        vec["subtract"]      = vectorSubtract;
+        vec["multiply"]      = vectorMultiply;
+        vec["divide"]        = vectorDivide;
+        vec["inverse"]       = vectorInverse;
+        vec["lengthSquared"] = vectorLengthSquared;
+        vec["length"]        = vectorLength;
+        vec["setLength"]     = vectorSetLength;
+        vec["limit"]         = vectorLimit;
+        vec["normalize"]     = vectorNormalize;
+        vec["clampToArea"]   = vectorClampToArea;
+        vec["clampToLength"] = vectorClampToLength;
+        vec["fromPolar"]     = vectorFromPolar;
+        vec["dot"]           = vectorDot;
+        vec["angleBetween"]  = vectorAngleBetween;
+        vec["lerp"]          = vectorLerp;
+        luaContext.global["vec"] = vec;
+        
+        luaContext.global["rectangle"] = rectangle;
+        luaContext.global["isRectangle"] = isRectangle;
+        luaContext.global["rect"] = lua::Table::records(luaContext,
+                "contains",   rectangleContains,
+                "intersects", rectangleIntersects);
 
 
         // Resources
-        luaContext.global["fonts"] = lua::Table::records(luaContext,
-                "load", load<sf::Font>,
-                "unload", unload<sf::Font>,
-                "unloadAll", unloadAll<sf::Font>);
-        luaContext.global["textures"] = lua::Table::records(luaContext,
-                "load", load<sf::Texture>,
-                "unload", unload<sf::Texture>,
-                "unloadAll", unloadAll<sf::Texture>);
+        addResourceHandlerTable<sf::Font>("fonts");
+        addResourceHandlerTable<sf::Texture>("textures");
         luaState.runFile("data/scripts/resources.lua");
 
         lua::Table resources = luaContext.global["Resources"];
@@ -127,20 +129,20 @@ inline static void init()
 
         // Random
         luaContext.global["random"] = lua::Table::records(luaContext,
-                "chance", chance,
+                "chance",  chance,
                 "uniform", uniform,
-                "normal", normal);
+                "normal",  normal);
 
         // Scenes
         luaContext.global["popScene"]  = popScene;  // deprecated
         luaContext.global["pushScene"] = pushScene; // deprecated
         luaContext.global["scene"] = lua::Table::records(luaContext,
-                "switchTo", switchScene,
+                "switchTo",        switchScene,
                 "saveAndSwitchTo", saveAndSwitchScene,
-                "load", loadScene,
-                "saveAndLoad", saveAndLoadScene,
-                "quit", quit,
-                "saveAndQuit", saveAndQuit);
+                "load",            loadScene,
+                "saveAndLoad",     saveAndLoadScene,
+                "quit",            quit,
+                "saveAndQuit",     saveAndQuit);
 
 
         // Settings
@@ -148,10 +150,9 @@ inline static void init()
 
 
         // Table
-        lua::Table table = luaContext.global["table"];
-        table["all"]  = tableAll;
-        table["any"]  = tableAny;
-        table["none"] = tableNone;
+        luaContext.global["allOf"]  = tableAll;
+        luaContext.global["anyOf"]  = tableAny;
+        luaContext.global["noneOf"] = tableNone;
 
 
         // Run the game.
