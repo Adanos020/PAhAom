@@ -66,7 +66,7 @@ end
 
 function Game:onKeyPressed(key)
     if key == Keyboard.Escape then
-        popScene()
+        scene.switchTo "Menu"
     end
 end
 

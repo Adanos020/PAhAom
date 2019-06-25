@@ -55,9 +55,9 @@ end
 
 function Menu:onKeyPressed(key)
     if key == Keyboard.Enter then
-        pushScene "Game"
+        scene.switchTo "Game"
     elseif key == Keyboard.Escape then
-        popScene()
+        scene.quit()
     elseif key == Keyboard.Space then
         entity.add(self:newBall(
             vector(random.uniform(0, Settings.video.resolution.x),

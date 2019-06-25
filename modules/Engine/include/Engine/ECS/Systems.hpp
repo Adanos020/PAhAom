@@ -34,6 +34,12 @@ public:
                 this->render.assignGraphics(entity, entityTable);
         }
 
+        void reset()
+        {
+                this->input.clearKeys();
+                this->entities.reset();
+        }
+
 public:
 
         InputSystem input;

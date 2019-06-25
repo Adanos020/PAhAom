@@ -6,8 +6,8 @@
 #include <Script.hpp>
 
 #include <Util/Constants.hpp>
+#include <Util/Math.hpp>
 #include <Util/Observer.hpp>
-#include <Util/Ranges.hpp>
 #include <Util/Types.hpp>
 
 #include <SFML/Graphics/Drawable.hpp>
@@ -27,13 +27,35 @@ class Scene : public util::Observer
 {
 public:
 
-        Scene(const std::string& stateType)
-        : stateName(stateType + "_scene")
+        Scene()
         {
                 util::Subject::addObserver(this);
+        }
+
+        Scene(const std::string& sceneName)
+        : Scene()
+        {
+                this->switchTo(sceneName);
+        }
+
+        ~Scene()
+        {
+                util::Subject::deleteObserver(this);
+                this->reset();
+        }
+
+        void reset()
+        {
+                this->systems.reset();
+                script::luaContext.global[this->stateName] = lua::nil;
+        }
+
+        void switchTo(const std::string& sceneName)
+        {
+                this->reset();
 
                 // Construct the scene object.
-                const lua::Table classTable = script::luaContext.global[stateType];
+                const lua::Table classTable = script::luaContext.global[sceneName];
                 script::luaContext.global[this->stateName] = classTable["new"](classTable);
 
                 lua::Table thisObj = script::luaContext.global[this->stateName];
@@ -45,12 +67,6 @@ public:
                 {
                         this->systems.addEntity(el);
                 });
-        }
-
-        ~Scene()
-        {
-                util::Subject::deleteObserver(this);
-                script::luaContext.global[this->stateName] = lua::nil;
         }
 
         void handleInput(const sf::Event& event)
@@ -73,7 +89,7 @@ public:
                 this->systems.physics.update();
         }
 
-        void draw(sf::RenderTarget& target)
+        void drawTo(sf::RenderTarget& target)
         {
                 this->systems.render.drawTo(target);
         }
@@ -82,39 +98,58 @@ public:
 
         virtual void receive(const util::Message& msg) override
         {
-                if (not util::isInRange(msg.msg.index(), 8lu, 15lu))
-                {
-                        return;
-                }
+                const auto id = static_cast<util::MessageID>(msg.msg.index());
 
-                if (auto pos = std::get_if<util::Message::AddEntity>(&msg.msg))
+                // if (not util::isWithin(id, util::MessageID::AddEntity, util::MessageID::ScaleEntityBy))
+                // {
+                //         return;
+                // }
+
+                switch (id)
                 {
-                        lua::Table entity = pos->data;
-                        this->systems.addEntity(entity);
-                }
-                else if (auto pos = std::get_if<util::Message::SetPosition>(&msg.msg))
-                {
-                        this->systems.transform.setPosition(pos->entity, pos->position);
-                }
-                else if (auto rot = std::get_if<util::Message::SetRotation>(&msg.msg))
-                {
-                        this->systems.transform.setRotation(rot->entity, rot->rotation);
-                }
-                else if (auto scl = std::get_if<util::Message::SetScale>(&msg.msg))
-                {
-                        this->systems.transform.setScale(scl->entity, scl->scale);
-                }
-                else if (auto pos = std::get_if<util::Message::MoveBy>(&msg.msg))
-                {
-                        this->systems.transform.move(pos->entity, pos->displacement);
-                }
-                else if (auto rot = std::get_if<util::Message::RotateBy>(&msg.msg))
-                {
-                        this->systems.transform.rotate(rot->entity, rot->rotation);
-                }
-                else if (auto scl = std::get_if<util::Message::ScaleBy>(&msg.msg))
-                {
-                        this->systems.transform.scale(scl->entity, scl->scale);
+                        case util::MessageID::AddEntity:
+                        {
+                                lua::Table entity = std::get<util::Message::AddEntity>(msg.msg).data;
+                                this->systems.addEntity(entity);
+                                break;
+                        }
+                        case util::MessageID::SetEntityPosition:
+                        {
+                                auto pos = std::get<util::Message::SetEntityPosition>(msg.msg);
+                                this->systems.transform.setPosition(pos.entity, pos.position);
+                                break;
+                        }
+                        case util::MessageID::SetEntityRotation:
+                        {
+                                auto rot = std::get<util::Message::SetEntityRotation>(msg.msg);
+                                this->systems.transform.setRotation(rot.entity, rot.rotation);
+                                break;
+                        }
+                        case util::MessageID::SetEntityScale:
+                        {
+                                auto scl = std::get<util::Message::SetEntityScale>(msg.msg);
+                                this->systems.transform.setScale(scl.entity, scl.scale);
+                                break;
+                        }
+                        case util::MessageID::MoveEntityBy:
+                        {
+                                auto pos = std::get<util::Message::MoveEntityBy>(msg.msg);
+                                this->systems.transform.move(pos.entity, pos.displacement);
+                                break;
+                        }
+                        case util::MessageID::RotateEntityBy:
+                        {
+                                auto rot = std::get<util::Message::RotateEntityBy>(msg.msg);
+                                this->systems.transform.rotate(rot.entity, rot.rotation);
+                                break;
+                        }
+                        case util::MessageID::ScaleEntityBy:
+                        {
+                                auto scl = std::get<util::Message::ScaleEntityBy>(msg.msg);
+                                this->systems.transform.scale(scl.entity, scl.scale);
+                                break;
+                        }
+                        default: break;
                 }
         }
 

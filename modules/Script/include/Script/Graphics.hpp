@@ -5,7 +5,6 @@
 
 #include <Script/Lua.hpp>
 
-#include <Util/Concepts.hpp>
 #include <Util/ErrorMessages.hpp>
 #include <Util/Graphics.hpp>
 #include <Util/Types.hpp>
@@ -139,7 +138,7 @@ inline util::Matrix<T> tableToMatrix(const lua::Table& obj)
         return mat;
 }
 
-template<util::Drawable T>
+template<util::Graphical T>
 inline void extractLocalBounds(const std::unique_ptr<T>& dobj, lua::Table& obj)
 {
         const sf::FloatRect bounds = dobj->getLocalBounds();
@@ -151,7 +150,7 @@ inline void extractLocalBounds(const std::unique_ptr<T>& dobj, lua::Table& obj)
         );
 }
 
-template<util::Drawable T>
+template<util::Graphical T>
 inline void extractGlobalBounds(const std::unique_ptr<T>& dobj, lua::Table& obj)
 {
         const sf::FloatRect bounds = dobj->getGlobalBounds();
@@ -167,12 +166,10 @@ inline void extractGlobalBounds(const std::unique_ptr<T>& dobj, lua::Table& obj)
 // Shorthand for checking table properties.
 #define prop(X, CPP_TYPE) (lua::Value X = obj[#X]; X.is<CPP_TYPE>())
 
-template<class TransformableObj>
-inline std::unique_ptr<TransformableObj>& updateTransformFromTable(
-        std::unique_ptr<TransformableObj>& dobj, lua::Table& obj)
+template<util::Transformable T>
+inline std::unique_ptr<T>& updateTransformFromTable(
+        std::unique_ptr<T>& dobj, lua::Table& obj)
 {
-        static_assert(std::is_base_of_v<sf::Transformable, TransformableObj>);
-
         extractLocalBounds(dobj, obj);
 
         auto tobj = static_cast<sf::Transformable*>(dobj.get());

@@ -1,7 +1,6 @@
 #pragma once
 
 
-#include <Util/Concepts.hpp>
 #include <Util/ErrorMessages.hpp>
 #include <Util/Types.hpp>
 
@@ -15,6 +14,18 @@
 
 namespace util
 {
+
+// Concepts
+
+template<typename T>
+concept Arithmetic = std::is_arithmetic_v<T>;
+
+template<typename T>
+concept Floating = std::is_floating_point_v<T>;
+
+template<typename T>
+concept Integral = std::is_integral_v<T>;
+
 
 // Numeric
 
@@ -33,6 +44,19 @@ inline float map(const float val, const float lo1, const float hi1,
 {
         return normalize(val, lo1, hi1) * (hi2 - lo2) + lo2;
 }
+
+template<Integral T>
+inline constexpr bool isWithin(const T& value, const T& lo, const T& hi)
+{
+        return static_cast<std::uint32_t>(value - lo) <= (hi - lo);
+}
+
+template<Floating T>
+inline constexpr bool isWithin(const T& value, const T& lo, const T& hi)
+{
+        return value >= lo and value <= hi;
+}
+
 
 // Vector
 

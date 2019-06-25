@@ -15,10 +15,7 @@ public:
 
         ~InputSystem()
         {
-                for (const lua::RegistryKey key : this->entityKeys)
-                {
-                        script::luaContext.registry[key] = lua::nil;
-                }
+                this->clearKeys();
         }
 
         void assignInput(lua::Valref entityTable)
@@ -40,6 +37,15 @@ public:
                         args[0] = entity;
                         entity["input"][script::EVENT_HANDLERS[event.type]](args);
                 }
+        }
+
+        void clearKeys()
+        {
+                for (const lua::RegistryKey key : this->entityKeys)
+                {
+                        script::luaContext.registry[key] = lua::nil;
+                }
+                this->entityKeys.clear();
         }
 
 private:

@@ -17,16 +17,12 @@
 namespace util
 {
 
+/**
+ * 
+ */
 struct Message
 {
         // Scenes
-
-        struct [[deprecated]] PopScene {};
-
-        struct [[deprecated]] PushScene
-        {
-                std::string sceneName;
-        };
 
         struct SwitchScene
         {
@@ -59,54 +55,60 @@ struct Message
                 lua::Table data;
         };
 
-        struct SetPosition
+        struct SetEntityPosition
         {
                 entt::entity entity;
                 Vector position;
         };
 
-        struct SetRotation
+        struct SetEntityRotation
         {
                 entt::entity entity;
                 float rotation;
         };
 
-        struct SetScale
+        struct SetEntityScale
         {
                 entt::entity entity;
                 Vector scale;
         };
 
-        struct MoveBy
+        struct MoveEntityBy
         {
                 entt::entity entity;
                 Vector displacement;
         };
 
-        struct RotateBy
+        struct RotateEntityBy
         {
                 entt::entity entity;
                 float rotation;
         };
 
-        struct ScaleBy
+        struct ScaleEntityBy
         {
                 entt::entity entity;
                 Vector scale;
         };
 
-        std::variant<
-                PopScene, PushScene,
-                SwitchScene, SaveAndSwitchScene,
-                LoadScene, SaveAndLoadScene,
-                Quit, SaveAndQuit,
-                AddEntity,
-                SetPosition, SetRotation, SetScale,
-                MoveBy, RotateBy, ScaleBy
-        > msg;
+#define MESSAGE_IDS\
+                SwitchScene, SaveAndSwitchScene,\
+                LoadScene, SaveAndLoadScene,\
+                Quit, SaveAndQuit,\
+                AddEntity,\
+                SetEntityPosition, SetEntityRotation, SetEntityScale,\
+                MoveEntityBy, RotateEntityBy, ScaleEntityBy
+
+        std::variant<MESSAGE_IDS> msg;
 };
 
+enum class MessageID { MESSAGE_IDS };
 
+#undef MESSAGE_IDS
+
+/**
+ * 
+ */
 class Observer
 {
         friend class Subject;
@@ -117,7 +119,9 @@ public:
         virtual ~Observer() {}
 };
 
-
+/**
+ * 
+ */
 class Subject
 {
         Subject() = delete;

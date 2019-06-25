@@ -134,8 +134,6 @@ inline static void init()
                 "normal",  normal);
 
         // Scenes
-        luaContext.global["popScene"]  = popScene;  // deprecated
-        luaContext.global["pushScene"] = pushScene; // deprecated
         luaContext.global["scene"] = lua::Table::records(luaContext,
                 "switchTo",        switchScene,
                 "saveAndSwitchTo", saveAndSwitchScene,
