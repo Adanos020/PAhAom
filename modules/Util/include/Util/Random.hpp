@@ -20,17 +20,16 @@ inline bool chance(const double prob = 0.5)
         return distribution(rng);
 }
 
-template<Arithmetic T>
+template<Integral T>
 inline T uniform(const T lo, const T hi)
 {
-        if constexpr (std::is_integral_v<T>)
-        {
-                return std::uniform_int_distribution<T>{ lo, hi }(rng);
-        }
-        else
-        {
-                return std::uniform_real_distribution<T>{ lo, hi }(rng);
-        }
+        return std::uniform_int_distribution<T>{lo, hi}(rng);
+}
+
+template<Floating T>
+inline T uniform(const T lo, const T hi)
+{
+        return std::uniform_real_distribution<T>{lo, hi}(rng);
 }
 
 template<Floating T>

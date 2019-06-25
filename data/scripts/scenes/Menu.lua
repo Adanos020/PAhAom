@@ -66,8 +66,7 @@ function Menu:onKeyPressed(key)
             rgb(random.uniform(0, 255),
                 random.uniform(0, 255),
                 random.uniform(0, 255)),
-            vector(random.uniform(-20, 20),
-                   random.uniform(-20, 20))
+            vector(random.uniform(-20, 20), random.uniform(-20, 20))
         ))
     end
 end

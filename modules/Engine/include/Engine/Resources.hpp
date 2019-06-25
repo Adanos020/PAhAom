@@ -15,11 +15,28 @@
 namespace engine
 {
 
-template<class T>
-concept Resource =
-        std::is_same_v<T, sf::Font> or
-        std::is_same_v<T, sf::Texture>;
+// Concepts
 
+template<class T>
+concept Loadable = requires(T r)
+{
+        { r.loadFromFile("") } -> bool;
+        { r.loadFromMemory("", 0) } -> bool;
+};
+
+template<class T>
+concept Openable = requires(T r)
+{
+        { r.openFromFile("") } -> bool;
+        { r.openFromMemory("", 0) } -> bool;
+};
+
+template<class T>
+concept Resource = Loadable<T> or Openable<T>;
+
+
+/** Manager of given type of resources.
+ */
 template<Resource Type>
 class Resources
 {

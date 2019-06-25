@@ -18,4 +18,7 @@ concept Drawable = std::is_base_of_v<sf::Drawable, T>;
 template<typename T>
 concept Floating = std::is_floating_point_v<T>;
 
+template<typename T>
+concept Integral = std::is_integral_v<T>;
+
 }

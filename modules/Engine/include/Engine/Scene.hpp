@@ -7,6 +7,7 @@
 
 #include <Util/Constants.hpp>
 #include <Util/Observer.hpp>
+#include <Util/Ranges.hpp>
 #include <Util/Types.hpp>
 
 #include <SFML/Graphics/Drawable.hpp>
@@ -81,6 +82,11 @@ public:
 
         virtual void receive(const util::Message& msg) override
         {
+                if (not util::isInRange(msg.msg.index(), 8lu, 15lu))
+                {
+                        return;
+                }
+
                 if (auto pos = std::get_if<util::Message::AddEntity>(&msg.msg))
                 {
                         lua::Table entity = pos->data;
