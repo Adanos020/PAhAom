@@ -105,28 +105,17 @@ private:
         
         virtual void receive(const util::Message& msg) override
         {
-                const auto id = static_cast<util::MessageID>(msg.msg.index());
-
-                // if (not util::isWithin(id, util::MessageID::SwitchScene, util::MessageID::SaveAndQuit))
-                // {
-                //         return;
-                // }
-
-                switch (id)
-                {
-                        case util::MessageID::SwitchScene:
+                std::visit(util::MsgHandlers {
+                        [this](const util::Message::SwitchScene& msg)
                         {
-                                auto val = std::get<util::Message::SwitchScene>(msg.msg);
-                                this->currentScene.switchTo(val.sceneName);
-                                break;
-                        }
-                        case util::MessageID::Quit:
+                                this->currentScene.switchTo(msg.sceneName);
+                        },
+                        [this](const util::Message::Quit&)
                         {
                                 this->running = false;
-                                break;
-                        }
-                        default: break;
-                }
+                        },
+                        [](const auto& discard [[maybe_unused]]) {},
+                }, msg.msg);
         }
 
 private:

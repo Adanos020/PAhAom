@@ -96,61 +96,40 @@ public:
 
 public:
 
-        virtual void receive(const util::Message& msg) override
+        virtual void receive(const util::Message& message) override
         {
-                const auto id = static_cast<util::MessageID>(msg.msg.index());
-
-                // if (not util::isWithin(id, util::MessageID::AddEntity, util::MessageID::ScaleEntityBy))
-                // {
-                //         return;
-                // }
-
-                switch (id)
-                {
-                        case util::MessageID::AddEntity:
+                std::visit(util::MsgHandlers {
+                        [this](const util::Message::AddEntity& msg)
                         {
-                                lua::Table entity = std::get<util::Message::AddEntity>(msg.msg).data;
+                                lua::Table entity = msg.data;
                                 this->systems.addEntity(entity);
-                                break;
-                        }
-                        case util::MessageID::SetEntityPosition:
+                        },
+                        [this](const util::Message::SetEntityPosition& msg)
                         {
-                                auto pos = std::get<util::Message::SetEntityPosition>(msg.msg);
-                                this->systems.transform.setPosition(pos.entity, pos.position);
-                                break;
-                        }
-                        case util::MessageID::SetEntityRotation:
+                                this->systems.transform.setPosition(msg.entity, msg.position);
+                        },
+                        [this](const util::Message::SetEntityRotation& msg)
                         {
-                                auto rot = std::get<util::Message::SetEntityRotation>(msg.msg);
-                                this->systems.transform.setRotation(rot.entity, rot.rotation);
-                                break;
-                        }
-                        case util::MessageID::SetEntityScale:
+                                this->systems.transform.setRotation(msg.entity, msg.rotation);
+                        },
+                        [this](const util::Message::SetEntityScale& msg)
                         {
-                                auto scl = std::get<util::Message::SetEntityScale>(msg.msg);
-                                this->systems.transform.setScale(scl.entity, scl.scale);
-                                break;
-                        }
-                        case util::MessageID::MoveEntityBy:
+                                this->systems.transform.setScale(msg.entity, msg.scale);
+                        },
+                        [this](const util::Message::MoveEntityBy& msg)
                         {
-                                auto pos = std::get<util::Message::MoveEntityBy>(msg.msg);
-                                this->systems.transform.move(pos.entity, pos.displacement);
-                                break;
-                        }
-                        case util::MessageID::RotateEntityBy:
+                                this->systems.transform.move(msg.entity, msg.displacement);
+                        },
+                        [this](const util::Message::RotateEntityBy& msg)
                         {
-                                auto rot = std::get<util::Message::RotateEntityBy>(msg.msg);
-                                this->systems.transform.rotate(rot.entity, rot.rotation);
-                                break;
-                        }
-                        case util::MessageID::ScaleEntityBy:
+                                this->systems.transform.rotate(msg.entity, msg.rotation);
+                        },
+                        [this](const util::Message::ScaleEntityBy& msg)
                         {
-                                auto scl = std::get<util::Message::ScaleEntityBy>(msg.msg);
-                                this->systems.transform.scale(scl.entity, scl.scale);
-                                break;
-                        }
-                        default: break;
-                }
+                                this->systems.transform.scale(msg.entity, msg.scale);
+                        },
+                        [](const auto& discard [[maybe_unused]]) {},
+                }, message.msg);
         }
 
 private:

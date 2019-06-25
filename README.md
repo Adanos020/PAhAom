@@ -23,14 +23,15 @@ $ cd build
 $ make -j
 ```
 
-# To-do list (in an arbitrary order)
+# To-do list (the order is arbitrary)
 - physics engine
 - audio system
 - shaders
+- better system for scene management
 - view (camera) manipulation and viewports
 - multiple language support (dictionaries)
 - noise functions
-- more graphical objects
+- more graphical objects (including animated ones)
 - manipulation of graphical objects
-- better support for rect tile map
+- better support for tile maps
 - GUI library

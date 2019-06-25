@@ -17,8 +17,7 @@
 namespace util
 {
 
-/**
- * 
+/** 
  */
 struct Message
 {
@@ -91,20 +90,21 @@ struct Message
                 Vector scale;
         };
 
-#define MESSAGE_IDS\
-                SwitchScene, SaveAndSwitchScene,\
-                LoadScene, SaveAndLoadScene,\
-                Quit, SaveAndQuit,\
-                AddEntity,\
-                SetEntityPosition, SetEntityRotation, SetEntityScale,\
-                MoveEntityBy, RotateEntityBy, ScaleEntityBy
 
-        std::variant<MESSAGE_IDS> msg;
+        std::variant<
+                SwitchScene, SaveAndSwitchScene,
+                LoadScene, SaveAndLoadScene,
+                Quit, SaveAndQuit,
+                AddEntity,
+                SetEntityPosition, SetEntityRotation, SetEntityScale,
+                MoveEntityBy, RotateEntityBy, ScaleEntityBy
+        > msg;
 };
 
-enum class MessageID { MESSAGE_IDS };
-
-#undef MESSAGE_IDS
+/** Helper template type for message handlers.
+ */
+template<class... Ts> struct MsgHandlers : Ts... { using Ts::operator()...; };
+template<class... Ts> MsgHandlers(Ts...) -> MsgHandlers<Ts...>;
 
 /**
  * 
