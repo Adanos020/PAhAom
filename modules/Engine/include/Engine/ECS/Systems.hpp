@@ -65,38 +65,6 @@ private:
                                 lua::Table entity = msg.data;
                                 this->addEntity(entity);
                         },
-                        [this](const util::Message::SetEntityPosition& msg)
-                        {
-                                this->transform.setPosition(msg.entity, msg.position);
-                        },
-                        [this](const util::Message::MoveEntityBy& msg)
-                        {
-                                this->transform.moveBy(msg.entity, msg.displacement);
-                        },
-                        [this](const util::Message::SetEntityRotation& msg)
-                        {
-                                this->transform.setRotation(msg.entity, msg.rotation);
-                        },
-                        [this](const util::Message::RotateEntityBy& msg)
-                        {
-                                this->transform.rotateBy(msg.entity, msg.rotation);
-                        },
-                        [this](const util::Message::SetEntityScale& msg)
-                        {
-                                this->transform.setScale(msg.entity, msg.scale);
-                        },
-                        [this](const util::Message::ScaleEntityBy& msg)
-                        {
-                                this->transform.scaleBy(msg.entity, msg.scale);
-                        },
-                        [this](const util::Message::SetEntityVelocity& msg)
-                        {
-                                this->physics.setVelocity(msg.entity, msg.velocity);
-                        },
-                        [this](const util::Message::AccelerateEntityBy& msg)
-                        {
-                                this->physics.accelerateBy(msg.entity, msg.acceleration);
-                        },
                         util::discardTheRest
                 }, message.msg);
         }

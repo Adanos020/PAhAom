@@ -5,19 +5,27 @@
 
 #include <Script/Aux.hpp>
 
+#include <Util/Observer.hpp>
+
 #include <entt/entity/registry.hpp>
 
 
 namespace engine::ecs
 {
 
-class TransformSystem
+class TransformSystem : public util::Observer
 {
 public:
 
         TransformSystem(entt::registry& entities)
         : entities(entities)
         {
+                util::Subject::addObserver(this);
+        }
+
+        ~TransformSystem()
+        {
+                util::Subject::deleteObserver(this);
         }
 
         void assignTransform(const entt::entity entity, const util::Vector position,
@@ -64,6 +72,39 @@ public:
                 util::Vector& s = this->entities.get<Transform>(entity).scale;
                 s.x *= scale.x;
                 s.y *= scale.y;
+        }
+
+private:
+
+        virtual void receive(const util::Message& message) override
+        {
+                std::visit(util::MsgHandlers {
+                        [this](const util::Message::SetEntityPosition& msg)
+                        {
+                                this->setPosition(msg.entity, msg.position);
+                        },
+                        [this](const util::Message::MoveEntityBy& msg)
+                        {
+                                this->moveBy(msg.entity, msg.displacement);
+                        },
+                        [this](const util::Message::SetEntityRotation& msg)
+                        {
+                                this->setRotation(msg.entity, msg.rotation);
+                        },
+                        [this](const util::Message::RotateEntityBy& msg)
+                        {
+                                this->rotateBy(msg.entity, msg.rotation);
+                        },
+                        [this](const util::Message::SetEntityScale& msg)
+                        {
+                                this->setScale(msg.entity, msg.scale);
+                        },
+                        [this](const util::Message::ScaleEntityBy& msg)
+                        {
+                                this->scaleBy(msg.entity, msg.scale);
+                        },
+                        util::discardTheRest
+                }, message.msg);
         }
 
 private:

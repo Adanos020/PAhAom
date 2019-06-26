@@ -112,8 +112,27 @@ private:
                         {
                                 this->currentScene.switchTo(msg.sceneName);
                         },
+                        [this](const util::Message::SaveAndSwitchScene& msg)
+                        {
+                                this->currentScene.save();
+                                this->currentScene.switchTo(msg.sceneName);
+                        },
+                        [this](const util::Message::LoadScene&)
+                        {
+                                this->currentScene.load();
+                        },
+                        [this](const util::Message::SaveAndLoadScene&)
+                        {
+                                this->currentScene.save();
+                                this->currentScene.load();
+                        },
                         [this](const util::Message::Quit&)
                         {
+                                this->running = false;
+                        },
+                        [this](const util::Message::SaveAndQuit&)
+                        {
+                                this->currentScene.save();
                                 this->running = false;
                         },
                         util::discardTheRest

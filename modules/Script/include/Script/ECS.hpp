@@ -127,7 +127,7 @@ inline static lua::Retval setVelocity(lua::Context& context)
         }
         else
         {
-                context.error("Attempting to assign velocity for an entity with no rigid body.");
+                context.error("Attempting to assign velocity to an entity with no rigid body.");
         }
         return context.ret();
 }
@@ -143,14 +143,48 @@ inline static lua::Retval accelerateBy(lua::Context& context)
                 util::Subject::send(util::Message::AccelerateEntityBy{entity["id"], context.args[1]});
 
                 lua::Table rigidBody = entity["rigidBody"];
-                rigidBody["velocity"]["x"] =
-                        rigidBody["velocity"]["x"] + context.args[1]["x"];
-                rigidBody["velocity"]["y"] =
-                        rigidBody["velocity"]["y"] + context.args[1]["y"];
+                rigidBody["velocity"]["x"] = rigidBody["velocity"]["x"] + context.args[1]["x"];
+                rigidBody["velocity"]["y"] = rigidBody["velocity"]["y"] + context.args[1]["y"];
         }
         else
         {
-                context.error("Attempting to assign velocity for an entity with no rigid body.");
+                context.error("Attempting to assign velocity to an entity with no rigid body.");
+        }
+        return context.ret();
+}
+
+inline static lua::Retval setMass(lua::Context& context)
+{
+        context.requireArgs<lua::Table, float>(2);
+
+        lua::Table entity = context.args[0];
+        
+        if (entity["rigidBody"].is<lua::Table>())
+        {
+                util::Subject::send(util::Message::SetEntityVelocity{entity["id"], context.args[1]});
+                entity["rigidBody"]["mass"] = context.args[1];
+        }
+        else
+        {
+                context.error("Attempting to assign mass to an entity with no rigid body.");
+        }
+        return context.ret();
+}
+
+inline static lua::Retval addMass(lua::Context& context)
+{
+        context.requireArgs<lua::Table, float>(2);
+
+        lua::Table entity = context.args[0];
+
+        if (entity["rigidBody"].is<lua::Table>())
+        {
+                util::Subject::send(util::Message::AccelerateEntityBy{entity["id"], context.args[1]});
+                entity["rigidBody"]["mass"] = entity["rigidBody"]["mass"] + context.args[1];
+        }
+        else
+        {
+                context.error("Attempting to assign mass to an entity with no rigid body.");
         }
         return context.ret();
 }

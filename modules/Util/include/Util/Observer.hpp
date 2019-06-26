@@ -5,7 +5,7 @@
 
 #include <Util/Math.hpp>
 
-#include <entt/entity/entity.hpp>
+#include <entt/entity/registry.hpp>
 
 #include <algorithm>
 #include <string_view>
@@ -46,6 +46,7 @@ struct Message
         struct Quit {};
 
         struct SaveAndQuit {};
+
 
         // ECS - Transform
 
@@ -90,7 +91,8 @@ struct Message
                 Vector scale;
         };
 
-        // ECS - Transform
+
+        // ECS - Physics
 
         struct SetEntityVelocity
         {
@@ -104,6 +106,18 @@ struct Message
                 Vector acceleration;
         };
 
+        struct SetEntityMass
+        {
+                entt::entity entity;
+                float mass;
+        };
+
+        struct AddEntityMass
+        {
+                entt::entity entity;
+                float dMass;
+        };
+
         std::variant<
                 SwitchScene, SaveAndSwitchScene,
                 LoadScene, SaveAndLoadScene,
@@ -112,18 +126,22 @@ struct Message
                 SetEntityPosition, MoveEntityBy,
                 SetEntityRotation, RotateEntityBy,
                 SetEntityScale,    ScaleEntityBy,
-                SetEntityVelocity, AccelerateEntityBy
+                SetEntityVelocity, AccelerateEntityBy,
+                SetEntityMass,     AddEntityMass
         > msg;
 };
+
 
 /** Helper template type for message handlers.
  */
 template<class... Ts> struct MsgHandlers : Ts... { using Ts::operator()...; };
 template<class... Ts> MsgHandlers(Ts...) -> MsgHandlers<Ts...>;
 
+
 /** Empty message handler for discarding unhandled messages.
  */
 static constexpr auto discardTheRest = [](const auto&){};
+
 
 /** Base class for objects that are receiving messages broadcasted by Subject.
  */
@@ -137,7 +155,8 @@ public:
         virtual ~Observer() {}
 };
 
-/** 
+
+/** System for broadcasting messages to all gathered observers.
  */
 class Subject
 {

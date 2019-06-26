@@ -55,9 +55,9 @@ end
 
 function Menu:onKeyPressed(key)
     if key == Keyboard.Enter then
-        scene.switchTo("Game")
+        game.switchTo("Game")
     elseif key == Keyboard.Escape then
-        scene.quit()
+        game.quit()
     elseif key == Keyboard.Space then
         entity.add(self:newBall(
             vector(random.uniform(0, Settings.video.resolution.x),
@@ -80,6 +80,4 @@ function Menu:update(dt)
     entity.setPosition(greeting, vec.add(windowCenter, polar))
     entity.setRotation(greeting, sinel * 30)
     entity.setScale(greeting, sinel * sinel + 0.5)
-
-    -- print(bkg.position.x, bkg.position.y)
 end

@@ -64,7 +64,7 @@ end
 
 function Game:onKeyPressed(key)
     if key == Keyboard.Escape then
-        scene.switchTo("Menu")
+        game.switchTo("Menu")
     end
 end
 

@@ -26,7 +26,9 @@ inline static void init()
                 "rotateBy",     rotateBy,
                 "scaleBy",      scaleBy,
                 "setVelocity",  setVelocity,
-                "accelerateBy", accelerateBy);
+                "accelerateBy", accelerateBy,
+                "setMass",      setMass,
+                "addMass",      addMass);
 
 
         // Graphics
@@ -136,7 +138,7 @@ inline static void init()
                 "normal",  normal);
 
         // Scenes
-        luaContext.global["scene"] = lua::Table::records(luaContext,
+        luaContext.global["game"] = lua::Table::records(luaContext,
                 "switchTo",        switchScene,
                 "saveAndSwitchTo", saveAndSwitchScene,
                 "load",            loadScene,

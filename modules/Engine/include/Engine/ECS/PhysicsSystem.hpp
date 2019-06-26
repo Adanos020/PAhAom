@@ -6,6 +6,7 @@
 #include <Script/Aux.hpp>
 
 #include <Util/Constants.hpp>
+#include <Util/Observer.hpp>
 
 #include <entt/entity/registry.hpp>
 
@@ -13,13 +14,19 @@
 namespace engine::ecs
 {
 
-class PhysicsSystem
+class PhysicsSystem : public util::Observer
 {
 public:
 
         PhysicsSystem(entt::registry& entities)
         : entities(entities)
         {
+                util::Subject::addObserver(this);
+        }
+
+        ~PhysicsSystem()
+        {
+                util::Subject::deleteObserver(this);
         }
 
         void assignRigidBody(const entt::entity entity, const util::Vector velocity, const float mass)
@@ -71,6 +78,31 @@ public:
                         {
                                 transform.position += rb.velocity * util::FRAME_TIME.asSeconds();
                         });
+        }
+
+private:
+
+        virtual void receive(const util::Message& message) override
+        {
+                std::visit(util::MsgHandlers {
+                        [this](const util::Message::SetEntityVelocity& msg)
+                        {
+                                this->setVelocity(msg.entity, msg.velocity);
+                        },
+                        [this](const util::Message::AccelerateEntityBy& msg)
+                        {
+                                this->accelerateBy(msg.entity, msg.acceleration);
+                        },
+                        [this](const util::Message::SetEntityMass& msg)
+                        {
+                                this->setMass(msg.entity, msg.mass);
+                        },
+                        [this](const util::Message::AddEntityMass& msg)
+                        {
+                                this->addMass(msg.entity, msg.dMass);
+                        },
+                        util::discardTheRest
+                }, message.msg);
         }
 
 private:
