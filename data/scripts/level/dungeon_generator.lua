@@ -1,10 +1,5 @@
 local mapSize      -- vector
 local tiles        -- matrix of numbers
-local rooms        -- array of rects
-local mapArea      -- rectangle
-local maxRoomSize  -- vector
-local minRoomSize  = vector(3, 3)
-local maxRoomTries = 100
 
 local Tile = {
     VOID    = 0,
@@ -38,35 +33,23 @@ local function fillArea(area, tile)
     end
 end
 
-local function initMap()
-    tiles = {}
-    for row = 1, mapSize.y do
-        tiles[row] = {}
-    end
-    fillArea(rectangle(vector(1, 1), mapSize), Tile.WALL)
-end
-
-local function leftIs(pos, tile, distance)
-    return pos.x > distance
-       and tiles[pos.y][pos.x - distance] == tile
-end
-
-local function rightIs(pos, tile, distance)
-    return pos.x <= mapSize.x - distance
-       and tiles[pos.y][pos.x + distance] == tile
-end
-
-local function upIs(pos, tile, distance)
-    return pos.y > distance
-       and tiles[pos.y - distance][pos.x] == tile
-end
-
-local function downIs(pos, tile, distance)
-    return pos.y <= mapSize.y - distance
-       and tiles[pos.y + distance][pos.x] == tile
-end
-
 local function findNeighbours(pos, tile, distance)
+    local function leftIs(pos, tile, distance)
+        return pos.x > distance
+           and tiles[pos.y][pos.x - distance] == tile
+    end
+    local function rightIs(pos, tile, distance)
+        return pos.x <= mapSize.x - distance
+           and tiles[pos.y][pos.x + distance] == tile
+    end
+    local function upIs(pos, tile, distance)
+        return pos.y > distance
+           and tiles[pos.y - distance][pos.x] == tile
+    end
+    local function downIs(pos, tile, distance)
+        return pos.y <= mapSize.y - distance
+           and tiles[pos.y + distance][pos.x] == tile
+    end
     return (leftIs (pos, tile, distance) and Neighbours.LEFT  or 0)
          | (rightIs(pos, tile, distance) and Neighbours.RIGHT or 0)
          | (upIs   (pos, tile, distance) and Neighbours.UP    or 0)
@@ -106,77 +89,96 @@ local function pickDirection(neighbours)
     return directions[random.uniform(1, #directions)]
 end
 
-local function generateMaze()
-    local cells = {
-        -- Pick a random first cell with odd coordinates.
-        vector(~1 & random.uniform(2, mapSize.x),
-               ~1 & random.uniform(2, mapSize.y))
-    }
-
-    local currCell = cells[#cells]
-    tiles[currCell.y][currCell.x] = Tile.HALLWAY
-
-    while #cells > 0 do
-        currCell = cells[#cells]
-        local neighbours = findNeighbours(currCell, Tile.WALL, 2)
-        local currDir = pickDirection(neighbours)
-
-        -- If there are no more adjacent cells to occupy, go back.
-        if neighbours == 0 then
-            table.remove(cells)
-        else
-            -- Advance to the next cell in current direction.
-            local nextCell = vec.add(currCell, currDir)
-
-            -- Decide on whether make a turn.
-            while not rect.contains(mapArea, nextCell)
-                or tiles[nextCell.y][nextCell.x] == Tile.HALLWAY
-                or random.chance(0.1)
-            do
-                currDir = pickDirection(neighbours)
-                nextCell = vec.add(currCell, currDir)
-            end
-
-            -- Carve the corridor.
-            local midWay = vec.add(currCell, vec.divide(currDir, 2))
-            tiles[midWay.y][midWay.x] = Tile.HALLWAY
-            tiles[nextCell.y][nextCell.x] = Tile.HALLWAY
-            table.insert(cells, nextCell)
-        end
-    end
-end
-
-local function spreadRooms()
-    rooms = {}
-    for i = 1, maxRoomTries do
-        local roomSize = vector(
-            1 | random.uniform(minRoomSize.x, math.tointeger(maxRoomSize.x)),
-            1 | random.uniform(minRoomSize.y, math.tointeger(maxRoomSize.y)))
-        local roomPos = vector(
-            ~1 & random.uniform(2, mapSize.x - roomSize.x),
-            ~1 & random.uniform(2, mapSize.y - roomSize.y))
-
-        local newRoom = rectangle(roomPos, roomSize)
-        local function overlapsNewRoom(room)
-            return rect.intersects(room, newRoom)
-        end
-
-        if noneOf(rooms, overlapsNewRoom) then
-            table.insert(rooms, newRoom)
-        end
-    end
-
-    for _, room in ipairs(rooms) do
-        fillArea(room, Tile.FLOOR)
-    end
-end
-
 local function isDeadEnd(pos)
     return tiles[pos.y][pos.x] == Tile.HALLWAY
        and countCloseNeighbours(pos, Tile.WALL) == 3
 end
 
-local function removeDeadEnds()
+function generateDungeon(size)
+    assert(isVector(size))
+
+    -- Initialise data
+    mapSize = vector(math.tointeger(size.x), math.tointeger(size.y))
+    local mapArea = rectangle(vector(1, 1), mapSize)
+    local maxRoomSize = vector(
+        math.clamp(mapSize.x // 2, 3, 13),
+        math.clamp(mapSize.y // 2, 3, 13))
+    tiles = {}
+    for row = 1, mapSize.y do
+        tiles[row] = {}
+    end
+    fillArea(rectangle(vector(1, 1), mapSize), Tile.WALL)
+    
+    -- Generate maze
+    do
+        local cells = {
+            -- Pick a random first cell with odd coordinates.
+            vector(~1 & random.uniform(2, mapSize.x),
+                ~1 & random.uniform(2, mapSize.y))
+        }
+
+        local currCell = cells[#cells]
+        tiles[currCell.y][currCell.x] = Tile.HALLWAY
+
+        while #cells > 0 do
+            currCell = cells[#cells]
+            local neighbours = findNeighbours(currCell, Tile.WALL, 2)
+            local currDir = pickDirection(neighbours)
+
+            -- If there are no more adjacent cells to occupy, go back.
+            if neighbours == 0 then
+                table.remove(cells)
+            else
+                -- Advance to the next cell in current direction.
+                local nextCell = vec.add(currCell, currDir)
+
+                -- Decide on whether make a turn.
+                while not rect.contains(mapArea, nextCell)
+                    or tiles[nextCell.y][nextCell.x] == Tile.HALLWAY
+                    or random.chance(0.1)
+                do
+                    currDir = pickDirection(neighbours)
+                    nextCell = vec.add(currCell, currDir)
+                end
+
+                -- Carve the corridor.
+                local midWay = vec.add(currCell, vec.divide(currDir, 2))
+                tiles[midWay.y][midWay.x] = Tile.HALLWAY
+                tiles[nextCell.y][nextCell.x] = Tile.HALLWAY
+                table.insert(cells, nextCell)
+            end
+        end
+    end
+
+    -- Spread rooms
+    do
+        local minRoomSize = vector(3, 3)
+        local maxRoomTries = 100
+        local rooms = {}
+        for i = 1, maxRoomTries do
+            local roomSize = vector(
+                1 | random.uniform(minRoomSize.x, math.tointeger(maxRoomSize.x)),
+                1 | random.uniform(minRoomSize.y, math.tointeger(maxRoomSize.y)))
+            local roomPos = vector(
+                ~1 & random.uniform(2, mapSize.x - roomSize.x),
+                ~1 & random.uniform(2, mapSize.y - roomSize.y))
+
+            local newRoom = rectangle(roomPos, roomSize)
+            local function overlapsNewRoom(room)
+                return rect.intersects(room, newRoom)
+            end
+
+            if noneOf(rooms, overlapsNewRoom) then
+                table.insert(rooms, newRoom)
+            end
+        end
+
+        -- Fill the established room areas.
+        for _, room in ipairs(rooms) do
+            fillArea(room, Tile.FLOOR)
+        end
+    end
+
     -- Search for dead ends.
     local deadEnds = {}
     for x = 2, mapSize.x, 2 do
@@ -202,21 +204,6 @@ local function removeDeadEnds()
             cell = vec.add(cell, dir)
         end
     end
-end
-
-function generateDungeon(size)
-    assert(isVector(size))
-
-    mapSize = vector(math.tointeger(size.x), math.tointeger(size.y))
-    mapArea = rectangle(vector(1, 1), mapSize)
-    maxRoomSize = vector(
-        math.clamp(mapSize.x // 2, 3, 13),
-        math.clamp(mapSize.y // 2, 3, 13))
-
-    initMap()
-    generateMaze()
-    spreadRooms()
-    removeDeadEnds()
 
     return tiles
 end

@@ -102,6 +102,8 @@ private:
                 this->window.draw(screen);
                 this->window.display();
         }
+
+private:
         
         virtual void receive(const util::Message& msg) override
         {
@@ -114,7 +116,7 @@ private:
                         {
                                 this->running = false;
                         },
-                        [](const auto& discard [[maybe_unused]]) {},
+                        util::discardTheRest
                 }, msg.msg);
         }
 

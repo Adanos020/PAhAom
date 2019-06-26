@@ -35,18 +35,18 @@ struct Graphics
 
 // Physical components
 
-struct BasicRigidBody
+struct RigidBody
 {
         util::Vector velocity = {0, 0};
         float mass = 0;
 };
 
-struct CircleRigidBody : BasicRigidBody
+struct CircleCollider
 {
         float radius = 0;
 };
 
-struct RectRigidBody : BasicRigidBody
+struct RectCollider
 {
         util::Vector size = {0, 0};
 };

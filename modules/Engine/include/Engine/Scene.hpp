@@ -7,7 +7,6 @@
 
 #include <Util/Constants.hpp>
 #include <Util/Math.hpp>
-#include <Util/Observer.hpp>
 #include <Util/Types.hpp>
 
 #include <SFML/Graphics/Drawable.hpp>
@@ -23,13 +22,12 @@
 namespace engine
 {
 
-class Scene : public util::Observer
+class Scene
 {
 public:
 
         Scene()
         {
-                util::Subject::addObserver(this);
         }
 
         Scene(const std::string& sceneName)
@@ -40,11 +38,10 @@ public:
 
         ~Scene()
         {
-                util::Subject::deleteObserver(this);
-                this->reset();
+                this->destroy();
         }
 
-        void reset()
+        void destroy()
         {
                 this->systems.reset();
                 script::luaContext.global[this->stateName] = lua::nil;
@@ -52,7 +49,7 @@ public:
 
         void switchTo(const std::string& sceneName)
         {
-                this->reset();
+                this->destroy();
 
                 // Construct the scene object.
                 const lua::Table classTable = script::luaContext.global[sceneName];
@@ -67,6 +64,16 @@ public:
                 {
                         this->systems.addEntity(el);
                 });
+        }
+
+        void load()
+        {
+                
+        }
+
+        void save()
+        {
+
         }
 
         void handleInput(const sf::Event& event)
@@ -92,44 +99,6 @@ public:
         void drawTo(sf::RenderTarget& target)
         {
                 this->systems.render.drawTo(target);
-        }
-
-public:
-
-        virtual void receive(const util::Message& message) override
-        {
-                std::visit(util::MsgHandlers {
-                        [this](const util::Message::AddEntity& msg)
-                        {
-                                lua::Table entity = msg.data;
-                                this->systems.addEntity(entity);
-                        },
-                        [this](const util::Message::SetEntityPosition& msg)
-                        {
-                                this->systems.transform.setPosition(msg.entity, msg.position);
-                        },
-                        [this](const util::Message::SetEntityRotation& msg)
-                        {
-                                this->systems.transform.setRotation(msg.entity, msg.rotation);
-                        },
-                        [this](const util::Message::SetEntityScale& msg)
-                        {
-                                this->systems.transform.setScale(msg.entity, msg.scale);
-                        },
-                        [this](const util::Message::MoveEntityBy& msg)
-                        {
-                                this->systems.transform.move(msg.entity, msg.displacement);
-                        },
-                        [this](const util::Message::RotateEntityBy& msg)
-                        {
-                                this->systems.transform.rotate(msg.entity, msg.rotation);
-                        },
-                        [this](const util::Message::ScaleEntityBy& msg)
-                        {
-                                this->systems.transform.scale(msg.entity, msg.scale);
-                        },
-                        [](const auto& discard [[maybe_unused]]) {},
-                }, message.msg);
         }
 
 private:

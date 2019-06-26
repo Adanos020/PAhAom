@@ -39,7 +39,7 @@ public:
                 this->entities.get<Transform>(entity).position = position;
         }
 
-        void move(const entt::entity entity, const util::Vector displacement)
+        void moveBy(const entt::entity entity, const util::Vector displacement)
         {
                 this->entities.get<Transform>(entity).position += displacement;
         }
@@ -49,7 +49,7 @@ public:
                 this->entities.get<Transform>(entity).rotation = rotation;
         }
 
-        void rotate(const entt::entity entity, const float rotation)
+        void rotateBy(const entt::entity entity, const float rotation)
         {
                 this->entities.get<Transform>(entity).rotation += rotation;
         }
@@ -59,7 +59,7 @@ public:
                 this->entities.get<Transform>(entity).scale = scale;
         }
 
-        void scale(const entt::entity entity, const util::Vector scale)
+        void scaleBy(const entt::entity entity, const util::Vector scale)
         {
                 util::Vector& s = this->entities.get<Transform>(entity).scale;
                 s.x *= scale.x;

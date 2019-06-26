@@ -1,6 +1,6 @@
-local elapsedTime = 0
-
 local windowCenter = vec.divide(Settings.video.resolution, 2)
+
+local elapsedTime = 0
 
 local greeting = {
     graphics = {
@@ -14,6 +14,7 @@ local greeting = {
 }
 
 local bkg = {
+    position = vector(0, 0),
     graphics = {
         type = "rectangle",
         texture = "menu bkg",
@@ -43,10 +44,9 @@ function Menu:newBall(pos, radius, color, velocity)
             origin = "center",
             z = 2,
         },
-        circleRB = {
+        rigidBody = {
             velocity = velocity,
             mass = radius / 10,
-            radius = radius,
         }
     }
     table.insert(self.entities, ball)
@@ -55,7 +55,7 @@ end
 
 function Menu:onKeyPressed(key)
     if key == Keyboard.Enter then
-        scene.switchTo "Game"
+        scene.switchTo("Game")
     elseif key == Keyboard.Escape then
         scene.quit()
     elseif key == Keyboard.Space then
@@ -63,9 +63,9 @@ function Menu:onKeyPressed(key)
             vector(random.uniform(0, Settings.video.resolution.x),
                    random.uniform(0, Settings.video.resolution.y)),
             random.uniform(10, 25),
-            rgb(random.uniform(0, 255),
-                random.uniform(0, 255),
-                random.uniform(0, 255)),
+            rgb(random.uniform(0, 256),
+                random.uniform(0, 256),
+                random.uniform(0, 256)),
             vector(random.uniform(-20, 20), random.uniform(-20, 20))
         ))
     end
@@ -80,4 +80,6 @@ function Menu:update(dt)
     entity.setPosition(greeting, vec.add(windowCenter, polar))
     entity.setRotation(greeting, sinel * 30)
     entity.setScale(greeting, sinel * sinel + 0.5)
+
+    -- print(bkg.position.x, bkg.position.y)
 end

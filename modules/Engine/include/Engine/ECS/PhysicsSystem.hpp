@@ -22,62 +22,55 @@ public:
         {
         }
 
-        void assignCircleRB(const entt::entity entity, const util::Vector velocity,
-                            const float mass, const float radius)
+        void assignRigidBody(const entt::entity entity, const util::Vector velocity, const float mass)
         {
-                this->entities.assign<CircleRigidBody>(entity, velocity, mass, radius);
+                this->entities.assign<RigidBody>(entity, velocity, mass);
         }
 
-        void assignCircleRB(const entt::entity entity, const lua::Table& entityTable)
+        void assignRigidBody(const entt::entity entity, const lua::Table& entityTable)
         {
-                if (entityTable["circleRB"].is<lua::Table>())
+                if (entityTable["rigidBody"].is<lua::Table>())
                 {
-                        lua::Table circleRB = entityTable["circleRB"];
-                        this->assignCircleRB(entity,
-                                script::tableFieldOr(circleRB, "velocity", util::Vector{}),
-                                circleRB["mass"].to<float>(0),
-                                circleRB["radius"].to<float>(0)
-                        );
-                }
-        }
-
-        void assignRectRB(const entt::entity entity, const util::Vector velocity,
-                          const float mass, const util::Vector size)
-        {
-                this->entities.assign<RectRigidBody>(entity, velocity, mass, size);
-        }
-
-        void assignRectRB(const entt::entity entity, const lua::Table& entityTable)
-        {
-                if (entityTable["rectRB"].is<lua::Table>())
-                {
-                        lua::Table rectRB = entityTable["rectRB"];
-                        this->assignRectRB(entity,
-                                script::tableFieldOr(rectRB, "velocity", util::Vector{}),
-                                rectRB["mass"].to<float>(0),
-                                script::tableFieldOr(rectRB, "size", util::Vector{})
-                        );
+                        lua::Table rigidBody = entityTable["rigidBody"];
+                        this->assignRigidBody(entity,
+                                script::tableFieldOr(rigidBody, "velocity", util::Vector{}),
+                                rigidBody["mass"].to<float>(0));
                 }
         }
 
         void assignPhysics(const entt::entity entity, const lua::Table& entityTable)
         {
-                this->assignCircleRB(entity, entityTable);
-                this->assignRectRB(entity, entityTable);
+                this->assignRigidBody(entity, entityTable);
+        }
+
+        void setVelocity(const entt::entity entity, const util::Vector velocity)
+        {
+                this->entities.get<RigidBody>(entity).velocity = velocity;
+        }
+
+        void accelerateBy(const entt::entity entity, const util::Vector acceleration)
+        {
+                this->entities.get<RigidBody>(entity).velocity += acceleration;
+        }
+
+        void setMass(const entt::entity entity, const float mass)
+        {
+                this->entities.get<RigidBody>(entity).mass = mass;
+        }
+
+        void addMass(const entt::entity entity, const float dMass)
+        {
+                this->entities.get<RigidBody>(entity).mass += dMass;
         }
 
         void update()
         {
-                const auto handle = [&](const entt::entity, Transform& transform, const auto& rb)
-                {
-                        transform.position += rb.velocity * util::FRAME_TIME.asSeconds();
-                };
-
-                entities.sort<Transform, CircleRigidBody>();
-                entities.view<Transform, CircleRigidBody>().each(handle);
-
-                entities.sort<Transform, RectRigidBody>();
-                entities.view<Transform, RectRigidBody>().each(handle);
+                entities.sort<Transform, RigidBody>();
+                entities.view<Transform, RigidBody>().each(
+                        [&](const entt::entity, Transform& transform, const auto& rb)
+                        {
+                                transform.position += rb.velocity * util::FRAME_TIME.asSeconds();
+                        });
         }
 
 private:

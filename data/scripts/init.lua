@@ -2,4 +2,4 @@ dofile "data/scripts/scenes/Menu.lua"
 dofile "data/scripts/scenes/Game.lua"
 dofile "data/scripts/level/dungeon_generator.lua"
 
-scene.switchTo "Menu"
+scene.switchTo("Menu")

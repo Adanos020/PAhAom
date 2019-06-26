@@ -18,37 +18,35 @@ local player = {
     graphics = {
         type = "sprite",
         texture = "player",
-        textureRect = {
-            left = 0,
-            right = 0,
-            width = 16,
-            height = 16,
-        },
+        textureRect = rectangle(0, 0, 16, 16),
         z = 1,
     },
-    rectRB = {
-        size = vector(16, 16),
-        velocity = vector(0, 0)
+    rigidBody = {
+        velocity = vector(0, 0),
     },
     input = {
         onKeyPressed = function(self, key)
+            local velocity = self.rigidBody.velocity
             if key == Keyboard.Left then
-                self.rectRB.velocity.x = -30
+                velocity.x = -200
             elseif key == Keyboard.Right then
-                self.rectRB.velocity.x = 30
+                velocity.x = 200
             elseif key == Keyboard.Up then
-                self.rectRB.velocity.y = -30
+                velocity.y = -200
             elseif key == Keyboard.Down then
-                self.rectRB.velocity.y = 30
+                velocity.y = 200
             end
+            entity.setVelocity(self, velocity)
         end,
         onKeyReleased = function(self, key)
+            local velocity = self.rigidBody.velocity
             if key == Keyboard.Left or key == Keyboard.Right then
-                self.rectRB.velocity.x = 0
+                velocity.x = 0
             elseif key == Keyboard.Up or key == Keyboard.Down then
-                self.rectRB.velocity.y = 0
+                velocity.y = 0
             end
-        end
+            entity.setVelocity(self, velocity)
+        end,
     },
 }
 
@@ -66,10 +64,11 @@ end
 
 function Game:onKeyPressed(key)
     if key == Keyboard.Escape then
-        scene.switchTo "Menu"
+        scene.switchTo("Menu")
     end
 end
 
 function Game:update(dt)
-    entity.moveBy(player, vec.multiply(player.rectRB.velocity, dt))
+    -- print(level.position.x, level.position.y, "|",
+    --       player.position.x, player.position.y)
 end

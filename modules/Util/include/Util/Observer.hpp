@@ -17,7 +17,7 @@
 namespace util
 {
 
-/** 
+/** Message representation 
  */
 struct Message
 {
@@ -47,7 +47,7 @@ struct Message
 
         struct SaveAndQuit {};
 
-        // ECS
+        // ECS - Transform
 
         struct AddEntity
         {
@@ -90,14 +90,29 @@ struct Message
                 Vector scale;
         };
 
+        // ECS - Transform
+
+        struct SetEntityVelocity
+        {
+                entt::entity entity;
+                Vector velocity;
+        };
+
+        struct AccelerateEntityBy
+        {
+                entt::entity entity;
+                Vector acceleration;
+        };
 
         std::variant<
                 SwitchScene, SaveAndSwitchScene,
                 LoadScene, SaveAndLoadScene,
                 Quit, SaveAndQuit,
                 AddEntity,
-                SetEntityPosition, SetEntityRotation, SetEntityScale,
-                MoveEntityBy, RotateEntityBy, ScaleEntityBy
+                SetEntityPosition, MoveEntityBy,
+                SetEntityRotation, RotateEntityBy,
+                SetEntityScale,    ScaleEntityBy,
+                SetEntityVelocity, AccelerateEntityBy
         > msg;
 };
 
@@ -106,8 +121,11 @@ struct Message
 template<class... Ts> struct MsgHandlers : Ts... { using Ts::operator()...; };
 template<class... Ts> MsgHandlers(Ts...) -> MsgHandlers<Ts...>;
 
-/**
- * 
+/** Empty message handler for discarding unhandled messages.
+ */
+static constexpr auto discardTheRest = [](const auto&){};
+
+/** Base class for objects that are receiving messages broadcasted by Subject.
  */
 class Observer
 {
@@ -119,8 +137,7 @@ public:
         virtual ~Observer() {}
 };
 
-/**
- * 
+/** 
  */
 class Subject
 {

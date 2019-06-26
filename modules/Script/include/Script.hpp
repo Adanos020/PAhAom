@@ -18,13 +18,15 @@ inline static void init()
 {
         // ECS
         luaContext.global["entity"] = lua::Table::records(luaContext,
-                "add",         addEntity,
-                "setPosition", setPosition,
-                "setRotation", setRotation,
-                "setScale",    setScale,
-                "moveBy",      moveBy,
-                "rotateBy",    rotateBy,
-                "scaleBy",     scaleBy);
+                "add",          addEntity,
+                "setPosition",  setPosition,
+                "setRotation",  setRotation,
+                "setScale",     setScale,
+                "moveBy",       moveBy,
+                "rotateBy",     rotateBy,
+                "scaleBy",      scaleBy,
+                "setVelocity",  setVelocity,
+                "accelerateBy", accelerateBy);
 
 
         // Graphics
