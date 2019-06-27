@@ -19,7 +19,7 @@ struct Video
 
         static void load()
         {
-                const lua::Table settings = script::luaContext.global["Settings"];
+                const lua::Table settings = script::luaContext.global["settings"];
 
                 const lua::Table video = settings["video"];
                 resolution = {

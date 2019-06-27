@@ -1,6 +1,6 @@
 -- Resources to load. Each entry is a table consisting of two auto-indexed
 -- strings: resource ID, and path to it.
-Resources = {
+resources = {
     -- All paths originate in "data/fonts/".
     fonts = {
         { "unifont", "unifont.ttf" },

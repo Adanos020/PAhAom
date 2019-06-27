@@ -1,4 +1,4 @@
-local windowCenter = vec.divide(Settings.video.resolution, 2)
+local windowCenter = vec.divide(settings.video.resolution, 2)
 
 local elapsedTime = 0
 
@@ -18,7 +18,7 @@ local bkg = {
     graphics = {
         type = "rectangle",
         texture = "menu bkg",
-        size = Settings.video.resolution,
+        size = settings.video.resolution,
         z = 0,
     },
 }
@@ -54,14 +54,14 @@ function Menu:newBall(pos, radius, color, velocity)
 end
 
 function Menu:onKeyPressed(key)
-    if key == Keyboard.Enter then
+    if key == keyboard.enter then
         game.switchTo("Game")
-    elseif key == Keyboard.Escape then
+    elseif key == keyboard.escape then
         game.quit()
-    elseif key == Keyboard.Space then
+    elseif key == keyboard.space then
         entity.add(self:newBall(
-            vector(random.uniform(0, Settings.video.resolution.x),
-                   random.uniform(0, Settings.video.resolution.y)),
+            vector(random.uniform(0, settings.video.resolution.x),
+                   random.uniform(0, settings.video.resolution.y)),
             random.uniform(10, 25),
             rgb(random.uniform(0, 256),
                 random.uniform(0, 256),

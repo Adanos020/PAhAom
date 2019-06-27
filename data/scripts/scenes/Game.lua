@@ -1,4 +1,4 @@
-local windowCenter = vec.divide(Settings.video.resolution, 2)
+local windowCenter = vec.divide(settings.video.resolution, 2)
 
 local level = {
     position = windowCenter,
@@ -27,22 +27,22 @@ local player = {
     input = {
         onKeyPressed = function(self, key)
             local velocity = self.rigidBody.velocity
-            if key == Keyboard.Left then
+            if key == keyboard.left then
                 velocity.x = -200
-            elseif key == Keyboard.Right then
+            elseif key == keyboard.right then
                 velocity.x = 200
-            elseif key == Keyboard.Up then
+            elseif key == keyboard.up then
                 velocity.y = -200
-            elseif key == Keyboard.Down then
+            elseif key == keyboard.down then
                 velocity.y = 200
             end
             entity.setVelocity(self, velocity)
         end,
         onKeyReleased = function(self, key)
             local velocity = self.rigidBody.velocity
-            if key == Keyboard.Left or key == Keyboard.Right then
+            if key == keyboard.left or key == keyboard.right then
                 velocity.x = 0
-            elseif key == Keyboard.Up or key == Keyboard.Down then
+            elseif key == keyboard.up or key == keyboard.down then
                 velocity.y = 0
             end
             entity.setVelocity(self, velocity)
@@ -63,7 +63,7 @@ function Game:new(o)
 end
 
 function Game:onKeyPressed(key)
-    if key == Keyboard.Escape then
+    if key == keyboard.escape then
         game.switchTo("Menu")
     end
 end

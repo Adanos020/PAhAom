@@ -31,7 +31,7 @@ $ make -j
 - view (camera) manipulation and viewports
 - multiple language support (dictionaries)
 - noise functions
-- more graphical objects (including animated ones)
+- more graphical objects and animations
 - manipulation of graphical objects
 - better support for tile maps
 - GUI library
