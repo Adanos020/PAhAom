@@ -3,14 +3,14 @@
 
 #include <Engine/ECS/Systems.hpp>
 
-#include <Script.hpp>
+#include <Script/Lua.hpp>
+#include <Script/Input.hpp>
 
 #include <Util/Constants.hpp>
 #include <Util/Math.hpp>
 #include <Util/Types.hpp>
 
 #include <SFML/Graphics/Drawable.hpp>
-#include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Window/Event.hpp>
 
@@ -66,14 +66,17 @@ public:
                 });
         }
 
-        void load()
+        void load(const util::SceneID)
         {
-                
+                this->destroy();
         }
 
-        void save()
+        void save(util::SceneID id)
         {
-
+                if (!id)
+                {
+                        id = ++currentId;
+                }
         }
 
         void handleInput(const sf::Event& event)
@@ -101,7 +104,16 @@ public:
                 this->systems.render.drawTo(target);
         }
 
+public:
+
+        static util::SceneID nextId()
+        {
+                return currentId + 1;
+        }
+
 private:
+
+        inline static util::SceneID currentId = 0;
 
         std::string stateName;
         ecs::Systems systems;

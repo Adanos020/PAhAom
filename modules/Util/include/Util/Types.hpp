@@ -40,4 +40,6 @@ using Matrix = std::vector<std::vector<T>>;
 template<typename T>
 using UniquePtrs = std::vector<std::unique_ptr<T>>;
 
+using SceneID = std::uint32_t;
+
 }

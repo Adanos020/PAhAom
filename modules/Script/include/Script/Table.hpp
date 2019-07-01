@@ -7,7 +7,7 @@
 namespace script
 {
 
-inline static lua::Retval tableAll(lua::Context& context)
+inline static lua::Retval allOf(lua::Context& context)
 {
         context.requireArgs<lua::Table, lua::LFunction>(2);
         bool result = true;
@@ -25,7 +25,7 @@ inline static lua::Retval tableAll(lua::Context& context)
         return context.ret(result);
 }
 
-inline static lua::Retval tableAny(lua::Context& context)
+inline static lua::Retval anyOf(lua::Context& context)
 {
         context.requireArgs<lua::Table, lua::LFunction>(2);
         bool result = false;
@@ -43,7 +43,7 @@ inline static lua::Retval tableAny(lua::Context& context)
         return context.ret(result);
 }
 
-inline static lua::Retval tableNone(lua::Context& context)
+inline static lua::Retval noneOf(lua::Context& context)
 {
         context.requireArgs<lua::Table, lua::LFunction>(2);
         bool result = true;

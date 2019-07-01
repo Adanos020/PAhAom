@@ -1,15 +1,12 @@
 #pragma once
 
 
-#include <Engine/Scene.hpp>
-
 #include <Util/Math.hpp>
+#include <Util/Types.hpp>
 
 #include <entt/entity/registry.hpp>
 
 #include <algorithm>
-#include <string_view>
-#include <type_traits>
 #include <unordered_set>
 #include <variant>
 
@@ -28,24 +25,17 @@ struct Message
                 std::string sceneName;
         };
 
-        struct SaveAndSwitchScene
+        struct SaveScene
         {
-                std::string sceneName;
+                SceneID sceneId;
         };
 
         struct LoadScene
         {
-                std::string sceneName;
-        };
-
-        struct SaveAndLoadScene
-        {
-                std::string sceneName;
+                SceneID sceneId;
         };
 
         struct Quit {};
-
-        struct SaveAndQuit {};
 
 
         // ECS - Transform
@@ -118,10 +108,14 @@ struct Message
                 float dMass;
         };
 
+
+        // Message data
+
         std::variant<
-                SwitchScene, SaveAndSwitchScene,
-                LoadScene, SaveAndLoadScene,
-                Quit, SaveAndQuit,
+                SwitchScene,
+                SaveScene,
+                LoadScene,
+                Quit,
                 AddEntity,
                 SetEntityPosition, MoveEntityBy,
                 SetEntityRotation, RotateEntityBy,
@@ -152,7 +146,9 @@ class Observer
 
 public:
 
-        virtual ~Observer() {}
+        virtual ~Observer()
+        {
+        }
 };
 
 

@@ -5,6 +5,10 @@
 #include <Engine/Settings.hpp>
 
 #include <Util/Observer.hpp>
+#include <Util/Random.hpp>
+#include <Util/Types.hpp>
+
+#include <Script.hpp>
 
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -112,27 +116,16 @@ private:
                         {
                                 this->currentScene.switchTo(msg.sceneName);
                         },
-                        [this](const util::Message::SaveAndSwitchScene& msg)
+                        [this](const util::Message::SaveScene& msg)
                         {
-                                this->currentScene.save();
-                                this->currentScene.switchTo(msg.sceneName);
+                                this->currentScene.save(msg.sceneId);
                         },
-                        [this](const util::Message::LoadScene&)
+                        [this](const util::Message::LoadScene& msg)
                         {
-                                this->currentScene.load();
-                        },
-                        [this](const util::Message::SaveAndLoadScene&)
-                        {
-                                this->currentScene.save();
-                                this->currentScene.load();
+                                this->currentScene.load(msg.sceneId);
                         },
                         [this](const util::Message::Quit&)
                         {
-                                this->running = false;
-                        },
-                        [this](const util::Message::SaveAndQuit&)
-                        {
-                                this->currentScene.save();
                                 this->running = false;
                         },
                         util::discardTheRest

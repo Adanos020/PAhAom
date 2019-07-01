@@ -139,12 +139,10 @@ inline static void init()
 
         // Scenes
         luaContext.global["game"] = lua::Table::records(luaContext,
-                "switchTo",        switchScene,
-                "saveAndSwitchTo", saveAndSwitchScene,
-                "load",            loadScene,
-                "saveAndLoad",     saveAndLoadScene,
-                "quit",            quit,
-                "saveAndQuit",     saveAndQuit);
+                "switchTo",  switchTo,
+                "saveScene", saveScene,
+                "loadScene", loadScene,
+                "quit",      quit);
 
 
         // Settings
@@ -152,9 +150,9 @@ inline static void init()
 
 
         // Table
-        luaContext.global["allOf"]  = tableAll;
-        luaContext.global["anyOf"]  = tableAny;
-        luaContext.global["noneOf"] = tableNone;
+        luaContext.global["allOf"]  = allOf;
+        luaContext.global["anyOf"]  = anyOf;
+        luaContext.global["noneOf"] = noneOf;
 
 
         // Run the game.

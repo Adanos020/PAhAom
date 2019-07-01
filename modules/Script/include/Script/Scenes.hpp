@@ -1,6 +1,8 @@
 #pragma once
 
 
+#include <Engine/Scene.hpp>
+
 #include <Script/Lua.hpp>
 
 #include <Util/Observer.hpp>
@@ -11,20 +13,28 @@ namespace script
 
 /** Switches to another scene without saving the current scene.
  */
-inline lua::Retval switchScene(lua::Context& context)
+inline lua::Retval switchTo(lua::Context& context)
 {
         context.requireArgs<std::string>(1);
         util::Subject::send(util::Message::SwitchScene{context.args[0]});
         return context.ret();
 }
 
-/** Switches to another scene and saves the current scene.
+/** Saves the current scene. If a valid scene ID is given, an existing scene
+ *  will be overwritten. Otherwise, the current scene will be saved in a new
+ *  file.
+ * 
+ *  Returns: ID of the saved scene.
  */
-inline lua::Retval saveAndSwitchScene(lua::Context& context)
+inline lua::Retval saveScene(lua::Context& context)
 {
-        context.requireArgs<std::string>(1);
-        util::Subject::send(util::Message::SaveAndSwitchScene{context.args[0]});
-        return context.ret();
+        if (context.checkArgs<util::SceneID>(1))
+        {
+                util::Subject::send(util::Message::SaveScene{context.args[0]});
+                return context.ret(context.args[0]);
+        }
+        util::Subject::send(util::Message::SaveScene{0});
+        return context.ret(engine::Scene::nextId());
 }
 
 /** Loads another previously saved scene and switches to without saving
@@ -32,18 +42,8 @@ inline lua::Retval saveAndSwitchScene(lua::Context& context)
  */
 inline lua::Retval loadScene(lua::Context& context)
 {
-        context.requireArgs<std::string>(1);
+        context.requireArgs<util::SceneID>(1);
         util::Subject::send(util::Message::LoadScene{context.args[0]});
-        return context.ret();
-}
-
-/** Loads another previously saved scene, switches to it, and saves
- *  the current scene.
- */
-inline lua::Retval saveAndLoadScene(lua::Context& context)
-{
-        context.requireArgs<std::string>(1);
-        util::Subject::send(util::Message::SaveAndLoadScene{context.args[0]});
         return context.ret();
 }
 
@@ -52,14 +52,6 @@ inline lua::Retval saveAndLoadScene(lua::Context& context)
 inline lua::Retval quit(lua::Context& context)
 {
         util::Subject::send(util::Message::Quit{});
-        return context.ret();
-}
-
-/** Terminates the program and saves the current scene.
- */
-inline lua::Retval saveAndQuit(lua::Context& context)
-{
-        util::Subject::send(util::Message::SaveAndQuit{});
         return context.ret();
 }
 
