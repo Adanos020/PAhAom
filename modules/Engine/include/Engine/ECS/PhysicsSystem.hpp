@@ -65,11 +65,6 @@ public:
                 this->entities.get<RigidBody>(entity).mass = mass;
         }
 
-        void addMass(const entt::entity entity, const float dMass)
-        {
-                this->entities.get<RigidBody>(entity).mass += dMass;
-        }
-
         void update()
         {
                 entities.sort<Transform, RigidBody>();
@@ -96,10 +91,6 @@ private:
                         [this](const util::Message::SetEntityMass& msg)
                         {
                                 this->setMass(msg.entity, msg.mass);
-                        },
-                        [this](const util::Message::AddEntityMass& msg)
-                        {
-                                this->addMass(msg.entity, msg.dMass);
                         },
                         util::discardTheRest
                 }, message.msg);

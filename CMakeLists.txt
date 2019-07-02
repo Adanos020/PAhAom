@@ -27,6 +27,9 @@ add_library(LuaPP STATIC ${SOURCES} ${HEADERS})
 target_include_directories(LuaPP PUBLIC "modules/luapp/luapp")
 target_link_libraries(LuaPP PUBLIC lua)
 
+# Sol3
+include_directories("modules/sol2/include")
+
 # EnTT
 include_directories("modules/entt/src")
 

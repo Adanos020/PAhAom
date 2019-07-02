@@ -171,22 +171,4 @@ inline static lua::Retval setMass(lua::Context& context)
         return context.ret();
 }
 
-inline static lua::Retval addMass(lua::Context& context)
-{
-        context.requireArgs<lua::Table, float>(2);
-
-        lua::Table entity = context.args[0];
-
-        if (entity["rigidBody"].is<lua::Table>())
-        {
-                util::Subject::send(util::Message::AccelerateEntityBy{entity["id"], context.args[1]});
-                entity["rigidBody"]["mass"] = entity["rigidBody"]["mass"] + context.args[1];
-        }
-        else
-        {
-                context.error("Attempting to assign mass to an entity with no rigid body.");
-        }
-        return context.ret();
-}
-
 }

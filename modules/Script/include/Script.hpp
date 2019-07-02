@@ -27,8 +27,7 @@ inline static void init()
                 "scaleBy",      scaleBy,
                 "setVelocity",  setVelocity,
                 "accelerateBy", accelerateBy,
-                "setMass",      setMass,
-                "addMass",      addMass);
+                "setMass",      setMass);
 
 
         // Graphics

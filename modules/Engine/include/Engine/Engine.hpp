@@ -58,7 +58,7 @@ public:
         {
                 if (not this->running)
                 {
-                        return 1;
+                        return EXIT_FAILURE;
                 }
 
                 sf::Time lag;
@@ -77,7 +77,7 @@ public:
                 }
                 this->window.close();
 
-                return 0;
+                return EXIT_SUCCESS;
         }
 
 private:

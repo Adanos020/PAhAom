@@ -102,12 +102,6 @@ struct Message
                 float mass;
         };
 
-        struct AddEntityMass
-        {
-                entt::entity entity;
-                float dMass;
-        };
-
 
         // Message data
 
@@ -121,7 +115,7 @@ struct Message
                 SetEntityRotation, RotateEntityBy,
                 SetEntityScale,    ScaleEntityBy,
                 SetEntityVelocity, AccelerateEntityBy,
-                SetEntityMass,     AddEntityMass
+                SetEntityMass
         > msg;
 };
 
@@ -132,9 +126,9 @@ template<class... Ts> struct MsgHandlers : Ts... { using Ts::operator()...; };
 template<class... Ts> MsgHandlers(Ts...) -> MsgHandlers<Ts...>;
 
 
-/** Empty message handler for discarding unhandled messages.
+/** Empty message handler for discarding all unhandled messages.
  */
-static constexpr auto discardTheRest = [](const auto&){};
+static constexpr auto discardTheRest = [](const auto&) {};
 
 
 /** Base class for objects that are receiving messages broadcasted by Subject.
@@ -142,13 +136,16 @@ static constexpr auto discardTheRest = [](const auto&){};
 class Observer
 {
         friend class Subject;
-        virtual void receive(const Message&) = 0;
 
 public:
 
         virtual ~Observer()
         {
         }
+
+private:
+
+        virtual void receive(const Message&) = 0;
 };
 
 

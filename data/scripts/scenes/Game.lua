@@ -25,8 +25,8 @@ local player = {
         velocity = vector(0, 0),
     },
     input = {
-        onKeyPressed = function(self, key)
-            local velocity = self.rigidBody.velocity
+        onKeyPressed = function(me, key)
+            local velocity = me.rigidBody.velocity
             if key == keyboard.left then
                 velocity.x = -200
             elseif key == keyboard.right then
@@ -36,16 +36,16 @@ local player = {
             elseif key == keyboard.down then
                 velocity.y = 200
             end
-            entity.setVelocity(self, velocity)
+            entity.setVelocity(me, velocity)
         end,
-        onKeyReleased = function(self, key)
-            local velocity = self.rigidBody.velocity
+        onKeyReleased = function(me, key)
+            local velocity = me.rigidBody.velocity
             if key == keyboard.left or key == keyboard.right then
                 velocity.x = 0
             elseif key == keyboard.up or key == keyboard.down then
                 velocity.y = 0
             end
-            entity.setVelocity(self, velocity)
+            entity.setVelocity(me, velocity)
         end,
     },
 }
