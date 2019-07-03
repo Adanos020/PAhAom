@@ -37,38 +37,34 @@ static constexpr util::CStr EVENT_HANDLERS[sf::Event::Count] = {
         "onSensorChanged",
 };
 
-/** Add empty event handlers for unhandled events.
- */
-inline void assignEmptyInputHandlers(lua::Table& obj)
+inline static void callInputHandler(sol::table obj, sol::table handlers, sf::Event event)
 {
-        for (std::size_t i = 0; i < sf::Event::Count; ++i)
+        if (handlers[EVENT_HANDLERS[event.type]].get_type() != sol::type::function)
         {
-                if (not obj[EVENT_HANDLERS[i]].is<lua::LFunction>())
-                {
-                        obj[EVENT_HANDLERS[i]] = [](lua::Context& c) { return c.ret(); };
-                }
+                return;
         }
-}
 
-inline lua::Valset addInputHandlerArgs(lua::Valset& args, const sf::Event& event)
-{
+        sol::function handler = handlers[EVENT_HANDLERS[event.type]];
         switch (event.type)
         {
                 case sf::Event::Resized:
                 {
-                        args.push_back(event.size.width, event.size.height);
+                        handler(obj,
+                                event.size.width,
+                                event.size.height);
                         break;
                 }
 
                 case sf::Event::TextEntered:
                 {
-                        args.push_back(event.text.unicode);
+                        handler(obj,
+                                event.text.unicode);
                         break;
                 }
 
                 case sf::Event::KeyPressed:
                 {
-                        args.push_back(
+                        handler(obj,
                                 event.key.code,
                                 event.key.alt,
                                 event.key.control,
@@ -79,7 +75,7 @@ inline lua::Valset addInputHandlerArgs(lua::Valset& args, const sf::Event& event
 
                 case sf::Event::KeyReleased:
                 {
-                        args.push_back(
+                        handler(obj,
                                 event.key.code,
                                 event.key.alt,
                                 event.key.control,
@@ -90,7 +86,7 @@ inline lua::Valset addInputHandlerArgs(lua::Valset& args, const sf::Event& event
 
                 case sf::Event::MouseWheelMoved:
                 {
-                        args.push_back(
+                        handler(obj,
                                 event.mouseWheel.delta,
                                 event.mouseWheel.x,
                                 event.mouseWheel.y);
@@ -99,7 +95,7 @@ inline lua::Valset addInputHandlerArgs(lua::Valset& args, const sf::Event& event
 
                 case sf::Event::MouseWheelScrolled:
                 {
-                        args.push_back(
+                        handler(obj,
                                 event.mouseWheelScroll.delta,
                                 event.mouseWheelScroll.x,
                                 event.mouseWheelScroll.y);
@@ -108,7 +104,7 @@ inline lua::Valset addInputHandlerArgs(lua::Valset& args, const sf::Event& event
 
                 case sf::Event::MouseButtonPressed:
                 {
-                        args.push_back(
+                        handler(obj,
                                 event.mouseButton.button,
                                 event.mouseButton.x,
                                 event.mouseButton.y);
@@ -117,7 +113,7 @@ inline lua::Valset addInputHandlerArgs(lua::Valset& args, const sf::Event& event
 
                 case sf::Event::MouseButtonReleased:
                 {
-                        args.push_back(
+                        handler(obj,
                                 event.mouseButton.button,
                                 event.mouseButton.x,
                                 event.mouseButton.y);
@@ -126,25 +122,31 @@ inline lua::Valset addInputHandlerArgs(lua::Valset& args, const sf::Event& event
 
                 case sf::Event::MouseMoved:
                 {
-                        args.push_back(event.mouseMove.x, event.mouseMove.y);
+                        handler(obj,
+                                event.mouseMove.x,
+                                event.mouseMove.y);
                         break;
                 }
 
                 case sf::Event::JoystickButtonPressed:
                 {
-                        args.push_back(event.joystickButton.joystickId, event.joystickButton.button);
+                        handler(obj,
+                                event.joystickButton.joystickId,
+                                event.joystickButton.button);
                         break;
                 }
 
                 case sf::Event::JoystickButtonReleased:
                 {
-                        args.push_back(event.joystickButton.joystickId, event.joystickButton.button);
+                        handler(obj,
+                                event.joystickButton.joystickId,
+                                event.joystickButton.button);
                         break;
                 }
 
                 case sf::Event::JoystickMoved:
                 {
-                        args.push_back(
+                        handler(obj,
                                 event.joystickMove.joystickId,
                                 event.joystickMove.axis,
                                 event.joystickMove.position);
@@ -153,19 +155,21 @@ inline lua::Valset addInputHandlerArgs(lua::Valset& args, const sf::Event& event
 
                 case sf::Event::JoystickConnected:
                 {
-                        args.push_back(event.joystickConnect.joystickId);
+                        handler(obj,
+                                event.joystickConnect.joystickId);
                         break;
                 }
 
                 case sf::Event::JoystickDisconnected:
                 {
-                        args.push_back(event.joystickConnect.joystickId);
+                        handler(obj,
+                                event.joystickConnect.joystickId);
                         break;
                 }
 
                 case sf::Event::TouchBegan:
                 {
-                        args.push_back(
+                        handler(obj,
                                 event.touch.finger,
                                 event.touch.x,
                                 event.touch.y);
@@ -174,7 +178,7 @@ inline lua::Valset addInputHandlerArgs(lua::Valset& args, const sf::Event& event
 
                 case sf::Event::TouchMoved:
                 {
-                        args.push_back(
+                        handler(obj,
                                 event.touch.finger,
                                 event.touch.x,
                                 event.touch.y);
@@ -183,7 +187,7 @@ inline lua::Valset addInputHandlerArgs(lua::Valset& args, const sf::Event& event
 
                 case sf::Event::TouchEnded:
                 {
-                        args.push_back(
+                        handler(obj,
                                 event.touch.finger,
                                 event.touch.x,
                                 event.touch.y);
@@ -192,7 +196,7 @@ inline lua::Valset addInputHandlerArgs(lua::Valset& args, const sf::Event& event
 
                 case sf::Event::SensorChanged:
                 {
-                        args.push_back(
+                        handler(obj,
                                 event.sensor.type,
                                 event.sensor.x,
                                 event.sensor.y,
@@ -202,8 +206,114 @@ inline lua::Valset addInputHandlerArgs(lua::Valset& args, const sf::Event& event
 
                 default: break;
         }
+}
 
-        return args;
+inline static void loadInput()
+{
+        lua["keyboard"] = lua.create_table_with(
+                "unknown",   sf::Keyboard::Unknown,
+                "a",         sf::Keyboard::A,
+                "b",         sf::Keyboard::B,
+                "c",         sf::Keyboard::C,
+                "d",         sf::Keyboard::D,
+                "e",         sf::Keyboard::E,
+                "f",         sf::Keyboard::F,
+                "g",         sf::Keyboard::G,
+                "h",         sf::Keyboard::H,
+                "i",         sf::Keyboard::I,
+                "j",         sf::Keyboard::J,
+                "k",         sf::Keyboard::K,
+                "l",         sf::Keyboard::L,
+                "m",         sf::Keyboard::M,
+                "n",         sf::Keyboard::N,
+                "o",         sf::Keyboard::O,
+                "p",         sf::Keyboard::P,
+                "q",         sf::Keyboard::Q,
+                "r",         sf::Keyboard::R,
+                "s",         sf::Keyboard::S,
+                "t",         sf::Keyboard::T,
+                "u",         sf::Keyboard::U,
+                "v",         sf::Keyboard::V,
+                "w",         sf::Keyboard::W,
+                "x",         sf::Keyboard::X,
+                "y",         sf::Keyboard::Y,
+                "z",         sf::Keyboard::Z,
+                "num0",      sf::Keyboard::Num0,
+                "num1",      sf::Keyboard::Num1,
+                "num2",      sf::Keyboard::Num2,
+                "num3",      sf::Keyboard::Num3,
+                "num4",      sf::Keyboard::Num4,
+                "num5",      sf::Keyboard::Num5,
+                "num6",      sf::Keyboard::Num6,
+                "num7",      sf::Keyboard::Num7,
+                "num8",      sf::Keyboard::Num8,
+                "num9",      sf::Keyboard::Num9,
+                "escape",    sf::Keyboard::Escape,
+                "lControl",  sf::Keyboard::LControl,
+                "lShift",    sf::Keyboard::LShift,
+                "lAlt",      sf::Keyboard::LAlt,
+                "lSystem",   sf::Keyboard::LSystem,
+                "rControl",  sf::Keyboard::RControl,
+                "rShift",    sf::Keyboard::RShift,
+                "rAlt",      sf::Keyboard::RAlt,
+                "rSystem",   sf::Keyboard::RSystem,
+                "menu",      sf::Keyboard::Menu,
+                "lBracket",  sf::Keyboard::LBracket,
+                "rBracket",  sf::Keyboard::RBracket,
+                "semicolon", sf::Keyboard::Semicolon,
+                "comma",     sf::Keyboard::Comma,
+                "period",    sf::Keyboard::Period,
+                "quote",     sf::Keyboard::Quote,
+                "slash",     sf::Keyboard::Slash,
+                "backslash", sf::Keyboard::Backslash,
+                "tilde",     sf::Keyboard::Tilde,
+                "equal",     sf::Keyboard::Equal,
+                "hyphen",    sf::Keyboard::Hyphen,
+                "space",     sf::Keyboard::Space,
+                "enter",     sf::Keyboard::Enter,
+                "backspace", sf::Keyboard::Backspace,
+                "tab",       sf::Keyboard::Tab,
+                "pageUp",    sf::Keyboard::PageUp,
+                "pageDown",  sf::Keyboard::PageDown,
+                "end",       sf::Keyboard::End,
+                "home",      sf::Keyboard::Home,
+                "insert",    sf::Keyboard::Insert,
+                "delete",    sf::Keyboard::Delete,
+                "add",       sf::Keyboard::Add,
+                "subtract",  sf::Keyboard::Subtract,
+                "multiply",  sf::Keyboard::Multiply,
+                "divide",    sf::Keyboard::Divide,
+                "left",      sf::Keyboard::Left,
+                "right",     sf::Keyboard::Right,
+                "up",        sf::Keyboard::Up,
+                "down",      sf::Keyboard::Down,
+                "numpad0",   sf::Keyboard::Numpad0,
+                "numpad1",   sf::Keyboard::Numpad1,
+                "numpad2",   sf::Keyboard::Numpad2,
+                "numpad3",   sf::Keyboard::Numpad3,
+                "numpad4",   sf::Keyboard::Numpad4,
+                "numpad5",   sf::Keyboard::Numpad5,
+                "numpad6",   sf::Keyboard::Numpad6,
+                "numpad7",   sf::Keyboard::Numpad7,
+                "numpad8",   sf::Keyboard::Numpad8,
+                "numpad9",   sf::Keyboard::Numpad9,
+                "f1",        sf::Keyboard::F1,
+                "f2",        sf::Keyboard::F2,
+                "f3",        sf::Keyboard::F3,
+                "f4",        sf::Keyboard::F4,
+                "f5",        sf::Keyboard::F5,
+                "f6",        sf::Keyboard::F6,
+                "f7",        sf::Keyboard::F7,
+                "f8",        sf::Keyboard::F8,
+                "f9",        sf::Keyboard::F9,
+                "f10",       sf::Keyboard::F10,
+                "f11",       sf::Keyboard::F11,
+                "f12",       sf::Keyboard::F12,
+                "f13",       sf::Keyboard::F13,
+                "f14",       sf::Keyboard::F14,
+                "f15",       sf::Keyboard::F15,
+                "pause",     sf::Keyboard::Pause,
+                "keyCount",  sf::Keyboard::KeyCount);
 }
 
 }

@@ -31,7 +31,7 @@ public:
                 util::Subject::deleteObserver(this);
         }
 
-        void addEntity(lua::Valref entityTable)
+        void addEntity(sol::table entityTable)
         {
                 const entt::entity entity = this->entities.create();
                 entityTable["id"] = entity;
@@ -62,8 +62,7 @@ private:
                 std::visit(util::MsgHandlers {
                         [this](const util::Message::AddEntity& msg)
                         {
-                                lua::Table entity = msg.data;
-                                this->addEntity(entity);
+                                this->addEntity(msg.data);
                         },
                         util::discardTheRest
                 }, message.msg);

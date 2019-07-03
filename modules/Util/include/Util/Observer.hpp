@@ -42,7 +42,7 @@ struct Message
 
         struct AddEntity
         {
-                lua::Table data;
+                sol::table data;
         };
 
         struct SetEntityPosition

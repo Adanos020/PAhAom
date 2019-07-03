@@ -3,7 +3,7 @@
 
 #include <Engine/ECS/Components.hpp>
 
-#include <Script/Aux.hpp>
+#include <Script/Math.hpp>
 
 #include <Util/Observer.hpp>
 
@@ -34,11 +34,11 @@ public:
                 this->entities.assign<Transform>(entity, position, scale, rotation);
         }
 
-        void assignTransform(const entt::entity entity, const lua::Table& entityTable)
+        void assignTransform(const entt::entity entity, sol::table entityTable)
         {
-                const auto position = script::tableFieldOr(entityTable, "position", util::Vector{});
-                const auto scale    = script::tableFieldOr(entityTable, "scale", util::Vector{1, 1});
-                const auto rotation = entityTable["rotation"].to<float>(0);
+                const auto position = entityTable.get_or("position", script::vector(0, 0));
+                const auto scale    = entityTable.get_or("scale",    script::vector(1, 1));
+                const auto rotation = entityTable.get_or("rotation", 0.f);
                 this->assignTransform(entity, position, scale, rotation);
         }
 

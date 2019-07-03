@@ -1,64 +1,58 @@
 #pragma once
 
 
-#include <luapp.hpp>
+#include <sol/sol.hpp>
+
+#include <algorithm>
 
 
 namespace script
 {
 
-inline static lua::Retval allOf(lua::Context& context)
+inline static bool allOf(sol::table tab, sol::function pred)
 {
-        context.requireArgs<lua::Table, lua::LFunction>(2);
         bool result = true;
-        static_cast<lua::Table>(context.args[0]).iterate([&](lua::Valref, lua::Valref el)
+        tab.for_each([pred, &result](sol::object, sol::object el)
         {
-                if (not context.args[1](el))
+                if (not pred(el))
                 {
-                        // If condition is met, break.
                         result = false;
-                        return false;
                 }
-                // Otherwise continue.
-                return true;
         });
-        return context.ret(result);
+        return result;
 }
 
-inline static lua::Retval anyOf(lua::Context& context)
+inline static bool anyOf(sol::table tab, sol::function pred)
 {
-        context.requireArgs<lua::Table, lua::LFunction>(2);
         bool result = false;
-        static_cast<lua::Table>(context.args[0]).iterate([&](lua::Valref, lua::Valref el)
+        tab.for_each([pred, &result](sol::object, sol::object el)
         {
-                if (context.args[1](el))
+                if (pred(el))
                 {
-                        // If condition is met, break.
                         result = true;
-                        return false;
                 }
-                // Otherwise continue.
-                return true;
         });
-        return context.ret(result);
+        return result;
 }
 
-inline static lua::Retval noneOf(lua::Context& context)
+inline static bool noneOf(sol::table tab, sol::function pred)
 {
-        context.requireArgs<lua::Table, lua::LFunction>(2);
         bool result = true;
-        static_cast<lua::Table>(context.args[0]).iterate([&](lua::Valref, lua::Valref el)
+        tab.for_each([pred, &result](sol::object, sol::object el)
         {
-                if (context.args[1](el))
+                if (pred(el))
                 {
-                        // If condition is met, break.
                         result = false;
-                        return false;
                 }
-                // Otherwise continue.
-                return true;
         });
-        return context.ret(result);
+        return result;
+}
+
+inline static void loadTable()
+{
+        lua["allOf"]  = allOf;
+        lua["anyOf"]  = anyOf;
+        lua["noneOf"] = noneOf;
 }
 
 }

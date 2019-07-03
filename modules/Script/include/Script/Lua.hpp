@@ -1,17 +1,12 @@
 #pragma once
 
 
-// #include <lua.hpp>
-#include <luapp.hpp>
+#include <sol/sol.hpp>
 
 
 namespace script
 {
 
-inline static lua::State luaState;
-inline static lua::Context luaContext = {
-        luaState.getRawState(),
-        lua::Context::initializeExplicitly
-};
+static sol::state lua;
 
 }

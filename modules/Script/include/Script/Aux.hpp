@@ -12,17 +12,17 @@ namespace script
  *  `to` with a backup value.
  */
 template<typename Return>
-inline static Return tableFieldOr(const lua::Table& table, const std::string& field, const Return rFalse)
+inline static Return tableFieldOr(sol::table table, const std::string& field, const Return rFalse)
 {
-        if (lua::Value v = std::move(table[field]))
+        if (sol::object v = table[field])
         {
                 if constexpr (std::is_fundamental_v<Return>)
                 {
-                        return v.to<Return>();
+                        return v.as<Return>();
                 }
                 else
                 {
-                        return Return{lua::Table{v}};
+                        return Return{v.as<sol::table>()};
                 }
         }
         return rFalse;

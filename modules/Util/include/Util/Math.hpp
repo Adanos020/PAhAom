@@ -6,7 +6,7 @@
 
 #include <SFML/System/Vector2.hpp>
 
-#include <luapp.hpp>
+#include <sol/sol.hpp>
 
 #include <cmath>
 #include <type_traits>
@@ -54,7 +54,7 @@ inline constexpr bool isWithin(const T& value, const T& lo, const T& hi)
 template<Floating T>
 inline constexpr bool isWithin(const T& value, const T& lo, const T& hi)
 {
-        return value >= lo and value <= hi;
+        return lo <= value and value <= hi;
 }
 
 
@@ -80,8 +80,8 @@ struct Vector : sf::Vector2f
         {
         }
 
-        Vector(const lua::Valref vec)
-        : sf::Vector2f(vec["x"].to<float>(0), vec["y"].to<float>(0))
+        Vector(sol::table vec)
+        : sf::Vector2f(vec.get_or<float>("x", 0), vec.get_or<float>("y", 0))
         {
         }
 

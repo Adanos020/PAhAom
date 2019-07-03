@@ -32,15 +32,15 @@ public:
                         [](const Graphics& a, const Graphics& b) { return a.z < b.z; });
         }
 
-        void assignGraphics(const entt::entity entity, const lua::Table& entityTable)
+        void assignGraphics(const entt::entity entity, sol::table entityTable)
         {
-                if (lua::Value gfx = entityTable["graphics"]; gfx.is<lua::Table>())
+                if (entityTable["graphics"].get_type() == sol::type::table)
                 {
-                        lua::Table gfxTable = gfx;
+                        sol::table gfxTable = entityTable["graphics"];
                         if (auto gfx = script::tableToDrawable(gfxTable))
                         {
-                                const auto z       = gfxTable["z"].to<std::int32_t>(0);
-                                const auto visible = script::tableFieldOr(gfxTable, "visible", true);
+                                const auto z       = gfxTable.get_or("z", 0);
+                                const auto visible = gfxTable.get_or("visible", true);
                                 this->assignGraphics(entity, std::move(*gfx), z, visible);
                         }
                 }

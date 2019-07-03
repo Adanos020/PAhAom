@@ -16,26 +16,26 @@ namespace script
 
 namespace impl
 {
-        inline bool isVector(const lua::Table& vec)
+        inline static bool isVector(sol::table vec)
         {
-                return vec["x"].is<float>() and vec["y"].is<float>();
+                return vec["x"].get_type() == sol::type::number
+                   and vec["y"].get_type() == sol::type::number;
         }
 
-        inline lua::Table vectorToTable(const util::Vector vec)
+        inline static sol::table vectorToTable(const util::Vector vec)
         {
-                auto newVec = lua::Table{luaContext};
-                newVec["x"] = vec.x;
-                newVec["y"] = vec.y;
-                return newVec;
+                return lua.create_table_with("x", vec.x, "y", vec.y);
         }
 
-        inline bool isRectangle(const lua::Table& rect)
+        inline static bool isRectangle(sol::table rect)
         {
-                return rect["left"].is<float>() and rect["top"].is<float>()
-                   and rect["width"].is<float>() and rect["height"].is<float>();
+                return rect["left"  ].get_type() == sol::type::number
+                   and rect["top"   ].get_type() == sol::type::number
+                   and rect["width" ].get_type() == sol::type::number
+                   and rect["height"].get_type() == sol::type::number;
         }
 
-        inline sf::FloatRect toRectangle(const lua::Table& rect)
+        inline static sf::FloatRect toRectangle(sol::table rect)
         {
                 if (isRectangle(rect))
                 {
@@ -44,92 +44,12 @@ namespace impl
                 return {};
         }
 
-        inline lua::Table rectangleToTable(const sf::FloatRect rect)
+        inline static sol::table rectangleToTable(const sf::FloatRect rect)
         {
-                auto newRect = lua::Table{luaContext};
-                newRect["left"]   = rect.left;
-                newRect["top"]    = rect.top;
-                newRect["width"]  = rect.width;
-                newRect["height"] = rect.height;
-                return newRect;
+                return lua.create_table_with(
+                        "left",  rect.left,  "top",    rect.top,
+                        "width", rect.width, "height", rect.height);
         }
-}
-
-/** Returns the given number 'trimmed' to fit in a given range.
- * 
- *  Params:
- *      val = Number. It will be returned if it's between lo and hi
- *      lo  = Number. It will be returned if val is less than it.
- *      hi  = Number. It will be returned if val is greater than it.
- * 
- *  Returns: Number
- */
-inline lua::Retval clamp(lua::Context& context)
-{
-        context.requireArgs<float, float, float>(3);
-
-        const lua::Valref val = context.args[0];
-        const lua::Valref lo  = context.args[1];
-        const lua::Valref hi  = context.args[2];
-
-        if (val.isInteger() and lo.isInteger() and hi.isInteger())
-        {
-                return context.ret(std::clamp(
-                        val.to<std::int32_t>(),
-                         lo.to<std::int32_t>(),
-                         hi.to<std::int32_t>()));
-        }
-        return context.ret(std::clamp(val.to<float>(), lo.to<float>(), hi.to<float>()));
-}
-
-/** Linearly interpolates between two given values.
- * 
- *  Params:
- *      v1    = Number. Lower bound.
- *      v2    = Number. Upper bound.
- *      alpha = Number. Alpha value - in range [0, 1].
- * 
- *  Returns: Number
- */
-inline lua::Retval numberLerp(lua::Context& context)
-{
-        context.requireArgs<float, float, float>(3);
-        return context.ret(util::lerp(context.args[0].to<float>(),
-                                      context.args[1].to<float>(),
-                                      context.args[2].to<float>()));
-}
-
-/** Maps a number in given range from hi to lo into a value in range from 0 to 1.
- * 
- *  Params:
- *      val = Number. Value to map.
- *      hi  = Number. Lower bound of the original range.
- *      lo  = Number. Upper bound of the original range.
- * 
- *  Returns: Number - Mapped to range [0, 1]
- */
-inline lua::Retval numberNormalize(lua::Context& context)
-{
-        context.requireArgs<float, float, float>(3);
-        return context.ret(util::normalize(context.args[0], context.args[1], context.args[2]));
-}
-
-/** Maps a number in given range from hi to lo into a value in range from 0 to 1.
- * 
- *  Params:
- *      val = Number. Value to map.
- *      hi1  = Number. Lower bound of the original range.
- *      lo1  = Number. Upper bound of the original range.
- *      hi2  = Number. Lower bound of the target range.
- *      lo2  = Number. Upper bound of the target range.
- * 
- *  Returns: Number - Mapped to range [lo2, hi2]
- */
-inline lua::Retval numberMap(lua::Context& context)
-{
-        context.requireArgs<float, float, float, float, float>(5);
-        return context.ret(util::map(context.args[0], context.args[1], context.args[2],
-                                     context.args[3], context.args[4]));
 }
 
 /** Creates a new Vector out of given x and y coordinates.
@@ -140,13 +60,9 @@ inline lua::Retval numberMap(lua::Context& context)
  * 
  *  Returns: Vector
  */
-inline lua::Retval vector(lua::Context& context)
+inline static sol::table vector(const float x, const float y)
 {
-        context.requireArgs<float, float>(2);
-        auto vec = lua::Table{context};
-        vec["x"] = context.args[0];
-        vec["y"] = context.args[1];
-        return context.ret(vec);
+        return lua.create_table_with("x", x, "y", y);
 }
 
 /** Checks if given table is an vector, i.e. it has two numbers called "x" and "y"
@@ -157,10 +73,9 @@ inline lua::Retval vector(lua::Context& context)
  * 
  *  Returns: Boolean
  */
-inline lua::Retval isVector(lua::Context& context)
+inline static bool isVector(sol::table vec)
 {
-        context.requireArgs<lua::Table>(1);
-        return context.ret(impl::isVector(context.args[0]));
+        return impl::isVector(vec);
 }
 
 /** Checks if given vectors are equal.
@@ -171,10 +86,9 @@ inline lua::Retval isVector(lua::Context& context)
  * 
  *  Returns: Boolean
  */
-inline lua::Retval vectorEquals(lua::Context& context)
+inline static bool vectorEquals(sol::table vec1, sol::table vec2)
 {
-        context.requireArgs<lua::Table, lua::Table>(2);
-        return context.ret(util::Vector{context.args[0]} == util::Vector{context.args[1]});
+        return util::Vector{vec1} == util::Vector{vec2};
 }
 
 /** Adds two vectors to each other.
@@ -185,12 +99,11 @@ inline lua::Retval vectorEquals(lua::Context& context)
  * 
  *  Returns: Vector
  */
-inline lua::Retval vectorAdd(lua::Context& context)
+inline static sol::table vectorAdd(sol::table vec1, sol::table vec2)
 {
-        context.requireArgs<lua::Table, lua::Table>(2);
-        const util::Vector v1 = {lua::Table{context.args[0]}};
-        const util::Vector v2 = {lua::Table{context.args[1]}};
-        return context.ret(static_cast<lua::Valref>(impl::vectorToTable(v1 + v2)));
+        const auto v1 = util::Vector{vec1};
+        const auto v2 = util::Vector{vec2};
+        return impl::vectorToTable(v1 + v2);
 }
 
 /** Subtracts two vectors from each other.
@@ -201,12 +114,11 @@ inline lua::Retval vectorAdd(lua::Context& context)
  * 
  *  Returns: Vector
  */
-inline lua::Retval vectorSubtract(lua::Context& context)
+inline static sol::table vectorSubtract(sol::table vec1, sol::table vec2)
 {
-        context.requireArgs<lua::Table, lua::Table>(2);
-        const util::Vector v1 = {lua::Table{context.args[0]}};
-        const util::Vector v2 = {lua::Table{context.args[1]}};
-        return context.ret(static_cast<lua::Valref>(impl::vectorToTable(v1 - v2)));
+        const util::Vector v1 = {vec1};
+        const util::Vector v2 = {vec2};
+        return impl::vectorToTable(v1 - v2);
 }
 
 /** Scales a vector by given factor.
@@ -217,12 +129,9 @@ inline lua::Retval vectorSubtract(lua::Context& context)
  * 
  *  Returns: Vector
  */
-inline lua::Retval vectorMultiply(lua::Context& context)
+inline static sol::table vectorMultiply(sol::table vec, const float fac)
 {
-        context.requireArgs<lua::Table, float>(2);
-        const util::Vector v = {lua::Table{context.args[0]}};
-        const float f = context.args[1];
-        return context.ret(static_cast<lua::Valref>(impl::vectorToTable(v * f)));
+        return impl::vectorToTable(util::Vector{vec} * fac);
 }
 
 /** Scales a vector by the inverse of given factor.
@@ -233,12 +142,9 @@ inline lua::Retval vectorMultiply(lua::Context& context)
  * 
  *  Returns: Vector
  */
-inline lua::Retval vectorDivide(lua::Context& context)
+inline static sol::table vectorDivide(sol::table vec, const float fac)
 {
-        context.requireArgs<lua::Table, float>(2);
-        const util::Vector v = {lua::Table{context.args[0]}};
-        const float f = context.args[1];
-        return context.ret(static_cast<lua::Valref>(impl::vectorToTable(v / f)));
+        return impl::vectorToTable(util::Vector{vec} / fac);
 }
 
 /** Inverses the direction of given vector.
@@ -248,11 +154,9 @@ inline lua::Retval vectorDivide(lua::Context& context)
  * 
  *  Returns: Vector
  */
-inline lua::Retval vectorInverse(lua::Context& context)
+inline static sol::table vectorInverse(sol::table vec)
 {
-        context.requireArgs<lua::Table>(1);
-        const util::Vector v{lua::Table{context.args[0]}};
-        return context.ret(static_cast<lua::Valref>(impl::vectorToTable(-v)));
+        return impl::vectorToTable(-util::Vector{vec});
 }
 
 /** Calculates the squared length of a vector.
@@ -262,10 +166,9 @@ inline lua::Retval vectorInverse(lua::Context& context)
  * 
  *  Returns: Number
  */
-inline lua::Retval vectorLengthSquared(lua::Context& context)
+inline static float vectorLengthSquared(sol::table vec)
 {
-        context.requireArgs<lua::Table>(1);
-        return context.ret(util::Vector{context.args[0]}.lengthSquared());
+        return util::Vector{vec}.lengthSquared();
 }
 
 /** Calculates the length of a vector.
@@ -275,25 +178,22 @@ inline lua::Retval vectorLengthSquared(lua::Context& context)
  * 
  *  Returns: Number
  */
-inline lua::Retval vectorLength(lua::Context& context)
+inline static float vectorLength(sol::table vec)
 {
-        context.requireArgs<lua::Table>(1);
-        return context.ret(util::Vector{context.args[0]}.length());
+        return util::Vector{vec}.length();
 }
 
 /** Creates a new vector with the same direction as the given vector but with a different length.
  * 
  *  Params:
- *      vec    = Vector.
- *      length = Number.
+ *      vec = Vector.
+ *      len = Number.
  * 
  *  Returns: Vector
  */
-inline lua::Retval vectorSetLength(lua::Context& context)
+inline static sol::table vectorSetLength(sol::table vec, const float len)
 {
-        context.requireArgs<lua::Table, float>(2);
-        const auto newVec = util::Vector{context.args[0]}.length(context.args[1]);
-        return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
+        return impl::vectorToTable(util::Vector{vec}.length(len));
 }
 
 /** Calculates the dot product of two vectors.
@@ -304,10 +204,9 @@ inline lua::Retval vectorSetLength(lua::Context& context)
  * 
  *  Returns: Number
  */
-inline lua::Retval vectorDot(lua::Context& context)
+inline static float vectorDot(sol::table vec1, sol::table vec2)
 {
-        context.requireArgs<lua::Table, lua::Table>(2);
-        return context.ret(util::Vector{context.args[0]}.dot(context.args[1]));
+        return util::Vector{vec1}.dot(vec2);
 }
 
 /** Limits a vector's length to a given `len`.
@@ -318,11 +217,9 @@ inline lua::Retval vectorDot(lua::Context& context)
  * 
  *  Returns: Vector
  */
-inline lua::Retval vectorLimit(lua::Context& context)
+inline static sol::table vectorLimit(sol::table vec, const float len)
 {
-        context.requireArgs<lua::Table, float>(2);
-        const auto newVec = util::Vector{context.args[0]}.limit(context.args[1]);
-        return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
+        return impl::vectorToTable(util::Vector{vec}.limit(len));
 }
 
 /** Calculates a unit vector out of an existing vector.
@@ -332,28 +229,23 @@ inline lua::Retval vectorLimit(lua::Context& context)
  * 
  *  Returns: Vector
  */
-inline lua::Retval vectorNormalize(lua::Context& context)
+inline static sol::table vectorNormalize(sol::table vec)
 {
-        context.requireArgs<lua::Table>(1);
-        const auto newVec = util::Vector{context.args[0]}.normalize();
-        return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
+        return impl::vectorToTable(util::Vector{vec}.normalize());
 }
 
 /** Limits a point (expressed by a Vector) to a given area (expressed by two Vectors).
  * 
  *  Params:
- *      point = Vector. The given point.
- *      min   = Vector. Top-left corner of the limited area.
- *      max   = Vector. Bottom-right corner of the limited area.
+ *      vec = Vector. The given point.
+ *      min = Vector. Top-left corner of the limited area.
+ *      max = Vector. Bottom-right corner of the limited area.
  * 
  *  Returns: Vector
  */
-inline lua::Retval vectorClampToArea(lua::Context& context)
+inline static sol::table vectorClampToArea(sol::table vec, sol::table min, sol::table max)
 {
-        context.requireArgs<lua::Table, lua::Table, lua::Table>(3);
-        const auto newVec = util::Vector{context.args[0]}.clamp(
-                util::Vector{context.args[1]}, util::Vector{context.args[2]});
-        return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
+        return impl::vectorToTable(util::Vector{vec}.clamp(util::Vector{min}, util::Vector{max}));
 }
 
 /** Limits a Vector's length to a given range (expressed by two Numbers).
@@ -365,29 +257,23 @@ inline lua::Retval vectorClampToArea(lua::Context& context)
  * 
  *  Returns: Vector
  */
-inline lua::Retval vectorClampToLength(lua::Context& context)
+inline static sol::table vectorClampToLength(sol::table vec, const float min, const float max)
 {
-        context.requireArgs<lua::Table, float, float>(3);
-        const auto newVec = util::Vector(context.args[0]).clamp(
-                static_cast<float>(context.args[1]), static_cast<float>(context.args[2]));
-        return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
+        return impl::vectorToTable(util::Vector{vec}.clamp(min, max));
 }
 
 /** Linearly interpolates between two given vectors.
  * 
  *  Params:
- *      v1    = Vector. Lower bounds.
- *      v2    = Vector. Upper bounds.
+ *      vec1  = Vector. Lower bounds.
+ *      vec2  = Vector. Upper bounds.
  *      alpha = Vector. Alpha values - in range [0, 1].
  * 
- *  Returns: Number
+ *  Returns: Vector
  */
-inline lua::Retval vectorLerp(lua::Context& context)
+inline static sol::table vectorLerp(sol::table vec1, sol::table vec2, const float alpha)
 {
-        context.requireArgs<lua::Table, lua::Table, float>(3);
-        const auto newVec = util::Vector::lerp(
-                util::Vector{context.args[0]}, util::Vector{context.args[1]}, context.args[2]);
-        return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
+        return impl::vectorToTable(util::Vector::lerp(util::Vector{vec1}, util::Vector{vec2}, alpha));
 }
 
 /** Converts Polar coordinates of a point to Cartesian coordinates.
@@ -398,11 +284,9 @@ inline lua::Retval vectorLerp(lua::Context& context)
  * 
  *  Returns: Vector
  */
-inline lua::Retval vectorFromPolar(lua::Context& context)
+inline static sol::table vectorFromPolar(const float radius, const float angle)
 {
-        context.requireArgs<float, float>(2);
-        const auto newVec = util::Vector::fromPolar(context.args[0], context.args[1]);
-        return context.ret(static_cast<lua::Valref>(impl::vectorToTable(newVec)));
+        return impl::vectorToTable(util::Vector::fromPolar(radius, angle));
 }
 
 /** Calculates the angle between two vectors.
@@ -413,12 +297,9 @@ inline lua::Retval vectorFromPolar(lua::Context& context)
  * 
  *  Returns: Number
  */
-inline lua::Retval vectorAngleBetween(lua::Context& context)
+inline static float vectorAngleBetween(sol::table vec1, sol::table vec2)
 {
-        context.requireArgs<lua::Table, lua::Table>(2);
-        const float angle = util::Vector::angleBetween(
-                util::Vector{context.args[0]}, util::Vector{context.args[1]});
-        return context.ret(angle);
+        return util::Vector::angleBetween(util::Vector{vec1}, util::Vector{vec2});
 }
 
 /** Creates a new Rectangle out of given parameters.
@@ -432,32 +313,35 @@ inline lua::Retval vectorAngleBetween(lua::Context& context)
  *      position = Vector.
  *      size     = Vector.
  * 
- *  Returns: Boolean
+ *  Returns: Rectangle
  */
-inline lua::Retval rectangle(lua::Context& context)
+inline static sol::table rectangle(const sol::variadic_args& args)
 {
-        if (context.checkArgs<lua::Table, lua::Table>(2))
+        if (args.size() == 2)
         {
-                return context.ret(static_cast<lua::Valref>(impl::rectangleToTable(
-                        {util::Vector{context.args[0]}, util::Vector{context.args[1]}})));
+                return impl::rectangleToTable(
+                        {util::Vector{args[0].as<sol::table>()},
+                         util::Vector{args[1].as<sol::table>()}});
         }
-        context.requireArgs<float, float, float, float>(4);
-        return context.ret(static_cast<lua::Valref>(impl::rectangleToTable(
-                {context.args[0], context.args[1], context.args[2], context.args[3]})));
+        else if (args.size() == 4)
+        {
+                return impl::rectangleToTable({args[0].as<float>(), args[1].as<float>(),
+                                               args[2].as<float>(), args[3].as<float>()});
+        }
+        return impl::rectangleToTable({});
 }
 
 /** Checks if given table is a rectangle, i.e. it has two vectors called
  *  "position" and "size".
  * 
  *  Params:
- *      vec = Table.
+ *      rect = Table.
  * 
  *  Returns: Boolean
  */
-inline lua::Retval isRectangle(lua::Context& context)
+inline static bool isRectangle(sol::table rect)
 {
-        context.requireArgs<lua::Table>(1);
-        return context.ret(impl::isRectangle(context.args[0]));
+        return impl::isRectangle(rect);
 }
 
 /** Checks if given rectangle contains a point expressed by given vector.
@@ -468,11 +352,9 @@ inline lua::Retval isRectangle(lua::Context& context)
  * 
  *  Returns: Boolean
  */
-inline lua::Retval rectangleContains(lua::Context& context)
+inline static bool rectangleContains(sol::table rect, sol::table vec)
 {
-        context.requireArgs<lua::Table, lua::Table>(2);
-        return context.ret(impl::toRectangle(context.args[0])
-                .contains(util::Vector{context.args[1]}));
+        return impl::toRectangle(rect).contains(util::Vector{vec});
 }
 
 /** Checks if given rectangles intersect.
@@ -483,11 +365,55 @@ inline lua::Retval rectangleContains(lua::Context& context)
  * 
  *  Returns: Boolean
  */
-inline lua::Retval rectangleIntersects(lua::Context& context)
+inline static bool rectangleIntersects(sol::table rect1, sol::table rect2)
 {
-        context.requireArgs<lua::Table, lua::Table>(2);
-        return context.ret(impl::toRectangle(context.args[0])
-               .intersects(impl::toRectangle(context.args[1])));
+        return impl::toRectangle(rect1).intersects(impl::toRectangle(rect2));
+}
+
+inline static void loadMath()
+{
+        lua["clamp"]     = std::clamp<double>;
+        lua["iclamp"]    = std::clamp<std::int32_t>;
+        lua["lerp"]      = util::lerp;
+        lua["normalize"] = util::normalize;
+        lua["map"]       = util::map;
+
+        // lua.new_usertype<sf::Vector2f>("vector",
+        //         "x", &sf::Vector2f::x,
+        //         "y", &sf::Vector2f::y);
+        lua["vector"]   = vector;
+        lua["isVector"] = isVector;
+
+        sol::table vec;
+        lua["vec"] = lua.create_table_with(
+                "equals",        vectorEquals,
+                "add",           vectorAdd,
+                "subtract",      vectorSubtract,
+                "multiply",      vectorMultiply,
+                "divide",        vectorDivide,
+                "inverse",       vectorInverse,
+                "lengthSquared", vectorLengthSquared,
+                "length",        vectorLength,
+                "setLength",     vectorSetLength,
+                "limit",         vectorLimit,
+                "normalize",     vectorNormalize,
+                "clampToArea",   vectorClampToArea,
+                "clampToLength", vectorClampToLength,
+                "fromPolar",     vectorFromPolar,
+                "dot",           vectorDot,
+                "angleBetween",  vectorAngleBetween,
+                "lerp",          vectorLerp);
+
+        // lua.new_usertype<sf::FloatRect>("rectangle",
+        //         "left",   &sf::FloatRect::left,
+        //         "top",    &sf::FloatRect::top,
+        //         "width",  &sf::FloatRect::width,
+        //         "height", &sf::FloatRect::Height);
+        lua["rectangle"] = rectangle;
+        lua["isRectangle"] = isRectangle;
+        lua["rect"] = lua.create_table_with(
+                "contains",   rectangleContains,
+                "intersects", rectangleIntersects);
 }
 
 }

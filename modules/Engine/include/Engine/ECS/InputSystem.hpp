@@ -13,44 +13,54 @@ class InputSystem
 {
 public:
 
+        InputSystem()
+        : entityCount(0)
+        {
+        }
+
         ~InputSystem()
         {
                 this->clearKeys();
         }
 
-        void assignInput(lua::Valref entityTable)
+        void assignInput(sol::table entityTable)
         {
-                if (entityTable["input"].is<lua::Table>())
+                if (entityTable["input"].get_type() == sol::type::table)
                 {
-                        lua::Table input = entityTable["input"];
-                        script::assignEmptyInputHandlers(input);
-                        const lua::RegistryKey key = script::luaContext.registry.store(entityTable);
-                        this->entityKeys.push_back(key);
+                        sol::table input = entityTable["input"];
+                        script::lua.registry()[this->key(this->entityCount++)] = entityTable;
                 }
         }
 
-        void handleInput(const sf::Event& event, lua::Valset& args)
+        void handleInput(const sf::Event& event)
         {
-                for (const lua::RegistryKey key : this->entityKeys)
+                for (std::uint32_t i = 0; i < this->entityCount; ++i)
                 {
-                        lua::Table entity = script::luaContext.registry[key];
-                        args[0] = entity;
-                        entity["input"][script::EVENT_HANDLERS[event.type]](args);
+                        sol::table entityTable = script::lua.registry()[this->key(i)];
+                        script::callInputHandler(entityTable, entityTable["input"], event);
                 }
         }
 
         void clearKeys()
         {
-                for (const lua::RegistryKey key : this->entityKeys)
+                for (std::uint32_t i = 0; i < this->entityCount; ++i)
                 {
-                        script::luaContext.registry[key] = lua::nil;
+                        script::lua.registry()[this->key(i)] = sol::nil;
                 }
-                this->entityKeys.clear();
+                this->entityCount = 0;
         }
 
 private:
 
-        std::vector<lua::RegistryKey> entityKeys;
+        std::string key(const std::uint32_t i)
+        {
+                return util::format("%s%u", keyPrefix, i);
+        }
+
+private:
+
+        std::uint32_t entityCount;
+        inline static util::CStr keyPrefix = "pahaom_entity_input_";
 };
 
 }

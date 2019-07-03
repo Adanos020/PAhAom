@@ -14,19 +14,6 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Lua API++
-include_directories("modules/luapp/luapp")
-file(GLOB HEADERS "modules/luapp/luapp/luapp.hpp")
-
-set(LUAPP_SOURCES "modules/luapp/luapp/luapp_impl.cpp")
-set(LUAPP_HEADERS "modules/luapp/luapp/*.{h,hpp,hxx}")
-
-file(GLOB_RECURSE SOURCES ${LUAPP_SOURCES} ${LUAPP_HEADERS})
-add_library(LuaPP STATIC ${SOURCES} ${HEADERS})
-
-target_include_directories(LuaPP PUBLIC "modules/luapp/luapp")
-target_link_libraries(LuaPP PUBLIC lua)
-
 # Sol3
 include_directories("modules/sol2/include")
 
@@ -55,5 +42,5 @@ target_link_libraries(
             sfml-window-d
             sfml-audio-d
             sfml-system-d
-            LuaPP
+            lua
 )

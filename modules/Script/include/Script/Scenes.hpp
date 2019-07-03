@@ -12,47 +12,56 @@ namespace script
 {
 
 /** Switches to another scene without saving the current scene.
+ * 
+ *  Params:
+ *      sceneName = String. Name of the scene type.
  */
-inline lua::Retval switchTo(lua::Context& context)
+inline static void switchTo(const std::string& sceneName)
 {
-        context.requireArgs<std::string>(1);
-        util::Subject::send(util::Message::SwitchScene{context.args[0]});
-        return context.ret();
+        util::Subject::send(util::Message::SwitchScene{sceneName});
 }
 
 /** Saves the current scene. If a valid scene ID is given, an existing scene
  *  will be overwritten. Otherwise, the current scene will be saved in a new
  *  file.
  * 
+ *  Params:
+ *      id (0) = Number. ID of the scene to overwrite. If 0 is given, a new
+ *               scene record is created.
+ * 
  *  Returns: ID of the saved scene.
  */
-inline lua::Retval saveScene(lua::Context& context)
+inline static util::SceneID saveScene(const util::SceneID id = 0)
 {
-        if (context.checkArgs<util::SceneID>(1))
-        {
-                util::Subject::send(util::Message::SaveScene{context.args[0]});
-                return context.ret(context.args[0]);
-        }
-        util::Subject::send(util::Message::SaveScene{0});
-        return context.ret(engine::Scene::nextId());
+        util::Subject::send(util::Message::SaveScene{id});
+        return id ? id : engine::Scene::nextId();
 }
 
 /** Loads another previously saved scene and switches to without saving
  *  the current scene.
+ * 
+ *  Params:
+ *      id (0) = Number. ID of the scene to load.
  */
-inline lua::Retval loadScene(lua::Context& context)
+inline static void loadScene(const util::SceneID id)
 {
-        context.requireArgs<util::SceneID>(1);
-        util::Subject::send(util::Message::LoadScene{context.args[0]});
-        return context.ret();
+        util::Subject::send(util::Message::LoadScene{id});
 }
 
-/** Terminates the program without saving the current scene.
+/** Terminates the program.
  */
-inline lua::Retval quit(lua::Context& context)
+inline static void quit()
 {
         util::Subject::send(util::Message::Quit{});
-        return context.ret();
+}
+
+inline static void loadScenes()
+{
+        lua["game"] = lua.create_table_with(
+                "switchTo",  switchTo,
+                "saveScene", saveScene,
+                "loadScene", loadScene,
+                "quit",      quit);
 }
 
 }

@@ -89,9 +89,9 @@ local function pickDirection(neighbours)
     if neighbours then
         assert(math.type(neighbours) == "integer")
         local inds, n = neighboursIndices(neighbours)
-        return directions[inds[random.uniform(1, n)]]
+        return directions[inds[random.iuniform(1, n)]]
     end
-    return directions[random.uniform(1, #directions)]
+    return directions[random.iuniform(1, #directions)]
 end
 
 local function isDeadEnd(pos)
@@ -105,9 +105,8 @@ end
 local function initialise(size)
     mapSize = vector(math.tointeger(size.x), math.tointeger(size.y))
     mapArea = rectangle(vector(1, 1), mapSize)
-    maxRoomSize = vector(
-        math.clamp(mapSize.x // 2, 3, 13),
-        math.clamp(mapSize.y // 2, 3, 13))
+    maxRoomSize = vector(iclamp(mapSize.x // 2, 3, 13),
+                         iclamp(mapSize.y // 2, 3, 13))
     tiles = {}
     for row = 1, mapSize.y do
         tiles[row] = {}
@@ -118,8 +117,8 @@ end
 local function generateMaze()
     local cells = {
         -- Pick a random first cell with odd coordinates.
-        vector( ~1 & random.uniform(2, mapSize.x),
-                ~1 & random.uniform(2, mapSize.y))
+        vector( ~1 & random.iuniform(2, mapSize.x),
+                ~1 & random.iuniform(2, mapSize.y))
     }
 
     local currCell = cells[#cells]
@@ -159,14 +158,14 @@ local function spreadRooms()
     local minRoomSize = vector(3, 3)
     local maxRoomTries = 100
     local rooms = {}
-    
+
     for i = 1, maxRoomTries do
         local roomSize = vector(
-            1 | random.uniform(minRoomSize.x, math.tointeger(maxRoomSize.x)),
-            1 | random.uniform(minRoomSize.y, math.tointeger(maxRoomSize.y)))
+            1 | random.iuniform(minRoomSize.x, maxRoomSize.x),
+            1 | random.iuniform(minRoomSize.y, maxRoomSize.y))
         local roomPos = vector(
-            ~1 & random.uniform(2, mapSize.x - roomSize.x),
-            ~1 & random.uniform(2, mapSize.y - roomSize.y))
+            ~1 & random.iuniform(2, mapSize.x - roomSize.x),
+            ~1 & random.iuniform(2, mapSize.y - roomSize.y))
 
         local newRoom = rectangle(roomPos, roomSize)
         local function overlapsNewRoom(room)

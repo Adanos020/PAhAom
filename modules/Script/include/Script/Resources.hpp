@@ -10,33 +10,41 @@ namespace script
 {
 
 template<engine::Resource T>
-inline lua::Retval load(lua::Context& context)
+inline static sol::table addResourceHandlerTable()
 {
-        context.requireArgs<std::string, std::string>(2);
-        return context.ret(engine::Resources<T>::load(context.args[0], context.args[1]));
+        return lua.create_table_with(
+                "load",      &engine::Resources<T>::load,
+                "unload",    &engine::Resources<T>::unload,
+                "unloadAll", &engine::Resources<T>::unloadAll);
 }
 
 template<engine::Resource T>
-inline lua::Retval unload(lua::Context& context)
+inline static void loadResource(sol::object, sol::object res)
 {
-        context.requireArgs<std::string>(1);
-        return context.ret(engine::Resources<T>::unload(context.args[0]));
+        const auto resource = res.as<sol::table>();
+        const std::string id   = resource[1];
+        const std::string path = resource[2];
+
+        if constexpr (std::is_same_v<T, sf::Font>)
+        {
+                engine::Resources<T>::load(id, "data/fonts/" + path);
+        }
+        else if constexpr (std::is_same_v<T, sf::Texture>)
+        {
+                engine::Resources<T>::load(id, "data/textures/" + path);
+        }
 }
 
-template<engine::Resource T>
-inline lua::Retval unloadAll(lua::Context& context)
+inline static void loadResources()
 {
-        engine::Resources<T>::unloadAll();
-        return context.ret();
-}
+        lua["fonts"]    = addResourceHandlerTable<sf::Font>();
+        lua["textures"] = addResourceHandlerTable<sf::Texture>();
 
-template<engine::Resource T>
-inline static void addResourceHandlerTable(const std::string& name)
-{
-        luaContext.global[name] = lua::Table::records(luaContext,
-                "load",      load<T>,
-                "unload",    unload<T>,
-                "unloadAll", unloadAll<T>);
+        lua.script_file("data/scripts/resources.lua");
+        sol::table resources = lua["resources"];
+
+        static_cast<sol::table>(resources["fonts"]).for_each(loadResource<sf::Font>);
+        static_cast<sol::table>(resources["textures"]).for_each(loadResource<sf::Texture>);
 }
 
 }

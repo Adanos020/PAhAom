@@ -44,7 +44,7 @@ public:
         void destroy()
         {
                 this->systems.reset();
-                script::luaContext.global[this->stateName] = lua::nil;
+                script::lua[this->stateName] = sol::nil;
         }
 
         void switchTo(const std::string& sceneName)
@@ -52,17 +52,20 @@ public:
                 this->destroy();
 
                 // Construct the scene object.
-                const lua::Table classTable = script::luaContext.global[sceneName];
-                script::luaContext.global[this->stateName] = classTable["new"](classTable);
+                sol::table classTable = script::lua[sceneName];
+                script::lua[this->stateName] = classTable["new"](classTable);
 
-                lua::Table thisObj = script::luaContext.global[this->stateName];
-                script::assignEmptyInputHandlers(thisObj);
+                sol::table thisObj = script::lua[this->stateName];
 
                 // Add predefined entities.
-                const lua::Table entities = thisObj["entities"];
-                entities.iterate([this](lua::Valref, lua::Valref el)
+                sol::table entities = thisObj["entities"];
+                entities.for_each([this](sol::object, sol::object el)
                 {
-                        this->systems.addEntity(el);
+                        if (el.get_type() == sol::type::table)
+                        {
+                                sol::table entity = el;
+                                this->systems.addEntity(entity);
+                        }
                 });
         }
 
@@ -81,20 +84,15 @@ public:
 
         void handleInput(const sf::Event& event)
         {
-                const lua::Table thisObj = script::luaContext.global[this->stateName];
-                const std::string which = script::EVENT_HANDLERS[event.type];
+                sol::table thisObj = script::lua[this->stateName];
                 
-                auto args = lua::Valset{thisObj};
-                script::addInputHandlerArgs(args, event);
-                
-                this->systems.input.handleInput(event, args);
-                args[0] = thisObj;
-                thisObj[which](args);
+                this->systems.input.handleInput(event);
+                script::callInputHandler(thisObj, thisObj, event);
         }
 
         void update()
         {
-                const lua::Table thisObj = script::luaContext.global[this->stateName];
+                sol::table thisObj = script::lua[this->stateName];
                 thisObj["update"](thisObj, util::FRAME_TIME.asSeconds());
                 this->systems.physics.update();
         }

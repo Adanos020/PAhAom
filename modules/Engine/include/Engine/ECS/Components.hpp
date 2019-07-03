@@ -5,8 +5,6 @@
 
 #include <SFML/Graphics/Drawable.hpp>
 
-#include <luapp.hpp>
-
 #include <cstdint>
 #include <memory>
 

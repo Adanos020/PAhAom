@@ -9,9 +9,11 @@
 #include <Util/Graphics.hpp>
 #include <Util/Types.hpp>
 
+#include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics.hpp>
 
 #include <cstdint>
+#include <iostream>
 #include <memory>
 #include <type_traits>
 #include <unordered_map>
@@ -22,30 +24,25 @@ namespace script
 
 // Externals
 
-inline lua::Retval rgba(lua::Context& context)
+inline static sol::table rgba(std::uint32_t r, std::uint32_t g, std::uint32_t b, std::uint32_t a)
 {
-        context.requireArgs<std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t>(4);
-        return context.ret(lua::Table::records(context,
-                "r", context.args[0].to<std::uint32_t>(),
-                "g", context.args[1].to<std::uint32_t>(),
-                "b", context.args[2].to<std::uint32_t>(),
-                "a", context.args[3].to<std::uint32_t>()
-        ));
+        return lua.create_table_with("r", r, "g", g, "b", b, "a", a);
 }
 
-inline lua::Retval rgb(lua::Context& context)
+inline static sol::table rgb(std::uint32_t r, std::uint32_t g, std::uint32_t b)
 {
-        context.requireArgs<std::uint32_t, std::uint32_t, std::uint32_t>(3);
-        return context.ret(lua::Table::records(context,
-                "r", context.args[0].to<std::uint32_t>(),
-                "g", context.args[1].to<std::uint32_t>(),
-                "b", context.args[2].to<std::uint32_t>()
-        ));
+        return lua.create_table_with("r", r, "g", g, "b", b);
+}
+
+inline static void loadGraphics()
+{
+        lua["rgba"] = rgba;
+        lua["rgb"]  = rgb;
 }
 
 // Internals
 
-inline sf::Color stringToColor(const std::string& str)
+inline static sf::Color stringToColor(const std::string& str)
 {
         static const util::MapStringTo<sf::Color> predefinedColors = {
                 { "black",       sf::Color::Black       },
@@ -64,7 +61,7 @@ inline sf::Color stringToColor(const std::string& str)
                 return c->second;
         }
 
-        luaContext.error(util::err::badColorName(str));
+        std::cerr << util::err::badColorName(str) << std::endl;
         return sf::Color::Transparent;
 }
 
@@ -76,13 +73,13 @@ inline sf::Color stringToColor(const std::string& str)
  *  - b: Number specifying the b component.
  *  - a: Number specifying the a component.
  */
-inline sf::Color tableToColor(const lua::Table& obj)
+inline sf::Color tableToColor(sol::table obj)
 {
         return {
-                static_cast<sf::Uint8>(obj["r"].to<std::uint32_t>(0u)),
-                static_cast<sf::Uint8>(obj["g"].to<std::uint32_t>(0u)),
-                static_cast<sf::Uint8>(obj["b"].to<std::uint32_t>(0u)),
-                static_cast<sf::Uint8>(obj["a"].to<std::uint32_t>(255u)),
+                static_cast<sf::Uint8>(obj.get_or("r", 0u)),
+                static_cast<sf::Uint8>(obj.get_or("g", 0u)),
+                static_cast<sf::Uint8>(obj.get_or("b", 0u)),
+                static_cast<sf::Uint8>(obj.get_or("a", 255u)),
         };
 }
 
@@ -95,36 +92,36 @@ inline sf::Color tableToColor(const lua::Table& obj)
  *  - height: Number specifying the rectangle's height.
  */
 template<util::Arithmetic T = float>
-inline sf::Rect<T> tableToRectangle(const lua::Table& obj)
+inline sf::Rect<T> tableToRectangle(sol::table obj)
 {
         return {
-                obj["left"  ].to<T>(0),
-                obj["top"   ].to<T>(0),
-                obj["width" ].to<T>(0),
-                obj["height"].to<T>(0),
+                obj.get_or("left"  , T{0}),
+                obj.get_or("top"   , T{0}),
+                obj.get_or("width" , T{0}),
+                obj.get_or("height", T{0}),
         };
 }
 
 /** Table of tables of numbers, where all inner tables must have equal lengths.
  */
 template<util::Arithmetic T = float>
-inline util::Matrix<T> tableToMatrix(const lua::Table& obj)
+inline util::Matrix<T> tableToMatrix(sol::table obj)
 {
         util::Matrix<T> mat;
-        mat.resize(obj.len().to<std::uint32_t>());
+        mat.resize(obj.size());
 
-        obj.iterate([&](lua::Valref i, lua::Valref row) {
-                if (not row.is<lua::Table>())
+        obj.for_each([&](sol::object i, sol::object row) {
+                if (not row.is<sol::table>())
                 {
-                        luaContext.error(util::err::notATable);
+                        std::cerr << util::err::notATable << std::endl;
                 }
-                static_cast<lua::Table>(row).iterate([&](lua::Valref, lua::Valref entry) {
-                        if (not entry.is<float>())
+                row.as<sol::table>().for_each([&](sol::object, sol::object entry) {
+                        if (entry.get_type() != sol::type::number)
                         {
-                                luaContext.error(util::err::notANumber);
+                                std::cerr << util::err::notANumber << std::endl;
                         }
-                        mat[static_cast<std::int32_t>(i - 1)].push_back(
-                                static_cast<T>(entry.to<float>()));
+                        mat[(i.as<std::int32_t>() - 1)].push_back(
+                                static_cast<T>(entry.as<float>()));
                 });
         });
 
@@ -132,85 +129,83 @@ inline util::Matrix<T> tableToMatrix(const lua::Table& obj)
         if (std::any_of(mat.begin(), mat.end(), [&](auto& row)
                 { return row.size() != mat[0].size(); }))
         {
-                luaContext.error(util::err::matrixNotRegular);
+                std::cerr << util::err::matrixNotRegular << std::endl;
         }
 
         return mat;
 }
 
 template<util::Graphical T>
-inline void extractLocalBounds(const std::unique_ptr<T>& dobj, lua::Table& obj)
+inline void extractLocalBounds(const std::unique_ptr<T>& dobj, sol::table obj)
 {
         const sf::FloatRect bounds = dobj->getLocalBounds();
-        obj["localBounds"] = lua::Table::records(luaContext,
+        obj["localBounds"] = lua.create_table_with(
                 "left",   bounds.left,
                 "top",    bounds.top,
                 "width",  bounds.width,
-                "height", bounds.height
-        );
+                "height", bounds.height);
 }
 
 template<util::Graphical T>
-inline void extractGlobalBounds(const std::unique_ptr<T>& dobj, lua::Table& obj)
+inline void extractGlobalBounds(const std::unique_ptr<T>& dobj, sol::table obj)
 {
         const sf::FloatRect bounds = dobj->getGlobalBounds();
-        obj["globalBounds"] = lua::Table::records(luaContext,
+        obj["globalBounds"] = lua.create_table_with(
                 "left",   bounds.left,
                 "top",    bounds.top,
                 "width",  bounds.width,
-                "height", bounds.height
-        );
+                "height", bounds.height);
 }
 
 
 // Shorthand for checking table properties.
-#define prop(X, CPP_TYPE) (lua::Value X = obj[#X]; X.is<CPP_TYPE>())
+#define prop(X, CPP_TYPE) (sol::object X = obj[#X]; X.is<CPP_TYPE>())
 
 template<util::Transformable T>
-inline std::unique_ptr<T>& updateTransformFromTable(
-        std::unique_ptr<T>& dobj, lua::Table& obj)
+inline std::unique_ptr<T>& updateTransformFromTable(std::unique_ptr<T>& dobj, sol::table obj)
 {
         extractLocalBounds(dobj, obj);
 
         auto tobj = static_cast<sf::Transformable*>(dobj.get());
-        if prop (position, lua::Table)
+        if prop (position, sol::table)
         {
                 tobj->setPosition(util::Vector{position});
         }
 
         if prop (rotation, float)
         {
-                tobj->setRotation(rotation);
+                tobj->setRotation(rotation.as<float>());
         }
 
-        if prop (scale, lua::Table)
+        if prop (scale, sol::table)
         {
                 tobj->setScale(util::Vector{scale});
         }
         else if prop (scale, float)
         {
-                tobj->setScale(scale, scale);
+                const auto s = scale.as<float>();
+                tobj->setScale(s, s);
         }
 
         if prop (origin, std::string)
         {
-                if prop (localBounds, lua::Table)
+                if prop (localBounds, sol::table)
                 {
-                        sf::FloatRect bounds = tableToRectangle(localBounds);
+                        const auto o = origin.as<std::string>();
+                        const sf::FloatRect bounds = tableToRectangle(localBounds);
                         tobj->setOrigin(
-                                origin == "center"       ? sf::Vector2f{bounds.width / 2, bounds.height / 2} :
-                                origin == "top"          ? sf::Vector2f{bounds.width / 2, 0.f              } :
-                                origin == "left"         ? sf::Vector2f{0.f,              bounds.height / 2} :
-                                origin == "bottom"       ? sf::Vector2f{bounds.width / 2, bounds.height    } :
-                                origin == "right"        ? sf::Vector2f{bounds.width,     bounds.height / 2} :
-                                origin == "bottom-left"  ? sf::Vector2f{0.f,              bounds.height    } :
-                                origin == "top-right"    ? sf::Vector2f{bounds.width,     0.f              } :
-                                origin == "bottom-right" ? sf::Vector2f{bounds.width,     bounds.height    } :
-                                /* origin == "top-left" */ sf::Vector2f{0.f,              0.f              }
-                        );
+                                o == "center"       ? sf::Vector2f{bounds.width / 2, bounds.height / 2} :
+                                o == "top"          ? sf::Vector2f{bounds.width / 2, 0.f              } :
+                                o == "left"         ? sf::Vector2f{0.f,              bounds.height / 2} :
+                                o == "bottom"       ? sf::Vector2f{bounds.width / 2, bounds.height    } :
+                                o == "right"        ? sf::Vector2f{bounds.width,     bounds.height / 2} :
+                                o == "bottom-left"  ? sf::Vector2f{0.f,              bounds.height    } :
+                                o == "top-right"    ? sf::Vector2f{bounds.width,     0.f              } :
+                                o == "bottom-right" ? sf::Vector2f{bounds.width,     bounds.height    } :
+                                /* o == "top-left" */ sf::Vector2f{0.f,              0.f              });
                 }
         }
-        else if prop (origin, lua::Table)
+        else if prop (origin, sol::table)
         {
                 tobj->setOrigin(util::Vector{origin});
         }
@@ -230,7 +225,7 @@ inline std::unique_ptr<T>& updateTransformFromTable(
  */
 template<class ShapeClass>
 inline std::unique_ptr<ShapeClass>& updateShapeFromTable(
-        std::unique_ptr<ShapeClass>& shape, lua::Table& obj)
+        std::unique_ptr<ShapeClass>& shape, sol::table obj)
 {
         static_assert(
                 std::is_same_v<ShapeClass, sf::CircleShape> or
@@ -239,42 +234,42 @@ inline std::unique_ptr<ShapeClass>& updateShapeFromTable(
 
         if prop (texture, std::string)
         {
-                if (auto tex = engine::Resources<sf::Texture>::get(texture))
+                if (auto tex = engine::Resources<sf::Texture>::get(texture.as<std::string>()))
                 {
                         shape->setTexture(&tex->get());
                 }
                 else
                 {
-                        luaContext.error(util::err::badTextureName(texture));
+                        std::cerr << util::err::badTextureName(texture.as<std::string>()) << std::endl;
                 }
         }
 
-        if prop (textureRect, lua::Table)
+        if prop (textureRect, sol::table)
         {
                 shape->setTextureRect(tableToRectangle<std::int32_t>(textureRect));
         }
 
         if prop (fillColor, std::string)
         {
-                shape->setFillColor(stringToColor(fillColor));
+                shape->setFillColor(stringToColor(fillColor.as<std::string>()));
         }
-        else if prop (fillColor, lua::Table)
+        else if prop (fillColor, sol::table)
         {
                 shape->setFillColor(tableToColor(fillColor));
         }
 
         if prop (outlineColor, std::string)
         {
-                shape->setOutlineColor(stringToColor(outlineColor));
+                shape->setOutlineColor(stringToColor(outlineColor.as<std::string>()));
         }
-        else if prop (outlineColor, lua::Table)
+        else if prop (outlineColor, sol::table)
         {
                 shape->setOutlineColor(tableToColor(outlineColor));
         }
 
         if prop (outlineThickness, float)
         {
-                shape->setOutlineThickness(outlineThickness);
+                shape->setOutlineThickness(outlineThickness.as<float>());
         }
 
         updateTransformFromTable(shape, obj);
@@ -289,15 +284,15 @@ inline std::unique_ptr<ShapeClass>& updateShapeFromTable(
  *  - all properties from Shape
  */
 inline std::unique_ptr<sf::CircleShape>& updateCircleShapeFromTable(
-        std::unique_ptr<sf::CircleShape>& circle, lua::Table& obj)
+        std::unique_ptr<sf::CircleShape>& circle, sol::table obj)
 {
         if prop (radius, float)
         {
-                circle->setRadius(radius);
+                circle->setRadius(radius.as<float>());
         }
         if prop (pointCount, std::uint32_t)
         {
-                circle->setPointCount(pointCount.to<std::uint32_t>());
+                circle->setPointCount(pointCount.as<std::uint32_t>());
         }
 
         updateShapeFromTable<sf::CircleShape>(circle, obj);
@@ -311,14 +306,15 @@ inline std::unique_ptr<sf::CircleShape>& updateCircleShapeFromTable(
  *  - all properties from Shape
  */
 inline std::unique_ptr<sf::ConvexShape>& updateConvexShapeFromTable(
-        std::unique_ptr<sf::ConvexShape>& convex, lua::Table& obj)
+        std::unique_ptr<sf::ConvexShape>& convex, sol::table obj)
 {
-        if prop (points, lua::Table)
+        if prop (points, sol::table)
         {
-                lua::Table pts = points;
-                convex->setPointCount(pts.len().to<std::uint32_t>());
-                pts.iterate([&](lua::Valref i, lua::Valref pos) {
-                        convex->setPoint(i.to<std::uint32_t>() - 1, util::Vector{pos});
+                sol::table pts = points;
+                convex->setPointCount(pts.size());
+                pts.for_each([&](sol::object i, sol::object pos)
+                {
+                        convex->setPoint(i.as<std::uint32_t>() - 1, util::Vector{pos.as<sol::table>()});
                 });
         }
 
@@ -333,9 +329,9 @@ inline std::unique_ptr<sf::ConvexShape>& updateConvexShapeFromTable(
  *  - all properties from Shape
  */
 inline std::unique_ptr<sf::RectangleShape>& updateRectangleShapeFromTable(
-        std::unique_ptr<sf::RectangleShape>& rect, lua::Table& obj)
+        std::unique_ptr<sf::RectangleShape>& rect, sol::table obj)
 {
-        if prop (size, lua::Table)
+        if prop (size, sol::table)
         {
                 rect->setSize(util::Vector{size});
         }
@@ -352,28 +348,28 @@ inline std::unique_ptr<sf::RectangleShape>& updateRectangleShapeFromTable(
  *  - color:       Color blended with the texture.
  */
 inline std::unique_ptr<sf::Sprite>& updateSpriteFromTable(
-        std::unique_ptr<sf::Sprite>& sprite, lua::Table& obj)
+        std::unique_ptr<sf::Sprite>& sprite, sol::table obj)
 {
         if prop (texture, std::string)
         {
-                if (auto tex = engine::Resources<sf::Texture>::get(texture))
+                if (auto tex = engine::Resources<sf::Texture>::get(texture.as<std::string>()))
                 {
                         sprite->setTexture(*tex);
                 }
                 else
                 {
-                        luaContext.error(util::err::badTextureName(texture));
+                        std::cerr << util::err::badTextureName(texture.as<std::string>()) << std::endl;
                 }
         }
 
-        if prop (textureRect, lua::Table)
+        if prop (textureRect, sol::table)
         {
                 sprite->setTextureRect(tableToRectangle<std::int32_t>(textureRect));
         }
 
         if prop (color, std::string)
         {
-                sprite->setColor(stringToColor(color));
+                sprite->setColor(stringToColor(color.as<std::string>()));
         }
 
         updateTransformFromTable(sprite, obj);
@@ -402,38 +398,38 @@ inline std::unique_ptr<sf::Sprite>& updateSpriteFromTable(
  *  - strikethrough
  */
 inline std::unique_ptr<sf::Text>& updateTextFromTable(
-        std::unique_ptr<sf::Text>& text, lua::Table& obj)
+        std::unique_ptr<sf::Text>& text, sol::table obj)
 {       
         if prop (content, std::string)
         {
-                text->setString(std::string(content));
+                text->setString(std::string(content.as<std::string>()));
         }
 
         if prop (font, std::string)
         {
-                if (auto fptr = engine::Resources<sf::Font>::get(font))
+                if (auto fptr = engine::Resources<sf::Font>::get(font.as<std::string>()))
                 {
                         text->setFont(*fptr);
                 }
                 else
                 {
-                        luaContext.error(util::err::badFontName(font));
+                        std::cerr << util::err::badFontName(font.as<std::string>()) << std::endl;
                 }
         }
 
         if prop (characterSize, std::uint32_t)
         {
-                text->setCharacterSize(characterSize);
+                text->setCharacterSize(characterSize.as<std::uint32_t>());
         }
 
         if prop (lineSpacing, float)
         {
-                text->setLineSpacing(lineSpacing);
+                text->setLineSpacing(lineSpacing.as<float>());
         }
 
         if prop (letterSpacing, float)
         {
-                text->setLetterSpacing(letterSpacing);
+                text->setLetterSpacing(letterSpacing.as<float>());
         }
 
         static const util::MapStringTo<sf::Text::Style> styles = {
@@ -452,44 +448,46 @@ inline std::unique_ptr<sf::Text>& updateTextFromTable(
                 }
                 else
                 {
-                        luaContext.error(util::err::badTextStyleName(style));
+                        std::cerr << util::err::badTextStyleName(style) << std::endl;
                         return sf::Text::Style::Regular;
                 }
         };
 
         if prop (style, std::string)
         {
-                text->setStyle(getStyle(style));
+                text->setStyle(getStyle(style.as<std::string>()));
         }
-        else if prop (style, lua::Table)
+        else if prop (style, sol::table)
         {
                 std::int32_t compound = sf::Text::Style::Regular;
-                static_cast<lua::Table>(style).iterate(
-                        [&](lua::Valref, lua::Valref s) { compound |= getStyle(s); });
+                static_cast<sol::table>(style).for_each([&](sol::object, sol::object s)
+                {
+                        compound |= getStyle(s.as<std::string>());
+                });
                 text->setStyle(compound);
         }
 
         if prop (fillColor, std::string)
         {
-                text->setFillColor(stringToColor(fillColor));
+                text->setFillColor(stringToColor(fillColor.as<std::string>()));
         }
-        else if prop (fillColor, lua::Table)
+        else if prop (fillColor, sol::table)
         {
                 text->setFillColor(tableToColor(fillColor));
         }
 
         if prop (outlineColor, std::string)
         {
-                text->setOutlineColor(stringToColor(outlineColor));
+                text->setOutlineColor(stringToColor(outlineColor.as<std::string>()));
         }
-        else if prop (outlineColor, lua::Table)
+        else if prop (outlineColor, sol::table)
         {
                 text->setOutlineColor(tableToColor(outlineColor));
         }
 
         if prop (outlineThickness, float)
         {
-                text->setOutlineThickness(outlineThickness);
+                text->setOutlineThickness(outlineThickness.as<float>());
         }
 
         updateTransformFromTable(text, obj);
@@ -509,64 +507,64 @@ inline std::unique_ptr<sf::Text>& updateTextFromTable(
  *  - texture:      String specifying the ID of the texture.
  */
 inline std::unique_ptr<util::graphics::RectTileMap>& updateRectTileMapFromTable(
-        std::unique_ptr<util::graphics::RectTileMap>& tmap, lua::Table& obj)
+        std::unique_ptr<util::graphics::RectTileMap>& tmap, sol::table obj)
 {
-        if prop (tileSize, lua::Table)
+        if prop (tileSize, sol::table)
         {
                 tmap->setTileSize(util::Vector{tileSize});
         }
         else if prop (tileSize, float)
         {
-                const float s = tileSize;
+                const float s = tileSize.as<float>();
                 tmap->setTileSize({s, s});
         }
         else
         {
-                luaContext.error(util::err::noTileSize);
+                std::cerr << util::err::noTileSize << std::endl;
         }
 
-        if prop (tileIconSize, lua::Table)
+        if prop (tileIconSize, sol::table)
         {
                 tmap->setTileIconSize(sf::Vector2u{util::Vector{tileIconSize}});
         }
         else if prop (tileIconSize, std::uint32_t)
         {
-                const std::uint32_t s = tileIconSize;
+                const std::uint32_t s = tileIconSize.as<std::uint32_t>();
                 tmap->setTileIconSize({s, s});
         }
 
         if prop (texture, std::string)
         {
-                if (auto tex = engine::Resources<sf::Texture>::get(texture))
+                if (auto tex = engine::Resources<sf::Texture>::get(texture.as<std::string>()))
                 {
                         tmap->setTexture(&tex->get());
                 }
                 else
                 {
-                        luaContext.error(util::err::badTextureName(texture));
+                        std::cerr << util::err::badTextureName(texture.as<std::string>()) << std::endl;
                 } 
         }
 
-        if prop (tiles, lua::Table)
+        if prop (tiles, sol::table)
         {
                 auto tileMatrix = tableToMatrix<util::graphics::TileID>(tiles);
                 tmap->setMap(tileMatrix);
         }
 
-        if prop (size, lua::Table)
+        if prop (size, sol::table)
         {
                 tmap->setSize(sf::Vector2u{util::Vector{size}});
         }
         else if prop (size, std::uint32_t)
         {
-                const std::uint32_t s = size;
+                const auto s = size.as<std::uint32_t>();
                 tmap->setSize({s, s});
         }
 
         if prop (fill, std::uint32_t)
         {
-                tmap->fill(fill.to<std::uint32_t>());
-                obj["fill"] = lua::nil;
+                tmap->fill(fill.as<std::uint32_t>());
+                obj["fill"] = sol::nil;
         }
 
         updateTransformFromTable(tmap, obj);
@@ -595,9 +593,9 @@ inline std::unique_ptr<util::graphics::RectTileMap>& updateRectTileMapFromTable(
  *  - rect tile map (RectTileMap)
  *  - text (sf::Text)
  */
-inline std::optional<std::unique_ptr<sf::Drawable>> tableToDrawable(lua::Table& obj)
+inline std::optional<std::unique_ptr<sf::Drawable>> tableToDrawable(sol::table obj)
 {
-        const lua::Value type = obj["type"];
+        const std::string type = obj["type"];
 
         if (type == "text")
         {
@@ -630,7 +628,7 @@ inline std::optional<std::unique_ptr<sf::Drawable>> tableToDrawable(lua::Table& 
                 return std::move(updateRectTileMapFromTable(rectTileMap, obj));
         }
 
-        luaContext.error(util::err::noDrawableTypeId);
+        std::cerr << util::err::noDrawableTypeId << std::endl;
         return {};
 }
 

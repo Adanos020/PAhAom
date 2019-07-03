@@ -2,173 +2,148 @@
 
 
 #include <Script/Lua.hpp>
+#include <Script/Math.hpp>
 
 #include <Util/Observer.hpp>
+
+#include <iostream>
 
 
 namespace script
 {
 
-// General
-
-inline static lua::Retval addEntity(lua::Context& context)
-{
-        context.requireArgs<lua::Table>(1);
-        util::Subject::send(util::Message::AddEntity{context.args[0]});
-        return context.ret();
-}
-
 // Transform
 
-inline static lua::Retval setPosition(lua::Context& context)
+inline static void setPosition(sol::table entity, sol::table position)
 {
-        context.requireArgs<lua::Table, lua::Table>(2);
-
-        lua::Table entity = context.args[0];
-        util::Subject::send(util::Message::SetEntityPosition{entity["id"], context.args[1]});
-        entity["position"] = context.args[1];
-
-        return context.ret();
+        util::Subject::send(util::Message::SetEntityPosition{entity["id"], position});
+        entity.set("position", position);
 }
 
-inline static lua::Retval moveBy(lua::Context& context)
+inline static void moveBy(sol::table entity, sol::table displacement)
 {
-        context.requireArgs<lua::Table, lua::Table>(2);
-
-        lua::Table entity = context.args[0];
-        util::Subject::send(util::Message::MoveEntityBy{entity["id"], context.args[1]});
-        entity["position"]["x"] = entity["position"]["x"] + context.args[1]["x"];
-        entity["position"]["y"] = entity["position"]["y"] + context.args[1]["y"];
-
-        return context.ret();
+        const util::Vector dpos = displacement;
+        util::Subject::send(util::Message::MoveEntityBy{entity["id"], dpos});
+        entity.set("position", lua.create_table_with(
+                "x", entity.traverse_get<float>("position", "x") + dpos.x,
+                "y", entity.traverse_get<float>("position", "y") + dpos.y));
 }
 
-inline static lua::Retval setRotation(lua::Context& context)
+inline static void setRotation(sol::table entity, const float rotation)
 {
-        context.requireArgs<lua::Table, float>(2);
-
-        lua::Table entity = context.args[0];
-        util::Subject::send(util::Message::SetEntityRotation{entity["id"], context.args[1]});
-        entity["rotation"] = context.args[1];
-
-        return context.ret();
+        util::Subject::send(util::Message::SetEntityRotation{entity["id"], rotation});
+        entity.set("rotation", rotation);
 }
 
-inline static lua::Retval rotateBy(lua::Context& context)
+inline static void rotateBy(sol::table entity, const float rotation)
 {
-        context.requireArgs<lua::Table, float>(2);
-
-        lua::Table entity = context.args[0];
-        util::Subject::send(util::Message::RotateEntityBy{entity["id"], context.args[1]});
-        entity["rotation"] = entity["rotation"] + context.args[1];
-
-        return context.ret();
+        util::Subject::send(util::Message::RotateEntityBy{entity["id"], rotation});
+        entity.set("rotation", entity.get_or("rotation", 0.f) + rotation);
 }
 
-inline static lua::Retval setScale(lua::Context& context)
+inline static void setScale(sol::table entity, sol::object scale)
 {
-        context.requireArgs<lua::Table>(2);
-
-        lua::Table entity = context.args[0];
-        if (context.args[1].is<lua::Table>())
+        if (scale.get_type() == sol::type::table)
         {
                 // Vector
-                util::Subject::send(util::Message::SetEntityScale{entity["id"], context.args[1]});
-                entity["scale"] = context.args[1];
+                util::Subject::send(util::Message::SetEntityScale{entity["id"], scale.as<sol::table>()});
+                entity.set("scale", scale);
         }
-        else if (context.args[1].is<float>())
+        else if (scale.get_type() == sol::type::number)
         {
                 // Scalar
-                const float s = context.args[1];
+                const float s = scale.as<float>();
                 util::Subject::send(util::Message::SetEntityScale{entity["id"], {s, s}});
-                entity["scale"] = lua::Table::records(context, "x", s, "y", s);
+                entity.set("scale", vector(s, s));
         }
-        return context.ret();
 }
 
-inline static lua::Retval scaleBy(lua::Context& context)
+inline static void scaleBy(sol::table entity, sol::object scale)
 {
-        context.requireArgs<lua::Table>(2);
-
-        lua::Table entity = context.args[0];
-        if (context.args[1].is<lua::Table>())
+        if (scale.get_type() == sol::type::table)
         {
                 // Vector
-                util::Subject::send(util::Message::ScaleEntityBy{entity["id"], context.args[1]});
-                entity["scale"]["x"] = entity["scale"]["x"] * context.args[1]["x"];
-                entity["scale"]["y"] = entity["scale"]["y"] * context.args[1]["y"];
+                const util::Vector s = scale.as<sol::table>();
+                util::Subject::send(util::Message::ScaleEntityBy{entity["id"], s});
+                entity.set("scale", lua.create_table_with(
+                        "x", entity.traverse_get<float>("scale", "x") * s.x,
+                        "y", entity.traverse_get<float>("scale", "y") * s.y));
         }
-        else if (context.args[1].is<float>())
+        else if (scale.get_type() == sol::type::number)
         {
                 // Scalar
-                const float s = context.args[1];
+                const auto s = scale.as<float>();
                 util::Subject::send(util::Message::ScaleEntityBy{entity["id"], {s, s}});
-                entity["scale"]["x"] = entity["scale"]["x"] * s;
-                entity["scale"]["y"] = entity["scale"]["y"] * s;
+                entity.set("scale", lua.create_table_with(
+                        "x", entity.traverse_get<float>("scale", "x") * s,
+                        "y", entity.traverse_get<float>("scale", "y") * s));
         }
-        return context.ret();
 }
 
 // Physics
 
-inline static lua::Retval setVelocity(lua::Context& context)
+inline static void setVelocity(sol::table entity, const sol::table velocity)
 {
-        context.requireArgs<lua::Table, lua::Table>(2);
-
-        lua::Table entity = context.args[0];
-        
-        if (entity["rigidBody"].is<lua::Table>())
+        if (entity["rigidBody"].get_type() == sol::type::table)
         {
-                util::Subject::send(util::Message::SetEntityVelocity{entity["id"], context.args[1]});
-
-                lua::Table rigidBody = entity["rigidBody"];
-                rigidBody["velocity"]["x"] = context.args[1]["x"];
-                rigidBody["velocity"]["y"] = context.args[1]["y"];
+                util::Subject::send(util::Message::SetEntityVelocity{entity["id"], velocity});
+                entity.traverse_set("rigidBody", "velocity", velocity);
         }
         else
         {
-                context.error("Attempting to assign velocity to an entity with no rigid body.");
+                std::cerr << "Attempting to assign velocity to an entity with no rigid body." << std::endl;
         }
-        return context.ret();
 }
 
-inline static lua::Retval accelerateBy(lua::Context& context)
+inline static void accelerateBy(sol::table entity, const sol::table acceleration)
 {
-        context.requireArgs<lua::Table, lua::Table>(2);
-
-        lua::Table entity = context.args[0];
-
-        if (entity["rigidBody"].is<lua::Table>())
+        if (entity["rigidBody"].get_type() == sol::type::table)
         {
-                util::Subject::send(util::Message::AccelerateEntityBy{entity["id"], context.args[1]});
-
-                lua::Table rigidBody = entity["rigidBody"];
-                rigidBody["velocity"]["x"] = rigidBody["velocity"]["x"] + context.args[1]["x"];
-                rigidBody["velocity"]["y"] = rigidBody["velocity"]["y"] + context.args[1]["y"];
+                const util::Vector acc = acceleration;
+                util::Subject::send(util::Message::AccelerateEntityBy{entity["id"], acc});
+                entity.traverse_set("rigidBody", "velocity", lua.create_table_with(
+                        "x", entity.traverse_get<float>("rigidBody", "velocity", "x") + acc.x,
+                        "y", entity.traverse_get<float>("rigidBody", "velocity", "y") + acc.y));
         }
         else
         {
-                context.error("Attempting to assign velocity to an entity with no rigid body.");
+                std::cerr << "Attempting to assign velocity to an entity with no rigid body." << std::endl;
         }
-        return context.ret();
 }
 
-inline static lua::Retval setMass(lua::Context& context)
+inline static void setMass(sol::table entity, const float mass)
 {
-        context.requireArgs<lua::Table, float>(2);
-
-        lua::Table entity = context.args[0];
-        
-        if (entity["rigidBody"].is<lua::Table>())
+        if (entity["rigidBody"].get_type() == sol::type::table)
         {
-                util::Subject::send(util::Message::SetEntityVelocity{entity["id"], context.args[1]});
-                entity["rigidBody"]["mass"] = context.args[1];
+                util::Subject::send(util::Message::SetEntityMass{entity["id"], mass});
+                entity.traverse_set("rigidBody", "mass", mass);
         }
         else
         {
-                context.error("Attempting to assign mass to an entity with no rigid body.");
+                std::cerr << "Attempting to assign mass to an entity with no rigid body." << std::endl;
         }
-        return context.ret();
+}
+
+// General
+
+inline static void addEntity(sol::table entity)
+{
+        util::Subject::send(util::Message::AddEntity{entity});
+}
+
+inline static void loadECS()
+{
+        lua["entity"] = lua.create_table_with(
+                "add",          addEntity,
+                "setPosition",  setPosition,
+                "setRotation",  setRotation,
+                "setScale",     setScale,
+                "moveBy",       moveBy,
+                "rotateBy",     rotateBy,
+                "scaleBy",      scaleBy,
+                "setVelocity",  setVelocity,
+                "accelerateBy", accelerateBy,
+                "setMass",      setMass);
 }
 
 }

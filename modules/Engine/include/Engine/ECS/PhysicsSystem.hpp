@@ -3,7 +3,7 @@
 
 #include <Engine/ECS/Components.hpp>
 
-#include <Script/Aux.hpp>
+#include <Script/Math.hpp>
 
 #include <Util/Constants.hpp>
 #include <Util/Observer.hpp>
@@ -34,18 +34,18 @@ public:
                 this->entities.assign<RigidBody>(entity, velocity, mass);
         }
 
-        void assignRigidBody(const entt::entity entity, const lua::Table& entityTable)
+        void assignRigidBody(const entt::entity entity, sol::table entityTable)
         {
-                if (entityTable["rigidBody"].is<lua::Table>())
+                if (entityTable["rigidBody"].get_type() == sol::type::table)
                 {
-                        lua::Table rigidBody = entityTable["rigidBody"];
+                        sol::table rigidBody = entityTable["rigidBody"];
                         this->assignRigidBody(entity,
-                                script::tableFieldOr(rigidBody, "velocity", util::Vector{}),
-                                rigidBody["mass"].to<float>(0));
+                                rigidBody.get_or("velocity", script::vector(0, 0)),
+                                rigidBody.get_or("mass", 0.f));
                 }
         }
 
-        void assignPhysics(const entt::entity entity, const lua::Table& entityTable)
+        void assignPhysics(const entt::entity entity, sol::table entityTable)
         {
                 this->assignRigidBody(entity, entityTable);
         }

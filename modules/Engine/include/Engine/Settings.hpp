@@ -19,9 +19,9 @@ struct Video
 
         static void load()
         {
-                const lua::Table settings = script::luaContext.global["settings"];
+                const sol::table settings = script::lua["settings"];
 
-                const lua::Table video = settings["video"];
+                const sol::table video = settings["video"];
                 resolution = {
                         video["resolution"]["x"],
                         video["resolution"]["y"],
