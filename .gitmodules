@@ -1,6 +1,3 @@
-[submodule "modules/luapp"]
-	path = modules/luapp
-	url = https://github.com/tnovits-d2d/luapp
 [submodule "modules/entt"]
 	path = modules/entt
 	url = https://github.com/skypjack/entt
