@@ -203,8 +203,8 @@ inline static void callInputHandler(sol::table obj, sol::table handlers, sf::Eve
                 {
                         handler(obj,
                                 event.sensor.type,
-                                event.sensor.x * rsRatio.x,
-                                event.sensor.y * rsRatio.y,
+                                event.sensor.x,
+                                event.sensor.y,
                                 event.sensor.z);
                         break;
                 }
