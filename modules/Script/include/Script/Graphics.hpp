@@ -169,7 +169,7 @@ inline std::unique_ptr<T>& updateTransformFromTable(std::unique_ptr<T>& dobj, so
         auto tobj = static_cast<sf::Transformable*>(dobj.get());
         if prop (position, sol::table)
         {
-                tobj->setPosition(util::Vector{position});
+                tobj->setPosition(util::FVector{position});
         }
 
         if prop (rotation, float)
@@ -179,7 +179,7 @@ inline std::unique_ptr<T>& updateTransformFromTable(std::unique_ptr<T>& dobj, so
 
         if prop (scale, sol::table)
         {
-                tobj->setScale(util::Vector{scale});
+                tobj->setScale(util::FVector{scale});
         }
         else if prop (scale, float)
         {
@@ -207,7 +207,7 @@ inline std::unique_ptr<T>& updateTransformFromTable(std::unique_ptr<T>& dobj, so
         }
         else if prop (origin, sol::table)
         {
-                tobj->setOrigin(util::Vector{origin});
+                tobj->setOrigin(util::FVector{origin});
         }
 
         extractGlobalBounds(dobj, obj);
@@ -314,7 +314,7 @@ inline std::unique_ptr<sf::ConvexShape>& updateConvexShapeFromTable(
                 convex->setPointCount(pts.size());
                 pts.for_each([&](sol::object i, sol::object pos)
                 {
-                        convex->setPoint(i.as<std::uint32_t>() - 1, util::Vector{pos.as<sol::table>()});
+                        convex->setPoint(i.as<std::uint32_t>() - 1, util::FVector{pos.as<sol::table>()});
                 });
         }
 
@@ -333,7 +333,7 @@ inline std::unique_ptr<sf::RectangleShape>& updateRectangleShapeFromTable(
 {
         if prop (size, sol::table)
         {
-                rect->setSize(util::Vector{size});
+                rect->setSize(util::FVector{size});
         }
 
         updateShapeFromTable<sf::RectangleShape>(rect, obj);
@@ -511,7 +511,7 @@ inline std::unique_ptr<util::graphics::RectTileMap>& updateRectTileMapFromTable(
 {
         if prop (tileSize, sol::table)
         {
-                tmap->setTileSize(util::Vector{tileSize});
+                tmap->setTileSize(util::FVector{tileSize});
         }
         else if prop (tileSize, float)
         {
@@ -525,7 +525,7 @@ inline std::unique_ptr<util::graphics::RectTileMap>& updateRectTileMapFromTable(
 
         if prop (tileIconSize, sol::table)
         {
-                tmap->setTileIconSize(sf::Vector2u{util::Vector{tileIconSize}});
+                tmap->setTileIconSize(sf::Vector2u{util::FVector{tileIconSize}});
         }
         else if prop (tileIconSize, std::uint32_t)
         {
@@ -553,7 +553,7 @@ inline std::unique_ptr<util::graphics::RectTileMap>& updateRectTileMapFromTable(
 
         if prop (size, sol::table)
         {
-                tmap->setSize(sf::Vector2u{util::Vector{size}});
+                tmap->setSize(sf::Vector2u{util::FVector{size}});
         }
         else if prop (size, std::uint32_t)
         {

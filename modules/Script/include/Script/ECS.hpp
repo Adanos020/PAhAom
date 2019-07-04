@@ -14,19 +14,17 @@ namespace script
 
 // Transform
 
-inline static void setPosition(sol::table entity, sol::table position)
+inline static void setPosition(sol::table entity, sf::Vector2f position)
 {
         util::Subject::send(util::Message::SetEntityPosition{entity["id"], position});
         entity.set("position", position);
 }
 
-inline static void moveBy(sol::table entity, sol::table displacement)
+inline static void moveBy(sol::table entity, sf::Vector2f displacement)
 {
-        const util::Vector dpos = displacement;
-        util::Subject::send(util::Message::MoveEntityBy{entity["id"], dpos});
-        entity.set("position", lua.create_table_with(
-                "x", entity.traverse_get<float>("position", "x") + dpos.x,
-                "y", entity.traverse_get<float>("position", "y") + dpos.y));
+        util::Subject::send(util::Message::MoveEntityBy{entity["id"], displacement});
+        const auto pos = entity.get_or("position", sol::make_user(sf::Vector2f{0, 0}));
+        entity.set("position", pos + displacement);
 }
 
 inline static void setRotation(sol::table entity, const float rotation)
@@ -41,48 +39,32 @@ inline static void rotateBy(sol::table entity, const float rotation)
         entity.set("rotation", entity.get_or("rotation", 0.f) + rotation);
 }
 
-inline static void setScale(sol::table entity, sol::object scale)
+inline static void setScale(sol::table entity, const sf::Vector2f scale)
 {
-        if (scale.get_type() == sol::type::table)
-        {
-                // Vector
-                util::Subject::send(util::Message::SetEntityScale{entity["id"], scale.as<sol::table>()});
-                entity.set("scale", scale);
-        }
-        else if (scale.get_type() == sol::type::number)
-        {
-                // Scalar
-                const float s = scale.as<float>();
-                util::Subject::send(util::Message::SetEntityScale{entity["id"], {s, s}});
-                entity.set("scale", vector(s, s));
-        }
+        util::Subject::send(util::Message::SetEntityScale{entity["id"], scale});
+        entity.set("scale", scale);
 }
 
-inline static void scaleBy(sol::table entity, sol::object scale)
+inline static void setScale(sol::table entity, const float scale)
 {
-        if (scale.get_type() == sol::type::table)
-        {
-                // Vector
-                const util::Vector s = scale.as<sol::table>();
-                util::Subject::send(util::Message::ScaleEntityBy{entity["id"], s});
-                entity.set("scale", lua.create_table_with(
-                        "x", entity.traverse_get<float>("scale", "x") * s.x,
-                        "y", entity.traverse_get<float>("scale", "y") * s.y));
-        }
-        else if (scale.get_type() == sol::type::number)
-        {
-                // Scalar
-                const auto s = scale.as<float>();
-                util::Subject::send(util::Message::ScaleEntityBy{entity["id"], {s, s}});
-                entity.set("scale", lua.create_table_with(
-                        "x", entity.traverse_get<float>("scale", "x") * s,
-                        "y", entity.traverse_get<float>("scale", "y") * s));
-        }
+        setScale(entity, {scale, scale});
+}
+
+inline static void scaleBy(sol::table entity, const sf::Vector2f scale)
+{
+        util::Subject::send(util::Message::ScaleEntityBy{entity["id"], scale});
+        const auto current = entity.get_or("scale", sol::make_user(sf::Vector2f{1, 1}));
+        entity.set("scale", sf::Vector2f{current.x * scale.x, current.y * scale.y});
+}
+
+inline static void scaleBy(sol::table entity, const float scale)
+{
+        scaleBy(entity, {scale, scale});
 }
 
 // Physics
 
-inline static void setVelocity(sol::table entity, const sol::table velocity)
+inline static void setVelocity(sol::table entity, const sf::Vector2f velocity)
 {
         if (entity["rigidBody"].get_type() == sol::type::table)
         {
@@ -95,15 +77,14 @@ inline static void setVelocity(sol::table entity, const sol::table velocity)
         }
 }
 
-inline static void accelerateBy(sol::table entity, const sol::table acceleration)
+inline static void accelerateBy(sol::table entity, const sf::Vector2f acceleration)
 {
         if (entity["rigidBody"].get_type() == sol::type::table)
         {
-                const util::Vector acc = acceleration;
-                util::Subject::send(util::Message::AccelerateEntityBy{entity["id"], acc});
-                entity.traverse_set("rigidBody", "velocity", lua.create_table_with(
-                        "x", entity.traverse_get<float>("rigidBody", "velocity", "x") + acc.x,
-                        "y", entity.traverse_get<float>("rigidBody", "velocity", "y") + acc.y));
+                util::Subject::send(util::Message::AccelerateEntityBy{entity["id"], acceleration});
+                sol::table rigidBody = entity["rigidBody"];
+                const auto pos = rigidBody.get_or("velocity", sol::make_user(sf::Vector2f{0, 0}));
+                rigidBody.set("velocity", pos + acceleration);
         }
         else
         {
@@ -136,11 +117,15 @@ inline static void loadECS()
         lua.create_named_table("entity",
                 "add",          addEntity,
                 "setPosition",  setPosition,
-                "setRotation",  setRotation,
-                "setScale",     setScale,
                 "moveBy",       moveBy,
+                "setRotation",  setRotation,
                 "rotateBy",     rotateBy,
-                "scaleBy",      scaleBy,
+                "setScale",     sol::overload(
+                        static_cast<void(*)(sol::table, sf::Vector2f)>(setScale),
+                        static_cast<void(*)(sol::table, float)>(setScale)),
+                "scaleBy",      sol::overload(
+                        static_cast<void(*)(sol::table, sf::Vector2f)>(scaleBy),
+                        static_cast<void(*)(sol::table, float)>(scaleBy)),
                 "setVelocity",  setVelocity,
                 "accelerateBy", accelerateBy,
                 "setMass",      setMass);

@@ -1,4 +1,4 @@
-local windowCenter = vec.divide(settings.video.resolution, 2)
+local windowCenter = settings.video.resolution:divide(2)
 
 local elapsedTime = 0
 
@@ -14,7 +14,7 @@ local greeting = {
 }
 
 local bkg = {
-    position = vector(0, 0),
+    position = vec.new(0, 0),
     graphics = {
         type = "rectangle",
         texture = "menu bkg",
@@ -64,12 +64,12 @@ end
 function Menu:onMousePressed(button, x, y)
     if button == mouse.left then
         entity.add(self:newBall(
-            vector(x, y),
+            vec.new(x, y),
             random.uniform(10, 25),
             rgb(random.uniform(0, 256),
                 random.uniform(0, 256),
                 random.uniform(0, 256)),
-            vector(random.uniform(-20, 20), random.uniform(-20, 20))
+            vec.new(random.uniform(-20, 20), random.uniform(-20, 20))
         ))
     end
 end
@@ -80,7 +80,7 @@ function Menu:update(dt)
     local sinel = math.sin(elapsedTime)
     local polar = vec.fromPolar(100, elapsedTime)
 
-    entity.setPosition(greeting, vec.add(windowCenter, polar))
+    entity.setPosition(greeting, vec.new(windowCenter):add(polar))
     entity.setRotation(greeting, sinel * 30)
     entity.setScale(greeting, sinel * sinel + 0.5)
 end

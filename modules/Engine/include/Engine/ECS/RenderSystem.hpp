@@ -3,7 +3,6 @@
 
 #include <Engine/ECS/Components.hpp>
 
-#include <Script/Aux.hpp>
 #include <Script/Graphics.hpp>
 
 #include <entt/entity/registry.hpp>

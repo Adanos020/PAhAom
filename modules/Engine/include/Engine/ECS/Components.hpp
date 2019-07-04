@@ -16,8 +16,8 @@ namespace engine::ecs
 
 struct Transform
 {
-        util::Vector position = {0, 0};
-        util::Vector scale = {1, 1};
+        util::FVector position = {0, 0};
+        util::FVector scale = {1, 1};
         float rotation = 0;
 };
 
@@ -35,7 +35,7 @@ struct Graphics
 
 struct RigidBody
 {
-        util::Vector velocity = {0, 0};
+        util::FVector velocity = {0, 0};
         float mass = 0;
 };
 
@@ -46,7 +46,7 @@ struct CircleCollider
 
 struct RectCollider
 {
-        util::Vector size = {0, 0};
+        util::FVector size = {0, 0};
 };
 
 }

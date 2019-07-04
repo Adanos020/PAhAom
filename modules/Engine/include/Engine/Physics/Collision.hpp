@@ -15,14 +15,14 @@ using ColliderTag = std::uint32_t;
 
 struct RectCollider
 {
-        util::Vector position;
-        util::Vector halfSize;
+        util::FVector position;
+        util::FVector halfSize;
         ColliderTag tag;
 };
 
 struct CircleCollider
 {
-        util::Vector position;
+        util::FVector position;
         float radius;
         ColliderTag tag;
 };
@@ -33,7 +33,7 @@ struct CircleCollider
 struct Collision
 {
         float penetration;
-        util::Vector normal;
+        util::FVector normal;
 
         bool occurred() const
         {
@@ -48,7 +48,7 @@ struct Collision
 
 inline static Collision collide(const CircleCollider circle1, const CircleCollider circle2)
 {
-        const util::Vector displacement = circle2.position - circle1.position;
+        const util::FVector displacement = circle2.position - circle1.position;
         return {displacement.length() - circle1.radius - circle2.radius, displacement.normalize()};
 }
 
@@ -65,18 +65,18 @@ inline static Collision collide(const RectCollider rect1, const RectCollider rec
                 return {0, {}};
         }
         return {
-                util::Vector(inRight - inLeft, inBottom - inTop).length(),
-                util::Vector(rect2.position - rect1.position).normalize()
+                util::FVector(inRight - inLeft, inBottom - inTop).length(),
+                util::FVector(rect2.position - rect1.position).normalize()
         };
 }
 
 inline static Collision collide(const RectCollider rect, const CircleCollider circle)
 {
-        const util::Vector closestPoint = circle.position.clamp(
+        const util::FVector closestPoint = circle.position.clamp(
                 rect.position - rect.halfSize, rect.position + rect.halfSize);
         return {
-                circle.radius - util::Vector(circle.position - closestPoint).length(),
-                util::Vector(circle.position - rect.position).normalize()
+                circle.radius - util::FVector(circle.position - closestPoint).length(),
+                util::FVector(circle.position - rect.position).normalize()
         };
 }
 

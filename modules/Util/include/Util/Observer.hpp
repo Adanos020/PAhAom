@@ -48,7 +48,7 @@ struct Message
         struct SetEntityPosition
         {
                 entt::entity entity;
-                Vector position;
+                sf::Vector2f position;
         };
 
         struct SetEntityRotation
@@ -60,13 +60,13 @@ struct Message
         struct SetEntityScale
         {
                 entt::entity entity;
-                Vector scale;
+                sf::Vector2f scale;
         };
 
         struct MoveEntityBy
         {
                 entt::entity entity;
-                Vector displacement;
+                sf::Vector2f displacement;
         };
 
         struct RotateEntityBy
@@ -78,7 +78,7 @@ struct Message
         struct ScaleEntityBy
         {
                 entt::entity entity;
-                Vector scale;
+                sf::Vector2f scale;
         };
 
 
@@ -87,13 +87,13 @@ struct Message
         struct SetEntityVelocity
         {
                 entt::entity entity;
-                Vector velocity;
+                sf::Vector2f velocity;
         };
 
         struct AccelerateEntityBy
         {
                 entt::entity entity;
-                Vector acceleration;
+                sf::Vector2f acceleration;
         };
 
         struct SetEntityMass

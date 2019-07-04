@@ -60,66 +60,67 @@ inline constexpr bool isWithin(const T& value, const T& lo, const T& hi)
 
 // Vector
 
-struct Vector : sf::Vector2f
+template<Arithmetic T>
+struct Vector : sf::Vector2<T>
 {
-        Vector() {}
+        Vector<T>() {}
 
-        Vector(const float x, const float y)
-        : sf::Vector2f(x, y)
+        Vector<T>(const T x, const T y)
+        : sf::Vector2<T>(x, y)
         {
         }
 
-        Vector(const Vector& copy)
-        : sf::Vector2f(copy)
+        Vector<T>(const Vector<T>& copy)
+        : sf::Vector2<T>(copy)
         {
         }
 
-        template<Arithmetic T>
-        Vector(const sf::Vector2<T>& other)
-        : sf::Vector2f(other)
+        template<Arithmetic U>
+        Vector<T>(const sf::Vector2<U>& other)
+        : sf::Vector2<T>(other)
         {
         }
 
-        Vector(sol::table vec)
-        : sf::Vector2f(vec.get_or<float>("x", 0), vec.get_or<float>("y", 0))
+        Vector<T>(sol::table vec)
+        : sf::Vector2<T>(vec.get_or<T>("x", 0), vec.get_or<T>("y", 0))
         {
         }
 
-        Vector& operator=(const Vector& other)
+        Vector<T>& operator=(const Vector<T>& other)
         {
                 this->x = other.x;
                 this->y = other.y;
                 return *this;
         }
 
-        float lengthSquared() const
+        T lengthSquared() const
         {
                 return this->x * this->x + this->y * this->y;
         }
 
-        float length() const
+        T length() const
         {
                 return std::sqrt(this->lengthSquared());
         }
 
-        float dot(const Vector& rhs) const
+        T dot(const Vector<T>& rhs) const
         {
                 return this->x * rhs.x + this->y * rhs.y;
         }
 
-        Vector& length(const float l)
+        Vector<T>& length(const T l)
         {
                 this->normalize() *= l;
                 return *this;
         }
 
-        Vector length(const float l) const
+        Vector<T> length(const T l) const
         {
-                Vector v = *this;
+                Vector<T> v = *this;
                 return v.length(l);
         }
 
-        Vector& limit(const float l)
+        Vector<T>& limit(const T l)
         {
                 if (this->length() > l)
                 {
@@ -128,38 +129,38 @@ struct Vector : sf::Vector2f
                 return *this;
         }
 
-        Vector limit(const float l) const
+        Vector<T> limit(const T l) const
         {
-                Vector v = *this;
+                Vector<T> v = *this;
                 return v.limit(l);
         }
 
-        Vector& normalize()
+        Vector<T>& normalize()
         {
                 *this /= this->length();
                 return *this;
         }
 
-        Vector normalize() const
+        Vector<T> normalize() const
         {
-                Vector v = *this;
+                Vector<T> v = *this;
                 return v.normalize();
         }
 
-        Vector& clamp(const Vector& lo, const Vector& hi)
+        Vector<T>& clamp(const Vector<T> lo, const Vector<T> hi)
         {
                 this->x = std::clamp(this->x, lo.x, hi.x);
                 this->y = std::clamp(this->y, lo.y, hi.y);
                 return *this;
         }
 
-        Vector clamp(const Vector& lo, const Vector& hi) const
+        Vector<T> clamp(const Vector<T> lo, const Vector<T> hi) const
         {
-                Vector v = *this;
+                Vector<T> v = *this;
                 return v.clamp(lo, hi);
         }
 
-        Vector& clamp(const float lo, const float hi)
+        Vector<T>& clamp(const T lo, const T hi)
         {
                 if (this->length() > hi)
                 {
@@ -172,28 +173,32 @@ struct Vector : sf::Vector2f
                 return *this;
         }
 
-        Vector clamp(const float lo, const float hi) const
+        Vector<T> clamp(const T lo, const T hi) const
         {
-                Vector v = *this;
+                Vector<T> v = *this;
                 return v.clamp(lo, hi);
         }
 
 public:
 
-        static Vector fromPolar(const float radius, const float angle)
+        static Vector<T> fromPolar(const T radius, const T angle)
         {
-                return {radius * std::cos(angle), radius * std::sin(angle)};
+                return {static_cast<T>(radius * std::cos(angle)),
+                        static_cast<T>(radius * std::sin(angle))};
         }
 
-        static Vector lerp(const Vector& v1, const Vector& v2, const float alpha)
+        static Vector<T> lerp(const Vector<T> v1, const Vector<T> v2, const T alpha)
         {
                 return v1 + alpha * (v2 - v1);
         }
 
-        static float angleBetween(const Vector& v1, const Vector& v2)
+        static float angleBetween(const Vector<T> v1, const Vector<T> v2)
         {
                 return std::acos(v1.dot(v2) / v1.length() / v2.length());
         }
 };
+
+using FVector = Vector<float>;
+using IVector = Vector<std::int32_t>;
 
 }

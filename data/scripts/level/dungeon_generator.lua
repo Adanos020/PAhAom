@@ -1,5 +1,5 @@
 local mapSize      -- vector
-local mapArea      -- rectangle
+local mapArea      -- irect.new
 local maxRoomSize  -- vector
 local tiles        -- matrix of numbers
 
@@ -18,19 +18,17 @@ local Neighbours = {
 }
 
 local directions = {
-    vector(-2,  0), -- LEFT
-    vector( 2,  0), -- RIGHT
-    vector( 0, -2), -- UP
-    vector( 0,  2), -- DOWN
+    ivec.new(-2,  0), -- LEFT
+    ivec.new( 2,  0), -- RIGHT
+    ivec.new( 0, -2), -- UP
+    ivec.new( 0,  2), -- DOWN
 }
 
 
 -- Helpers
 
 local function fillArea(area, tile)
-    assert(isRectangle(area))
     assert(math.type(tile) == "integer")
-
     for x = area.left, area.left + area.width - 1 do
         for y = area.top, area.top + area.height - 1 do
             tiles[y][x] = tile
@@ -103,22 +101,22 @@ end
 -- Procedures
 
 local function initialise(size)
-    mapSize = vector(math.tointeger(size.x), math.tointeger(size.y))
-    mapArea = rectangle(vector(1, 1), mapSize)
-    maxRoomSize = vector(iclamp(mapSize.x // 2, 3, 13),
-                         iclamp(mapSize.y // 2, 3, 13))
+    mapSize = ivec.new(size)
+    mapArea = irect.new(ivec.new(1, 1), mapSize)
+    maxRoomSize = ivec.new(iclamp(mapSize.x // 2, 3, 13),
+                           iclamp(mapSize.y // 2, 3, 13))
     tiles = {}
     for row = 1, mapSize.y do
         tiles[row] = {}
     end
-    fillArea(rectangle(vector(1, 1), mapSize), Tile.WALL)
+    fillArea(mapArea, Tile.WALL)
 end
 
 local function generateMaze()
     local cells = {
         -- Pick a random first cell with odd coordinates.
-        vector( ~1 & random.iuniform(2, mapSize.x),
-                ~1 & random.iuniform(2, mapSize.y))
+        ivec.new(~1 & random.iuniform(2, mapSize.x),
+                 ~1 & random.iuniform(2, mapSize.y))
     }
 
     local currCell = cells[#cells]
@@ -134,19 +132,19 @@ local function generateMaze()
             table.remove(cells)
         else
             -- Advance to the next cell in current direction.
-            local nextCell = vec.add(currCell, currDir)
+            local nextCell = currCell:add(currDir)
 
             -- Decide on whether make a turn.
-            while not rect.contains(mapArea, nextCell)
+            while not mapArea:contains(nextCell)
                 or tiles[nextCell.y][nextCell.x] == Tile.HALLWAY
                 or random.chance(0.1)
             do
                 currDir = pickDirection(neighbours)
-                nextCell = vec.add(currCell, currDir)
+                nextCell = currCell:add(currDir)
             end
 
             -- Carve the corridor.
-            local midWay = vec.add(currCell, vec.divide(currDir, 2))
+            local midWay = currCell:add(currDir:divide(2))
             tiles[midWay.y][midWay.x] = Tile.HALLWAY
             tiles[nextCell.y][nextCell.x] = Tile.HALLWAY
             table.insert(cells, nextCell)
@@ -155,21 +153,21 @@ local function generateMaze()
 end
 
 local function spreadRooms()
-    local minRoomSize = vector(3, 3)
+    local minRoomSize = ivec.new(3, 3)
     local maxRoomTries = 100
     local rooms = {}
 
     for i = 1, maxRoomTries do
-        local roomSize = vector(
+        local roomSize = ivec.new(
             1 | random.iuniform(minRoomSize.x, maxRoomSize.x),
             1 | random.iuniform(minRoomSize.y, maxRoomSize.y))
-        local roomPos = vector(
+        local roomPos = ivec.new(
             ~1 & random.iuniform(2, mapSize.x - roomSize.x),
             ~1 & random.iuniform(2, mapSize.y - roomSize.y))
 
-        local newRoom = rectangle(roomPos, roomSize)
+        local newRoom = irect.new(roomPos, roomSize)
         local function overlapsNewRoom(room)
-            return rect.intersects(room, newRoom)
+            return newRoom:intersects(room)
         end
 
         if noneOf(rooms, overlapsNewRoom) then
@@ -188,7 +186,7 @@ local function fillDeadEnds()
     local deadEnds = {}
     for x = 2, mapSize.x, 2 do
         for y = 2, mapSize.y, 2 do
-            local cell = vector(x, y)
+            local cell = ivec.new(x, y)
             if isDeadEnd(cell) then
                 table.insert(deadEnds, cell)
             end
@@ -201,24 +199,20 @@ local function fillDeadEnds()
         while isDeadEnd(cell) do
             local neighbours = findNeighbours(cell, Tile.HALLWAY, 1)
             local dir = directions[neighboursIndices(neighbours)[1]]
-            local midWay = vector(cell.x + dir.x // 2, cell.y + dir.y // 2)
+            local midWay = cell:add(dir:divide(2))
 
             tiles[cell.y][cell.x] = Tile.WALL
             tiles[midWay.y][midWay.x] = Tile.WALL
 
-            cell = vec.add(cell, dir)
+            cell = cell:add(dir)
         end
     end
 end
 
 function generateDungeon(size)
-    assert(isVector(size))
-
-    -- Generate
     initialise(size)
     generateMaze()
     spreadRooms()
     fillDeadEnds()
-
     return tiles
 end

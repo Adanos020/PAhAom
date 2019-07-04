@@ -29,7 +29,7 @@ public:
                 util::Subject::deleteObserver(this);
         }
 
-        void assignRigidBody(const entt::entity entity, const util::Vector velocity, const float mass)
+        void assignRigidBody(const entt::entity entity, const util::FVector velocity, const float mass)
         {
                 this->entities.assign<RigidBody>(entity, velocity, mass);
         }
@@ -40,7 +40,7 @@ public:
                 {
                         sol::table rigidBody = entityTable["rigidBody"];
                         this->assignRigidBody(entity,
-                                rigidBody.get_or("velocity", script::vector(0, 0)),
+                                rigidBody.get_or("velocity", sol::make_user(util::FVector{0, 0})),
                                 rigidBody.get_or("mass", 0.f));
                 }
         }
@@ -50,12 +50,12 @@ public:
                 this->assignRigidBody(entity, entityTable);
         }
 
-        void setVelocity(const entt::entity entity, const util::Vector velocity)
+        void setVelocity(const entt::entity entity, const util::FVector velocity)
         {
                 this->entities.get<RigidBody>(entity).velocity = velocity;
         }
 
-        void accelerateBy(const entt::entity entity, const util::Vector acceleration)
+        void accelerateBy(const entt::entity entity, const util::FVector acceleration)
         {
                 this->entities.get<RigidBody>(entity).velocity += acceleration;
         }

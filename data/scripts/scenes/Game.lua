@@ -1,4 +1,4 @@
-local windowCenter = vec.divide(settings.video.resolution, 2)
+local windowCenter = settings.video.resolution:divide(2)
 
 local level = {
     position = windowCenter,
@@ -18,11 +18,11 @@ local player = {
     graphics = {
         type = "sprite",
         texture = "player",
-        textureRect = rectangle(0, 0, 16, 16),
+        textureRect = irect.new(0, 0, 16, 16),
         z = 1,
     },
     rigidBody = {
-        velocity = vector(0, 0),
+        velocity = vec.new(0, 0),
     },
     input = {
         onKeyPressed = function(me, key)
@@ -62,7 +62,7 @@ function Game:new(o)
     o = o or {}
     setmetatable(o, self)
     self.__index = self
-    level.graphics.tiles = generateDungeon(vector(37, 21))
+    level.graphics.tiles = generateDungeon(ivec.new(37, 21))
     return o
 end
 
@@ -73,6 +73,6 @@ function Game:onKeyPressed(key)
 end
 
 function Game:update(dt)
-    -- print(level.position.x, level.position.y, "|",
-    --       player.position.x, player.position.y)
+    print(level.position.x, level.position.y, "|",
+          player.position.x, player.position.y)
 end

@@ -28,26 +28,26 @@ public:
                 util::Subject::deleteObserver(this);
         }
 
-        void assignTransform(const entt::entity entity, const util::Vector position,
-                             const util::Vector scale, const float rotation)
+        void assignTransform(const entt::entity entity, const util::FVector position,
+                             const util::FVector scale, const float rotation)
         {
                 this->entities.assign<Transform>(entity, position, scale, rotation);
         }
 
         void assignTransform(const entt::entity entity, sol::table entityTable)
         {
-                const auto position = entityTable.get_or("position", script::vector(0, 0));
-                const auto scale    = entityTable.get_or("scale",    script::vector(1, 1));
+                const auto position = entityTable.get_or("position", sol::make_user(util::FVector{0, 0}));
+                const auto scale    = entityTable.get_or("scale",    sol::make_user(util::FVector{1, 1}));
                 const auto rotation = entityTable.get_or("rotation", 0.f);
                 this->assignTransform(entity, position, scale, rotation);
         }
 
-        void setPosition(const entt::entity entity, const util::Vector position)
+        void setPosition(const entt::entity entity, const util::FVector position)
         {
                 this->entities.get<Transform>(entity).position = position;
         }
 
-        void moveBy(const entt::entity entity, const util::Vector displacement)
+        void moveBy(const entt::entity entity, const util::FVector displacement)
         {
                 this->entities.get<Transform>(entity).position += displacement;
         }
@@ -62,14 +62,14 @@ public:
                 this->entities.get<Transform>(entity).rotation += rotation;
         }
 
-        void setScale(const entt::entity entity, const util::Vector scale)
+        void setScale(const entt::entity entity, const util::FVector scale)
         {
                 this->entities.get<Transform>(entity).scale = scale;
         }
 
-        void scaleBy(const entt::entity entity, const util::Vector scale)
+        void scaleBy(const entt::entity entity, const util::FVector scale)
         {
-                util::Vector& s = this->entities.get<Transform>(entity).scale;
+                util::FVector& s = this->entities.get<Transform>(entity).scale;
                 s.x *= scale.x;
                 s.y *= scale.y;
         }
