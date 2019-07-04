@@ -37,6 +37,11 @@ struct Video
                 return {windowSize.x, windowSize.y};
         }
 
+        static sf::Vector2f resolutionSizeRatio()
+        {
+                return {float(resolution.x) / windowSize.x, float(resolution.y) / windowSize.y};
+        }
+
         Video() = delete;
 };
 

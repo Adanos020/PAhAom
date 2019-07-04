@@ -57,7 +57,7 @@ inline static void quit()
 
 inline static void loadScenes()
 {
-        lua["game"] = lua.create_table_with(
+        lua.create_named_table("game",
                 "switchTo",  switchTo,
                 "saveScene", saveScene,
                 "loadScene", loadScene,

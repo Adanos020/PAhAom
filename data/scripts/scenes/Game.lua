@@ -40,10 +40,14 @@ local player = {
         end,
         onKeyReleased = function(me, key)
             local velocity = me.rigidBody.velocity
-            if key == keyboard.left or key == keyboard.right then
-                velocity.x = 0
-            elseif key == keyboard.up or key == keyboard.down then
-                velocity.y = 0
+            if key == keyboard.left then
+                velocity.x = keyboard.isPressed(keyboard.right) and  200 or 0
+            elseif key == keyboard.right then
+                velocity.x = keyboard.isPressed(keyboard.left)  and -200 or 0
+            elseif key == keyboard.up then
+                velocity.y = keyboard.isPressed(keyboard.down)  and  200 or 0
+            elseif key == keyboard.down then
+                velocity.y = keyboard.isPressed(keyboard.up)    and -200 or 0
             end
             entity.setVelocity(me, velocity)
         end,

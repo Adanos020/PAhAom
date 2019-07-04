@@ -35,7 +35,7 @@ public:
                 util::rng.seed(std::chrono::system_clock::now().time_since_epoch().count());
 
                 // Scripts.
-                script::init();
+                script::init(this->window);
 
                 // Settings.
                 Settings::Video::load();

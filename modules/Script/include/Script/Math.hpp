@@ -381,11 +381,16 @@ inline static void loadMath()
         // lua.new_usertype<sf::Vector2f>("vector",
         //         "x", &sf::Vector2f::x,
         //         "y", &sf::Vector2f::y);
+
+        lua.new_usertype<sf::Vector2i>("ivector",
+                "x", &sf::Vector2i::x,
+                "y", &sf::Vector2i::y);
+
         lua["vector"]   = vector;
         lua["isVector"] = isVector;
 
         sol::table vec;
-        lua["vec"] = lua.create_table_with(
+        lua.create_named_table("vec",
                 "equals",        vectorEquals,
                 "add",           vectorAdd,
                 "subtract",      vectorSubtract,
@@ -411,7 +416,7 @@ inline static void loadMath()
         //         "height", &sf::FloatRect::Height);
         lua["rectangle"] = rectangle;
         lua["isRectangle"] = isRectangle;
-        lua["rect"] = lua.create_table_with(
+        lua.create_named_table("rect",
                 "contains",   rectangleContains,
                 "intersects", rectangleIntersects);
 }

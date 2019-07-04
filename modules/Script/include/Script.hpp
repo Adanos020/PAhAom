@@ -13,7 +13,7 @@
 namespace script
 {
 
-inline static void init()
+inline static void init(sf::Window& window)
 {
         lua.open_libraries(
                 sol::lib::base,
@@ -31,12 +31,12 @@ inline static void init()
 
         loadECS();
         loadGraphics();
-        loadInput();
+        loadInput(window);
         loadMath();
         loadResources();
 
         // Random
-        lua["random"] = lua.create_table_with(
+        lua.create_named_table("random",
                 "chance",   util::chance,
                 "uniform",  util::uniform<double>,
                 "iuniform", util::uniform<std::int32_t>,

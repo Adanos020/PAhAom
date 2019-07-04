@@ -133,7 +133,7 @@ inline static void addEntity(sol::table entity)
 
 inline static void loadECS()
 {
-        lua["entity"] = lua.create_table_with(
+        lua.create_named_table("entity",
                 "add",          addEntity,
                 "setPosition",  setPosition,
                 "setRotation",  setRotation,

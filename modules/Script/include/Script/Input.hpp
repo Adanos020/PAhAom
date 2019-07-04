@@ -1,11 +1,14 @@
 #pragma once
 
 
+#include <Engine/Settings.hpp>
+
 #include <Script/Lua.hpp>
 
 #include <Util/String.hpp>
 
 #include <SFML/Window/Event.hpp>
+#include <SFML/Window/Window.hpp>
 
 
 namespace script
@@ -43,6 +46,8 @@ inline static void callInputHandler(sol::table obj, sol::table handlers, sf::Eve
         {
                 return;
         }
+
+        const sf::Vector2f rsRatio = engine::Settings::Video::resolutionSizeRatio();
 
         sol::function handler = handlers[EVENT_HANDLERS[event.type]];
         switch (event.type)
@@ -88,8 +93,8 @@ inline static void callInputHandler(sol::table obj, sol::table handlers, sf::Eve
                 {
                         handler(obj,
                                 event.mouseWheel.delta,
-                                event.mouseWheel.x,
-                                event.mouseWheel.y);
+                                event.mouseWheel.x * rsRatio.x,
+                                event.mouseWheel.y * rsRatio.y);
                         break;
                 }
 
@@ -97,8 +102,8 @@ inline static void callInputHandler(sol::table obj, sol::table handlers, sf::Eve
                 {
                         handler(obj,
                                 event.mouseWheelScroll.delta,
-                                event.mouseWheelScroll.x,
-                                event.mouseWheelScroll.y);
+                                event.mouseWheelScroll.x * rsRatio.x,
+                                event.mouseWheelScroll.y * rsRatio.y);
                         break;
                 }
 
@@ -106,8 +111,8 @@ inline static void callInputHandler(sol::table obj, sol::table handlers, sf::Eve
                 {
                         handler(obj,
                                 event.mouseButton.button,
-                                event.mouseButton.x,
-                                event.mouseButton.y);
+                                event.mouseButton.x * rsRatio.x,
+                                event.mouseButton.y * rsRatio.y);
                         break;
                 }
 
@@ -115,16 +120,16 @@ inline static void callInputHandler(sol::table obj, sol::table handlers, sf::Eve
                 {
                         handler(obj,
                                 event.mouseButton.button,
-                                event.mouseButton.x,
-                                event.mouseButton.y);
+                                event.mouseButton.x * rsRatio.x,
+                                event.mouseButton.y * rsRatio.y);
                         break;
                 }
 
                 case sf::Event::MouseMoved:
                 {
                         handler(obj,
-                                event.mouseMove.x,
-                                event.mouseMove.y);
+                                event.mouseMove.x * rsRatio.x,
+                                event.mouseMove.y * rsRatio.y);
                         break;
                 }
 
@@ -171,8 +176,8 @@ inline static void callInputHandler(sol::table obj, sol::table handlers, sf::Eve
                 {
                         handler(obj,
                                 event.touch.finger,
-                                event.touch.x,
-                                event.touch.y);
+                                event.touch.x * rsRatio.x,
+                                event.touch.y * rsRatio.y);
                         break;
                 }
 
@@ -180,8 +185,8 @@ inline static void callInputHandler(sol::table obj, sol::table handlers, sf::Eve
                 {
                         handler(obj,
                                 event.touch.finger,
-                                event.touch.x,
-                                event.touch.y);
+                                event.touch.x * rsRatio.x,
+                                event.touch.y * rsRatio.y);
                         break;
                 }
 
@@ -189,8 +194,8 @@ inline static void callInputHandler(sol::table obj, sol::table handlers, sf::Eve
                 {
                         handler(obj,
                                 event.touch.finger,
-                                event.touch.x,
-                                event.touch.y);
+                                event.touch.x * rsRatio.x,
+                                event.touch.y * rsRatio.y);
                         break;
                 }
 
@@ -198,8 +203,8 @@ inline static void callInputHandler(sol::table obj, sol::table handlers, sf::Eve
                 {
                         handler(obj,
                                 event.sensor.type,
-                                event.sensor.x,
-                                event.sensor.y,
+                                event.sensor.x * rsRatio.x,
+                                event.sensor.y * rsRatio.y,
                                 event.sensor.z);
                         break;
                 }
@@ -208,9 +213,32 @@ inline static void callInputHandler(sol::table obj, sol::table handlers, sf::Eve
         }
 }
 
-inline static void loadInput()
+inline static void loadInput(sf::Window& window [[maybe_unused]])
 {
-        lua["keyboard"] = lua.create_table_with(
+        // Joystick
+        lua.new_enum("JoystickAxis",
+                "axisX",        sf::Joystick::X,
+                "axisY",        sf::Joystick::Y,
+                "axisZ",        sf::Joystick::Z,
+                "axisR",        sf::Joystick::R,
+                "axisU",        sf::Joystick::U,
+                "axisV",        sf::Joystick::V,
+                "axisPovX",     sf::Joystick::PovX,
+                "axisPovY",     sf::Joystick::PovY,
+                "axisCount",    sf::Joystick::AxisCount);
+
+        lua.create_named_table("joystick",
+                "buttonCount",  sf::Joystick::ButtonCount,
+                "count",        sf::Joystick::Count,
+                "isConnected",  sf::Joystick::isConnected,
+                "isPressed",    sf::Joystick::isButtonPressed,
+                "buttonCount",  sf::Joystick::getButtonCount,
+                "axisPosition", sf::Joystick::getAxisPosition,
+                "info",         sf::Joystick::getIdentification,
+                "update",       sf::Joystick::update);
+
+        // Keyboard
+        lua.create_named_table("keyboard",
                 "unknown",   sf::Keyboard::Unknown,
                 "a",         sf::Keyboard::A,
                 "b",         sf::Keyboard::B,
@@ -313,7 +341,27 @@ inline static void loadInput()
                 "f14",       sf::Keyboard::F14,
                 "f15",       sf::Keyboard::F15,
                 "pause",     sf::Keyboard::Pause,
-                "keyCount",  sf::Keyboard::KeyCount);
+                "keyCount",  sf::Keyboard::KeyCount,
+                "isPressed", sf::Keyboard::isKeyPressed);
+
+        // Mouse
+        lua.create_named_table("mouse",
+                "left",            sf::Mouse::Left,
+                "right",           sf::Mouse::Right,
+                "middle",          sf::Mouse::Middle,
+                "x1",              sf::Mouse::XButton1,
+                "x2",              sf::Mouse::XButton2,
+                "buttonCount",     sf::Mouse::ButtonCount,
+                "verticalWheel",   sf::Mouse::VerticalWheel,
+                "horizontalWheel", sf::Mouse::HorizontalWheel,
+                "isPressed",       sf::Mouse::isButtonPressed,
+
+                "position", sol::property(
+                        [] { return sf::Mouse::getPosition(); },
+                        [] (const sf::Vector2i pos) { sf::Mouse::setPosition(pos); }),
+                "positionInWindow", sol::property(
+                        [&] { return sf::Mouse::getPosition(window); },
+                        [&] (const sf::Vector2i pos) { sf::Mouse::setPosition(pos, window); }));
 }
 
 }

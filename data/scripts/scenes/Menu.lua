@@ -58,10 +58,13 @@ function Menu:onKeyPressed(key)
         game.switchTo("Game")
     elseif key == keyboard.escape then
         game.quit()
-    elseif key == keyboard.space then
+    end
+end
+
+function Menu:onMousePressed(button, x, y)
+    if button == mouse.left then
         entity.add(self:newBall(
-            vector(random.uniform(0, settings.video.resolution.x),
-                   random.uniform(0, settings.video.resolution.y)),
+            vector(x, y),
             random.uniform(10, 25),
             rgb(random.uniform(0, 256),
                 random.uniform(0, 256),

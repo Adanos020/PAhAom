@@ -10,7 +10,7 @@ namespace script
 {
 
 template<engine::Resource T>
-inline static sol::table addResourceHandlerTable()
+inline static sol::table createResourceHandlerTable()
 {
         return lua.create_table_with(
                 "load",      &engine::Resources<T>::load,
@@ -37,8 +37,8 @@ inline static void loadResource(sol::object, sol::object res)
 
 inline static void loadResources()
 {
-        lua["fonts"]    = addResourceHandlerTable<sf::Font>();
-        lua["textures"] = addResourceHandlerTable<sf::Texture>();
+        lua["fonts"]    = createResourceHandlerTable<sf::Font>();
+        lua["textures"] = createResourceHandlerTable<sf::Texture>();
 
         lua.script_file("data/scripts/resources.lua");
         sol::table resources = lua["resources"];
