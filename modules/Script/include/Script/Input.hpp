@@ -216,7 +216,7 @@ inline static void callInputHandler(sol::table obj, sol::table handlers, sf::Eve
 inline static void loadInput(sf::Window& window [[maybe_unused]])
 {
         // Joystick
-        lua.new_enum("JoystickAxis",
+        lua.create_named_table("joystick",
                 "axisX",        sf::Joystick::X,
                 "axisY",        sf::Joystick::Y,
                 "axisZ",        sf::Joystick::Z,
@@ -225,9 +225,7 @@ inline static void loadInput(sf::Window& window [[maybe_unused]])
                 "axisV",        sf::Joystick::V,
                 "axisPovX",     sf::Joystick::PovX,
                 "axisPovY",     sf::Joystick::PovY,
-                "axisCount",    sf::Joystick::AxisCount);
-
-        lua.create_named_table("joystick",
+                "axisCount",    sf::Joystick::AxisCount,
                 "buttonCount",  sf::Joystick::ButtonCount,
                 "count",        sf::Joystick::Count,
                 "isConnected",  sf::Joystick::isConnected,
