@@ -1,4 +1,4 @@
-local windowCenter = settings.video.resolution:divide(2)
+local windowCenter = vec.new(settings.video.resolution:divide(2))
 
 local level = {
     position = windowCenter,
@@ -73,6 +73,6 @@ function Game:onKeyPressed(key)
 end
 
 function Game:update(dt)
-    print(level.position.x, level.position.y, "|",
-          player.position.x, player.position.y)
+    -- print(level.position.x, level.position.y, "|",
+    --       player.position.x, player.position.y)
 end

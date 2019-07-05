@@ -93,8 +93,11 @@ inline static void loadMath()
 
         impl::registerVectorUserType<float>("vec");
         impl::registerVectorUserType<std::int32_t>("ivec");
+        impl::registerVectorUserType<std::uint32_t>("uvec");
+
         impl::registerRectangleUserType<float>("rect");
         impl::registerRectangleUserType<std::int32_t>("irect");
+        impl::registerRectangleUserType<std::uint32_t>("urect");
 }
 
 }

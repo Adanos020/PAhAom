@@ -48,13 +48,13 @@ inline float map(const float val, const float lo1, const float hi1,
 template<Integral T>
 inline constexpr bool isWithin(const T& value, const T& lo, const T& hi)
 {
-        return static_cast<std::uint32_t>(value - lo) <= (hi - lo);
+        return static_cast<std::uint32_t>(value - lo) < (hi - lo);
 }
 
 template<Floating T>
 inline constexpr bool isWithin(const T& value, const T& lo, const T& hi)
 {
-        return lo <= value and value <= hi;
+        return lo <= value and value < hi;
 }
 
 

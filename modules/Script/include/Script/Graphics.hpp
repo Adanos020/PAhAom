@@ -7,6 +7,7 @@
 
 #include <Util/ErrorMessages.hpp>
 #include <Util/Graphics.hpp>
+#include <Util/Math.hpp>
 #include <Util/Types.hpp>
 
 #include <SFML/Graphics/Color.hpp>
@@ -22,140 +23,120 @@
 namespace script
 {
 
-// Externals
-
-inline static sol::table rgba(std::uint32_t r, std::uint32_t g, std::uint32_t b, std::uint32_t a)
-{
-        return lua.create_table_with("r", r, "g", g, "b", b, "a", a);
-}
-
-inline static sol::table rgb(std::uint32_t r, std::uint32_t g, std::uint32_t b)
-{
-        return lua.create_table_with("r", r, "g", g, "b", b);
-}
-
 inline static void loadGraphics()
 {
-        lua["rgba"] = rgba;
-        lua["rgb"]  = rgb;
-}
-
-// Internals
-
-inline static sf::Color stringToColor(const std::string& str)
-{
-        static const util::MapStringTo<sf::Color> predefinedColors = {
-                { "black",       sf::Color::Black       },
-                { "white",       sf::Color::White       },
-                { "red",         sf::Color::Red         },
-                { "green",       sf::Color::Green       },
-                { "blue",        sf::Color::Blue        },
-                { "yellow",      sf::Color::Yellow      },
-                { "magenta",     sf::Color::Magenta     },
-                { "cyan",        sf::Color::Cyan        },
-                { "transparent", sf::Color::Transparent },
-        };
-
-        if (auto c = predefinedColors.find(str); c != predefinedColors.end())
+        // (The "p" here stands for "parameter")
+        const auto hspcm = [](float h, float s, float p, const float c, const float m)
         {
-                return c->second;
-        }
+                struct fRGB { float r; float g; float b; };
 
-        std::cerr << util::err::badColorName(str) << std::endl;
-        return sf::Color::Transparent;
-}
+                h = std::fmod(h, 360);
+                s = std::clamp(s, 0.f, 1.f);
+                p = std::clamp(p, 0.f, 1.f);
 
-/** Transforms a Lua table into an sf::Color object.
- * 
- *  Table syntax:
- *  - r: Number specifying the r component.
- *  - g: Number specifying the g component.
- *  - b: Number specifying the b component.
- *  - a: Number specifying the a component.
- */
-inline sf::Color tableToColor(sol::table obj)
-{
-        return {
-                static_cast<sf::Uint8>(obj.get_or("r", 0u)),
-                static_cast<sf::Uint8>(obj.get_or("g", 0u)),
-                static_cast<sf::Uint8>(obj.get_or("b", 0u)),
-                static_cast<sf::Uint8>(obj.get_or("a", 255u)),
+                const float x = c * (1 - std::fabs(std::fmod(h / 60, 2) - 1));
+                const auto c1 = util::isWithin(h,   0.f,  60.f) ? fRGB{c, x, 0}
+                              : util::isWithin(h,  60.f, 120.f) ? fRGB{x, c, 0}
+                              : util::isWithin(h, 120.f, 180.f) ? fRGB{0, c, x}
+                              : util::isWithin(h, 180.f, 240.f) ? fRGB{0, x, c}
+                              : util::isWithin(h, 240.f, 300.f) ? fRGB{x, 0, c}
+                              :             /* 300 ≤ h < 360 ? */ fRGB{c, 0, x};
+
+                return sf::Color{static_cast<sf::Uint8>((c1.r + m) * 255), 
+                                 static_cast<sf::Uint8>((c1.g + m) * 255), 
+                                 static_cast<sf::Uint8>((c1.b + m) * 255)};
         };
-}
 
-/** Transforms a Lua table into an sf::Rect<T> object.
- * 
- *  Table syntax:
- *  - left:   Number specifying the x coordinate of the top-left corner.
- *  - top:    Number specifying the y coordinate of the top-left corner.
- *  - width:  Number specifying the rectangle's width.
- *  - height: Number specifying the rectangle's height.
- */
-template<util::Arithmetic T = float>
-inline sf::Rect<T> tableToRectangle(sol::table obj)
-{
-        return {
-                obj.get_or("left"  , T{0}),
-                obj.get_or("top"   , T{0}),
-                obj.get_or("width" , T{0}),
-                obj.get_or("height", T{0}),
-        };
-}
-
-/** Table of tables of numbers, where all inner tables must have equal lengths.
- */
-template<util::Arithmetic T = float>
-inline util::Matrix<T> tableToMatrix(sol::table obj)
-{
-        util::Matrix<T> mat;
-        mat.resize(obj.size());
-
-        obj.for_each([&](sol::object i, sol::object row) {
-                if (not row.is<sol::table>())
-                {
-                        std::cerr << util::err::notATable << std::endl;
-                }
-                row.as<sol::table>().for_each([&](sol::object, sol::object entry) {
-                        if (entry.get_type() != sol::type::number)
+        lua.new_usertype<sf::Color>("color",
+                sol::no_constructor,
+                "r", &sf::Color::r,
+                "g", &sf::Color::g,
+                "b", &sf::Color::b,
+                "a", &sf::Color::a,
+                "rgb",  [](sf::Uint8 r, sf::Uint8 g, sf::Uint8 b)
                         {
-                                std::cerr << util::err::notANumber << std::endl;
-                        }
-                        mat[(i.as<std::int32_t>() - 1)].push_back(
-                                static_cast<T>(entry.as<float>()));
-                });
-        });
+                                return sf::Color{r, g, b};
+                        },
+                "rgba", [](sf::Uint8 r, sf::Uint8 g, sf::Uint8 b, sf::Uint8 a)
+                        {
+                                return sf::Color{r, g, b, a};
+                        },
+                "hsl",  [hspcm](float h, float s, float l)
+                        {
+                                const float c = s * (1 - std::fabs(2 * l - 1));
+                                const float m = l - c * 0.5f;
+                                return hspcm(h, s, l, c, m);
+                        },
+                "hsv",  [hspcm](float h, float s, float v)
+                        {
+                                const float c = v * s;
+                                const float m = v - c;
+                                return hspcm(h, s, v, c, m);
+                        },
+                "add",      std::plus<sf::Color>{},
+                "subtract", std::minus<sf::Color>{},
+                "multiply", std::multiplies<sf::Color>{});
+}
 
-        // All columns must have equal numbers of rows.
-        if (std::any_of(mat.begin(), mat.end(), [&](auto& row)
-                { return row.size() != mat[0].size(); }))
+namespace impl
+{
+        inline static sf::Color stringToColor(const std::string& str)
         {
-                std::cerr << util::err::matrixNotRegular << std::endl;
+                static const util::MapStringTo<sf::Color> predefinedColors = {
+                        { "black",       sf::Color::Black       },
+                        { "white",       sf::Color::White       },
+                        { "red",         sf::Color::Red         },
+                        { "green",       sf::Color::Green       },
+                        { "blue",        sf::Color::Blue        },
+                        { "yellow",      sf::Color::Yellow      },
+                        { "magenta",     sf::Color::Magenta     },
+                        { "cyan",        sf::Color::Cyan        },
+                        { "transparent", sf::Color::Transparent },
+                };
+
+                if (auto c = predefinedColors.find(str); c != predefinedColors.end())
+                {
+                        return c->second;
+                }
+
+                std::cerr << util::err::badColorName(str) << std::endl;
+                return sf::Color::Transparent;
         }
 
-        return mat;
+        /** Table of tables of numbers, where all inner tables must have equal lengths.
+         */
+        template<util::Arithmetic T = float>
+        inline util::Matrix<T> tableToMatrix(sol::table obj)
+        {
+                util::Matrix<T> mat;
+                mat.resize(obj.size());
+
+                obj.for_each([&](sol::object i, sol::object row) {
+                        if (not row.is<sol::table>())
+                        {
+                                std::cerr << util::err::notATable << std::endl;
+                        }
+                        row.as<sol::table>().for_each([&](sol::object, sol::object entry) {
+                                if (entry.get_type() != sol::type::number)
+                                {
+                                        std::cerr << util::err::notANumber << std::endl;
+                                }
+                                mat[(i.as<std::int32_t>() - 1)].push_back(
+                                        static_cast<T>(entry.as<float>()));
+                        });
+                });
+
+                // All columns must have equal numbers of rows.
+                if (std::any_of(mat.begin(), mat.end(), [&](auto& row)
+                        { return row.size() != mat[0].size(); }))
+                {
+                        std::cerr << util::err::matrixNotRegular << std::endl;
+                }
+
+                return mat;
+        }
 }
 
-template<util::Graphical T>
-inline void extractLocalBounds(const std::unique_ptr<T>& dobj, sol::table obj)
-{
-        const sf::FloatRect bounds = dobj->getLocalBounds();
-        obj["localBounds"] = lua.create_table_with(
-                "left",   bounds.left,
-                "top",    bounds.top,
-                "width",  bounds.width,
-                "height", bounds.height);
-}
-
-template<util::Graphical T>
-inline void extractGlobalBounds(const std::unique_ptr<T>& dobj, sol::table obj)
-{
-        const sf::FloatRect bounds = dobj->getGlobalBounds();
-        obj["globalBounds"] = lua.create_table_with(
-                "left",   bounds.left,
-                "top",    bounds.top,
-                "width",  bounds.width,
-                "height", bounds.height);
-}
 
 
 // Shorthand for checking table properties.
@@ -164,12 +145,12 @@ inline void extractGlobalBounds(const std::unique_ptr<T>& dobj, sol::table obj)
 template<util::Transformable T>
 inline std::unique_ptr<T>& updateTransformFromTable(std::unique_ptr<T>& dobj, sol::table obj)
 {
-        extractLocalBounds(dobj, obj);
+        obj["localBounds"] = dobj->getLocalBounds();
 
         auto tobj = static_cast<sf::Transformable*>(dobj.get());
-        if prop (position, sol::table)
+        if prop (offset, sf::Vector2f)
         {
-                tobj->setPosition(util::FVector{position});
+                tobj->setPosition(offset.as<sf::Vector2f>());
         }
 
         if prop (rotation, float)
@@ -177,9 +158,9 @@ inline std::unique_ptr<T>& updateTransformFromTable(std::unique_ptr<T>& dobj, so
                 tobj->setRotation(rotation.as<float>());
         }
 
-        if prop (scale, sol::table)
+        if prop (scale, sf::Vector2f)
         {
-                tobj->setScale(util::FVector{scale});
+                tobj->setScale(scale.as<sf::Vector2f>());
         }
         else if prop (scale, float)
         {
@@ -189,28 +170,29 @@ inline std::unique_ptr<T>& updateTransformFromTable(std::unique_ptr<T>& dobj, so
 
         if prop (origin, std::string)
         {
-                if prop (localBounds, sol::table)
+                if prop (localBounds, sf::FloatRect)
                 {
                         const auto o = origin.as<std::string>();
-                        const sf::FloatRect bounds = tableToRectangle(localBounds);
+                        const sf::FloatRect bounds = localBounds.as<sf::FloatRect>();
+                        const sf::Vector2f size = {bounds.width, bounds.height};
                         tobj->setOrigin(
-                                o == "center"       ? sf::Vector2f{bounds.width / 2, bounds.height / 2} :
-                                o == "top"          ? sf::Vector2f{bounds.width / 2, 0.f              } :
-                                o == "left"         ? sf::Vector2f{0.f,              bounds.height / 2} :
-                                o == "bottom"       ? sf::Vector2f{bounds.width / 2, bounds.height    } :
-                                o == "right"        ? sf::Vector2f{bounds.width,     bounds.height / 2} :
-                                o == "bottom-left"  ? sf::Vector2f{0.f,              bounds.height    } :
-                                o == "top-right"    ? sf::Vector2f{bounds.width,     0.f              } :
-                                o == "bottom-right" ? sf::Vector2f{bounds.width,     bounds.height    } :
-                                /* o == "top-left" */ sf::Vector2f{0.f,              0.f              });
+                                o == "center"       ? sf::Vector2f{size.x / 2, size.y / 2} :
+                                o == "top"          ? sf::Vector2f{size.x / 2, 0.f       } :
+                                o == "left"         ? sf::Vector2f{0.f,        size.y / 2} :
+                                o == "bottom"       ? sf::Vector2f{size.x / 2, size.y    } :
+                                o == "right"        ? sf::Vector2f{size.x,     size.y / 2} :
+                                o == "bottom-left"  ? sf::Vector2f{0.f,        size.y    } :
+                                o == "top-right"    ? sf::Vector2f{size.x,     0.f       } :
+                                o == "bottom-right" ? sf::Vector2f{size.x,     size.y    } :
+                                /* o == "top-left" */ sf::Vector2f{0.f,        0.f       });
                 }
         }
-        else if prop (origin, sol::table)
+        else if prop (origin, sf::Vector2f)
         {
-                tobj->setOrigin(util::FVector{origin});
+                tobj->setOrigin(origin.as<sf::Vector2f>());
         }
 
-        extractGlobalBounds(dobj, obj);
+        obj["globalBounds"] = dobj->getGlobalBounds();
         return dobj;
 }
 
@@ -244,27 +226,27 @@ inline std::unique_ptr<ShapeClass>& updateShapeFromTable(
                 }
         }
 
-        if prop (textureRect, sol::table)
+        if prop (textureRect, sf::IntRect)
         {
-                shape->setTextureRect(tableToRectangle<std::int32_t>(textureRect));
+                shape->setTextureRect(textureRect.as<sf::IntRect>());
         }
 
         if prop (fillColor, std::string)
         {
-                shape->setFillColor(stringToColor(fillColor.as<std::string>()));
+                shape->setFillColor(impl::stringToColor(fillColor.as<std::string>()));
         }
-        else if prop (fillColor, sol::table)
+        else if prop (fillColor, sf::Color)
         {
-                shape->setFillColor(tableToColor(fillColor));
+                shape->setFillColor(fillColor.as<sf::Color>());
         }
 
         if prop (outlineColor, std::string)
         {
-                shape->setOutlineColor(stringToColor(outlineColor.as<std::string>()));
+                shape->setOutlineColor(impl::stringToColor(outlineColor.as<std::string>()));
         }
-        else if prop (outlineColor, sol::table)
+        else if prop (outlineColor, sf::Color)
         {
-                shape->setOutlineColor(tableToColor(outlineColor));
+                shape->setOutlineColor(outlineColor.as<sf::Color>());
         }
 
         if prop (outlineThickness, float)
@@ -314,7 +296,7 @@ inline std::unique_ptr<sf::ConvexShape>& updateConvexShapeFromTable(
                 convex->setPointCount(pts.size());
                 pts.for_each([&](sol::object i, sol::object pos)
                 {
-                        convex->setPoint(i.as<std::uint32_t>() - 1, util::FVector{pos.as<sol::table>()});
+                        convex->setPoint(i.as<std::uint32_t>() - 1, pos.as<sf::Vector2f>());
                 });
         }
 
@@ -331,9 +313,9 @@ inline std::unique_ptr<sf::ConvexShape>& updateConvexShapeFromTable(
 inline std::unique_ptr<sf::RectangleShape>& updateRectangleShapeFromTable(
         std::unique_ptr<sf::RectangleShape>& rect, sol::table obj)
 {
-        if prop (size, sol::table)
+        if prop (size, sf::Vector2f)
         {
-                rect->setSize(util::FVector{size});
+                rect->setSize(size.as<sf::Vector2f>());
         }
 
         updateShapeFromTable<sf::RectangleShape>(rect, obj);
@@ -347,8 +329,7 @@ inline std::unique_ptr<sf::RectangleShape>& updateRectangleShapeFromTable(
  *  - textureRect: Rectangle representing the area of the texture to be displayed.
  *  - color:       Color blended with the texture.
  */
-inline std::unique_ptr<sf::Sprite>& updateSpriteFromTable(
-        std::unique_ptr<sf::Sprite>& sprite, sol::table obj)
+inline std::unique_ptr<sf::Sprite>& updateSpriteFromTable(std::unique_ptr<sf::Sprite>& sprite, sol::table obj)
 {
         if prop (texture, std::string)
         {
@@ -362,14 +343,18 @@ inline std::unique_ptr<sf::Sprite>& updateSpriteFromTable(
                 }
         }
 
-        if prop (textureRect, sol::table)
+        if prop (textureRect, sf::IntRect)
         {
-                sprite->setTextureRect(tableToRectangle<std::int32_t>(textureRect));
+                sprite->setTextureRect(textureRect.as<sf::IntRect>());
         }
 
         if prop (color, std::string)
         {
-                sprite->setColor(stringToColor(color.as<std::string>()));
+                sprite->setColor(impl::stringToColor(color.as<std::string>()));
+        }
+        else if prop (color, sf::Color)
+        {
+                sprite->setColor(color.as<sf::Color>());
         }
 
         updateTransformFromTable(sprite, obj);
@@ -469,20 +454,20 @@ inline std::unique_ptr<sf::Text>& updateTextFromTable(
 
         if prop (fillColor, std::string)
         {
-                text->setFillColor(stringToColor(fillColor.as<std::string>()));
+                text->setFillColor(impl::stringToColor(fillColor.as<std::string>()));
         }
-        else if prop (fillColor, sol::table)
+        else if prop (fillColor, sf::Color)
         {
-                text->setFillColor(tableToColor(fillColor));
+                text->setFillColor(fillColor.as<sf::Color>());
         }
 
         if prop (outlineColor, std::string)
         {
-                text->setOutlineColor(stringToColor(outlineColor.as<std::string>()));
+                text->setOutlineColor(impl::stringToColor(outlineColor.as<std::string>()));
         }
-        else if prop (outlineColor, sol::table)
+        else if prop (outlineColor, sf::Color)
         {
-                text->setOutlineColor(tableToColor(outlineColor));
+                text->setOutlineColor(outlineColor.as<sf::Color>());
         }
 
         if prop (outlineThickness, float)
@@ -509,9 +494,9 @@ inline std::unique_ptr<sf::Text>& updateTextFromTable(
 inline std::unique_ptr<util::graphics::RectTileMap>& updateRectTileMapFromTable(
         std::unique_ptr<util::graphics::RectTileMap>& tmap, sol::table obj)
 {
-        if prop (tileSize, sol::table)
+        if prop (tileSize, sf::Vector2f)
         {
-                tmap->setTileSize(util::FVector{tileSize});
+                tmap->setTileSize(tileSize.as<sf::Vector2f>());
         }
         else if prop (tileSize, float)
         {
@@ -523,9 +508,9 @@ inline std::unique_ptr<util::graphics::RectTileMap>& updateRectTileMapFromTable(
                 std::cerr << util::err::noTileSize << std::endl;
         }
 
-        if prop (tileIconSize, sol::table)
+        if prop (tileIconSize, sf::Vector2u)
         {
-                tmap->setTileIconSize(sf::Vector2u{util::FVector{tileIconSize}});
+                tmap->setTileIconSize(tileIconSize.as<sf::Vector2u>());
         }
         else if prop (tileIconSize, std::uint32_t)
         {
@@ -547,13 +532,13 @@ inline std::unique_ptr<util::graphics::RectTileMap>& updateRectTileMapFromTable(
 
         if prop (tiles, sol::table)
         {
-                auto tileMatrix = tableToMatrix<util::graphics::TileID>(tiles);
+                auto tileMatrix = impl::tableToMatrix<util::graphics::TileID>(tiles);
                 tmap->setMap(tileMatrix);
         }
 
-        if prop (size, sol::table)
+        if prop (size, sf::Vector2u)
         {
-                tmap->setSize(sf::Vector2u{util::FVector{size}});
+                tmap->setSize(size.as<sf::Vector2u>());
         }
         else if prop (size, std::uint32_t)
         {
