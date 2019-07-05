@@ -23,61 +23,6 @@
 namespace script
 {
 
-inline static void loadGraphics()
-{
-        // (The "p" here stands for "parameter")
-        const auto hspcm = [](float h, float s, float p, const float c, const float m)
-        {
-                struct fRGB { float r; float g; float b; };
-
-                h = std::fmod(h, 360);
-                s = std::clamp(s, 0.f, 1.f);
-                p = std::clamp(p, 0.f, 1.f);
-
-                const float x = c * (1 - std::fabs(std::fmod(h / 60, 2) - 1));
-                const auto c1 = util::isWithin(h,   0.f,  60.f) ? fRGB{c, x, 0}
-                              : util::isWithin(h,  60.f, 120.f) ? fRGB{x, c, 0}
-                              : util::isWithin(h, 120.f, 180.f) ? fRGB{0, c, x}
-                              : util::isWithin(h, 180.f, 240.f) ? fRGB{0, x, c}
-                              : util::isWithin(h, 240.f, 300.f) ? fRGB{x, 0, c}
-                              :             /* 300 ≤ h < 360 ? */ fRGB{c, 0, x};
-
-                return sf::Color{static_cast<sf::Uint8>((c1.r + m) * 255), 
-                                 static_cast<sf::Uint8>((c1.g + m) * 255), 
-                                 static_cast<sf::Uint8>((c1.b + m) * 255)};
-        };
-
-        lua.new_usertype<sf::Color>("color",
-                sol::no_constructor,
-                "r", &sf::Color::r,
-                "g", &sf::Color::g,
-                "b", &sf::Color::b,
-                "a", &sf::Color::a,
-                "rgb",  [](sf::Uint8 r, sf::Uint8 g, sf::Uint8 b)
-                        {
-                                return sf::Color{r, g, b};
-                        },
-                "rgba", [](sf::Uint8 r, sf::Uint8 g, sf::Uint8 b, sf::Uint8 a)
-                        {
-                                return sf::Color{r, g, b, a};
-                        },
-                "hsl",  [hspcm](float h, float s, float l)
-                        {
-                                const float c = s * (1 - std::fabs(2 * l - 1));
-                                const float m = l - c * 0.5f;
-                                return hspcm(h, s, l, c, m);
-                        },
-                "hsv",  [hspcm](float h, float s, float v)
-                        {
-                                const float c = v * s;
-                                const float m = v - c;
-                                return hspcm(h, s, v, c, m);
-                        },
-                "add",      std::plus<sf::Color>{},
-                "subtract", std::minus<sf::Color>{},
-                "multiply", std::multiplies<sf::Color>{});
-}
-
 namespace impl
 {
         inline static sf::Color stringToColor(const std::string& str)
@@ -582,16 +527,6 @@ inline std::optional<std::unique_ptr<sf::Drawable>> tableToDrawable(sol::table o
 {
         const std::string type = obj["type"];
 
-        if (type == "text")
-        {
-                auto text = std::make_unique<sf::Text>();
-                return std::move(updateTextFromTable(text, obj));
-        }
-        if (type == "sprite")
-        {
-                auto sprite = std::make_unique<sf::Sprite>();
-                return std::move(updateSpriteFromTable(sprite, obj));
-        }
         if (type == "circle")
         {
                 auto circleShape = std::make_unique<sf::CircleShape>();
@@ -607,6 +542,16 @@ inline std::optional<std::unique_ptr<sf::Drawable>> tableToDrawable(sol::table o
                 auto rectangleShape = std::make_unique<sf::RectangleShape>();
                 return std::move(updateRectangleShapeFromTable(rectangleShape, obj));
         }
+        if (type == "sprite")
+        {
+                auto sprite = std::make_unique<sf::Sprite>();
+                return std::move(updateSpriteFromTable(sprite, obj));
+        }
+        if (type == "text")
+        {
+                auto text = std::make_unique<sf::Text>();
+                return std::move(updateTextFromTable(text, obj));
+        }
         if (type == "rect tile map")
         {
                 auto rectTileMap = std::make_unique<util::graphics::RectTileMap>();
@@ -615,6 +560,250 @@ inline std::optional<std::unique_ptr<sf::Drawable>> tableToDrawable(sol::table o
 
         std::cerr << util::err::noDrawableTypeId << std::endl;
         return {};
+}
+
+inline static void loadGraphics()
+{
+        // Color
+        const auto hspcm = [](float h, float s, float p, const float c, const float m)
+        {
+                struct fRGB { float r; float g; float b; };
+
+                h = std::fmod(h, 360);
+                s = std::clamp(s, 0.f, 1.f);
+                p = std::clamp(p, 0.f, 1.f); // (The "p" here stands for "parameter", either l or v)
+
+                const float x = c * (1 - std::fabs(std::fmod(h / 60, 2) - 1));
+                const auto c1 = util::isWithin(h,   0.f,  60.f) ? fRGB{c, x, 0}
+                              : util::isWithin(h,  60.f, 120.f) ? fRGB{x, c, 0}
+                              : util::isWithin(h, 120.f, 180.f) ? fRGB{0, c, x}
+                              : util::isWithin(h, 180.f, 240.f) ? fRGB{0, x, c}
+                              : util::isWithin(h, 240.f, 300.f) ? fRGB{x, 0, c}
+                              :             /* 300 ≤ h < 360 ? */ fRGB{c, 0, x};
+
+                return sf::Color{static_cast<sf::Uint8>((c1.r + m) * 255), 
+                                 static_cast<sf::Uint8>((c1.g + m) * 255), 
+                                 static_cast<sf::Uint8>((c1.b + m) * 255)};
+        };
+
+        lua.new_usertype<sf::Color>("color",
+                sol::no_constructor,
+                "r", &sf::Color::r,
+                "g", &sf::Color::g,
+                "b", &sf::Color::b,
+                "a", &sf::Color::a,
+                "rgb",  [](const sf::Uint8 r, const sf::Uint8 g, const sf::Uint8 b)
+                        {
+                                return sf::Color{r, g, b};
+                        },
+                "rgba", [](const sf::Uint8 r, const sf::Uint8 g, const sf::Uint8 b, const sf::Uint8 a)
+                        {
+                                return sf::Color{r, g, b, a};
+                        },
+                "hsl",  [hspcm](const float h, const float s, const float l)
+                        {
+                                const float c = s * (1 - std::fabs(2 * l - 1));
+                                const float m = l - c * 0.5f;
+                                return hspcm(h, s, l, c, m);
+                        },
+                "hsv",  [hspcm](const float h, const float s, const float v)
+                        {
+                                const float c = v * s;
+                                const float m = v - c;
+                                return hspcm(h, s, v, c, m);
+                        },
+                "add",      std::plus<sf::Color>{},
+                "subtract", std::minus<sf::Color>{},
+                "multiply", std::multiplies<sf::Color>{});
+
+        // Base classes
+        lua.new_usertype<sf::Drawable>("sfdrawable", sol::no_constructor);
+        lua.new_usertype<sf::Transformable>("sftransformable",
+                sol::no_constructor,
+                "offset", sol::property(
+                        &sf::Transformable::getPosition,
+                        static_cast<void(sf::Transformable::*)(const sf::Vector2f&)>(&sf::Transformable::setPosition)),
+                "rotation", sol::property(
+                        &sf::Transformable::getRotation,
+                        &sf::Transformable::setRotation),
+                "scale", sol::property(
+                        &sf::Transformable::getScale,
+                        static_cast<void(sf::Transformable::*)(const sf::Vector2f&)>(&sf::Transformable::setScale)),
+                "origin", sol::property(
+                        &sf::Transformable::getOrigin,
+                        static_cast<void(sf::Transformable::*)(const sf::Vector2f&)>(&sf::Transformable::setOrigin)),
+                "moveBy",   static_cast<void(sf::Transformable::*)(const sf::Vector2f&)>(&sf::Transformable::move),
+                "scaleBy",  static_cast<void(sf::Transformable::*)(const sf::Vector2f&)>(&sf::Transformable::scale),
+                "rotateBy", &sf::Transformable::rotate);
+
+        lua.new_usertype<sf::Shape>("sfshape",
+                sol::no_constructor,
+                "texture", sol::property(
+                        [](sf::Shape& s, const std::string& id)
+                        {
+                                if (auto tex = engine::Resources<sf::Texture>::get(id))
+                                {
+                                        s.setTexture(&tex->get());
+                                }
+                                else
+                                {
+                                        std::cerr << util::err::badTextureName(id) << std::endl;
+                                }
+                        }),
+                "textureRect", sol::property(
+                        &sf::Shape::getTextureRect,
+                        &sf::Shape::setTextureRect),
+                "fillColor", sol::property(
+                        &sf::Shape::getFillColor,
+                        &sf::Shape::setFillColor),
+                "outlineColor", sol::property(
+                        &sf::Shape::getOutlineColor,
+                        &sf::Shape::setOutlineColor),
+                "outlineThickness", sol::property(
+                        &sf::Shape::getOutlineThickness,
+                        &sf::Shape::setOutlineThickness),
+                "point",        &sf::Shape::getPoint,
+                "pointCount",   sol::property(&sf::Shape::getPointCount),
+                "localBounds",  sol::property(&sf::Shape::getLocalBounds),
+                "globalBounds", sol::property(&sf::Shape::getGlobalBounds),
+                sol::base_classes, sol::bases<sf::Drawable, sf::Transformable>{});
+
+        // Actual graphical objects
+        lua.new_usertype<sf::CircleShape>("circle",
+                sol::constructors<
+                        sf::CircleShape(),
+                        sf::CircleShape(float),
+                        sf::CircleShape(float, std::size_t)>{},
+                "radius", sol::property(
+                        &sf::CircleShape::getRadius,
+                        &sf::CircleShape::setRadius),
+                "pointCount", sol::property(
+                        &sf::CircleShape::getPointCount,
+                        &sf::CircleShape::setPointCount),
+                sol::base_classes, sol::bases<sf::Shape>{});
+
+        lua.new_usertype<sf::ConvexShape>("convex",
+                sol::constructors<
+                        sf::ConvexShape(),
+                        sf::ConvexShape(std::size_t)>{},
+                "point", sol::overload(
+                        &sf::ConvexShape::getPoint,
+                        &sf::ConvexShape::setPoint),
+                "pointCount", sol::property(
+                        &sf::ConvexShape::getPointCount,
+                        &sf::ConvexShape::setPointCount),
+                sol::base_classes, sol::bases<sf::Shape>{});
+
+        lua.new_usertype<sf::RectangleShape>("rectangle",
+                sol::constructors<
+                        sf::RectangleShape(),
+                        sf::RectangleShape(const sf::Vector2f&)>(),
+                "size", sol::property(
+                        &sf::RectangleShape::getSize,
+                        &sf::RectangleShape::setSize),
+                sol::base_classes, sol::bases<sf::Shape>{});
+
+        lua.new_usertype<sf::Sprite>("sprite",
+                sol::constructors<sf::Sprite()>{},
+                // Other constructors isn't be supported due to the presence of
+                // sf::Texture& parameter.
+                "texture", sol::property(
+                        [](sf::Sprite& s, const std::string& id)
+                        {
+                                if (auto tex = engine::Resources<sf::Texture>::get(id))
+                                {
+                                        s.setTexture(tex->get());
+                                }
+                                else
+                                {
+                                        std::cerr << util::err::badTextureName(id) << std::endl;
+                                }
+                        }),
+                "textureRect", sol::property(
+                        &sf::Sprite::getTextureRect,
+                        &sf::Sprite::setTextureRect),
+                "color", sol::property(
+                        &sf::Sprite::getColor,
+                        &sf::Sprite::setColor),
+                "localBounds",  sol::property(&sf::Sprite::getLocalBounds),
+                "globalBounds", sol::property(&sf::Sprite::getGlobalBounds),
+                sol::base_classes, sol::bases<sf::Drawable, sf::Transformable>{});
+
+        lua.new_usertype<sf::Text>("text",
+                sol::constructors<sf::Text()>{},
+                // The other constructor isn't be supported due to the presence of
+                // sf::Font& parameter.
+                "string", sol::property(
+                        [](sf::Text& t) { return t.getString().toAnsiString(); },
+                        [](sf::Text& t, const std::string& s) { t.setString(s); }),
+                "font", sol::property(
+                        [](sf::Text& s, const std::string& id)
+                        {
+                                if (auto font = engine::Resources<sf::Font>::get(id))
+                                {
+                                        s.setFont(font->get());
+                                }
+                                else
+                                {
+                                        std::cerr << util::err::badFontName(id) << std::endl;
+                                }
+                        }),
+                "charSize", sol::property(
+                        &sf::Text::getCharacterSize,
+                        &sf::Text::setCharacterSize),
+                "lineSpacing", sol::property(
+                        &sf::Text::getLineSpacing,
+                        &sf::Text::setLineSpacing),
+                "letterSpacing", sol::property(
+                        &sf::Text::getLetterSpacing,
+                        &sf::Text::setLetterSpacing),
+                "style", sol::property(
+                        &sf::Text::getStyle,
+                        &sf::Text::setStyle),
+                "fillColor", sol::property(
+                        &sf::Text::getFillColor,
+                        &sf::Text::setFillColor),
+                "outlineColor", sol::property(
+                        &sf::Text::getOutlineColor,
+                        &sf::Text::setOutlineColor),
+                "outlineThickness", sol::property(
+                        &sf::Text::getOutlineThickness,
+                        &sf::Text::setOutlineThickness),
+                "localBounds",  sol::property(&sf::Text::getLocalBounds),
+                "globalBounds", sol::property(&sf::Text::getGlobalBounds),
+                "charPosition", &sf::Text::findCharacterPos,
+                sol::base_classes, sol::bases<sf::Drawable, sf::Transformable>{});
+
+        lua.create_named_table("textStyle",
+                "regular",       sf::Text::Regular,
+                "bold",          sf::Text::Bold,
+                "italic",        sf::Text::Italic,
+                "underlined",    sf::Text::Underlined,
+                "strikeThrough", sf::Text::StrikeThrough);
+
+        lua.new_usertype<util::graphics::RectTileMap>("rectTileMap",
+                sol::constructors<
+                        util::graphics::RectTileMap(),
+                        util::graphics::RectTileMap(sf::Vector2u),
+                        util::graphics::RectTileMap(sf::Vector2u, sf::Vector2f),
+                        util::graphics::RectTileMap(sf::Vector2u, sf::Vector2f, sf::Vector2u),
+                        util::graphics::RectTileMap(const util::graphics::RectTileMap&)>{},
+                "fillWith",     &util::graphics::RectTileMap::fill,
+                "fillAreaWith", &util::graphics::RectTileMap::fillArea,
+                "setTile",      &util::graphics::RectTileMap::setTile,
+                "setMap",       &util::graphics::RectTileMap::setMap,
+                "size", sol::property(
+                        &util::graphics::RectTileMap::getSize,
+                        &util::graphics::RectTileMap::setSize),
+                "tileSize", sol::property(
+                        &util::graphics::RectTileMap::getTileSize,
+                        &util::graphics::RectTileMap::setTileSize),
+                "iconSize", sol::property(
+                        &util::graphics::RectTileMap::getTileIconSize,
+                        &util::graphics::RectTileMap::setTileIconSize),
+                "localBounds",  sol::property(&util::graphics::RectTileMap::getLocalBounds),
+                "globalBounds", sol::property(&util::graphics::RectTileMap::getGlobalBounds),
+                sol::base_classes, sol::bases<sf::Drawable, sf::Transformable>{});
 }
 
 }

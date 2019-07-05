@@ -353,7 +353,6 @@ inline static void loadInput(sf::Window& window [[maybe_unused]])
                 "verticalWheel",   sf::Mouse::VerticalWheel,
                 "horizontalWheel", sf::Mouse::HorizontalWheel,
                 "isPressed",       sf::Mouse::isButtonPressed,
-
                 "position", sol::property(
                         [] { return sf::Mouse::getPosition(); },
                         [] (const sf::Vector2i pos) { sf::Mouse::setPosition(pos); }),

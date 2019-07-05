@@ -24,8 +24,7 @@ namespace impl
                                 sf::Vector2<T>(),
                                 sf::Vector2<T>(T, T),
                                 sf::Vector2<T>(sf::Vector2i&),
-                                sf::Vector2<T>(sf::Vector2f&)
-                                >(),
+                                sf::Vector2<T>(sf::Vector2f&)>(),
                         "x", &sf::Vector2<T>::x,
                         "y", &sf::Vector2<T>::y,
                         "add",      std::plus<sf::Vector2<T>>{},
@@ -42,8 +41,7 @@ namespace impl
                                 VT(util::IVector&),
                                 VT(util::FVector&),
                                 VT(sf::Vector2i&),
-                                VT(sf::Vector2f&)
-                                >(),
+                                VT(sf::Vector2f&)>(),
                         sol::base_classes, sol::bases<sf::Vector2<T>>{},
                         "lengthSquared", &VT::lengthSquared,
                         "length",        sol::property(
@@ -68,8 +66,7 @@ namespace impl
                         sol::constructors<
                                 RT(),
                                 RT(sf::Vector2<T>, sf::Vector2<T>),
-                                RT(T, T, T, T)
-                                >(),
+                                RT(T, T, T, T)>(),
                         "left",   &RT::left,
                         "top",    &RT::top,
                         "width",  &RT::width,
