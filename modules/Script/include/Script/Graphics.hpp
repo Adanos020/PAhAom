@@ -53,23 +53,24 @@ namespace impl
         template<util::Arithmetic T = float>
         inline util::Matrix<T> tableToMatrix(sol::table obj)
         {
-                util::Matrix<T> mat;
-                mat.resize(obj.size());
+                util::Matrix<T> mat{obj.size()};
 
-                obj.for_each([&](sol::object i, sol::object row) {
-                        if (not row.is<sol::table>())
+                for (auto [i, row] : obj)
+                {
+                        if (row.get_type() != sol::type::table)
                         {
                                 std::cerr << util::err::notATable << std::endl;
                         }
-                        row.as<sol::table>().for_each([&](sol::object, sol::object entry) {
+                        for (auto [_, entry] : row.as<sol::table>())
+                        {
                                 if (entry.get_type() != sol::type::number)
                                 {
                                         std::cerr << util::err::notANumber << std::endl;
+                                        continue;
                                 }
-                                mat[(i.as<std::int32_t>() - 1)].push_back(
-                                        static_cast<T>(entry.as<float>()));
-                        });
-                });
+                                mat[i.as<std::uint32_t>() - 1].push_back(entry.as<T>());
+                        }
+                }
 
                 // All columns must have equal numbers of rows.
                 if (std::any_of(mat.begin(), mat.end(), [&](auto& row)
@@ -239,10 +240,10 @@ inline std::unique_ptr<sf::ConvexShape>& updateConvexShapeFromTable(
         {
                 sol::table pts = points;
                 convex->setPointCount(pts.size());
-                pts.for_each([&](sol::object i, sol::object pos)
+                for (auto [i, pos] : pts)
                 {
                         convex->setPoint(i.as<std::uint32_t>() - 1, pos.as<sf::Vector2f>());
-                });
+                }
         }
 
         updateShapeFromTable<sf::ConvexShape>(convex, obj);
@@ -389,11 +390,11 @@ inline std::unique_ptr<sf::Text>& updateTextFromTable(
         }
         else if prop (style, sol::table)
         {
-                std::int32_t compound = sf::Text::Style::Regular;
-                static_cast<sol::table>(style).for_each([&](sol::object, sol::object s)
+                std::uint32_t compound = sf::Text::Style::Regular;
+                for (auto [_, s] : style.as<sol::table>())
                 {
                         compound |= getStyle(s.as<std::string>());
-                });
+                }
                 text->setStyle(compound);
         }
 
