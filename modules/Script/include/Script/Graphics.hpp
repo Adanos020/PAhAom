@@ -208,9 +208,10 @@ inline std::unique_ptr<ShapeClass>& updateShapeFromTable(
  *  - pointCount: Number representing number of vertices around the center.
  *  - all properties from Shape
  */
-inline std::unique_ptr<sf::CircleShape>& updateCircleShapeFromTable(
-        std::unique_ptr<sf::CircleShape>& circle, sol::table obj)
+inline std::unique_ptr<sf::CircleShape> tableToCircleShape(sol::table obj)
 {
+        auto circle = std::make_unique<sf::CircleShape>();
+        
         if prop (radius, float)
         {
                 circle->setRadius(radius.as<float>());
@@ -220,7 +221,7 @@ inline std::unique_ptr<sf::CircleShape>& updateCircleShapeFromTable(
                 circle->setPointCount(pointCount.as<std::uint32_t>());
         }
 
-        updateShapeFromTable<sf::CircleShape>(circle, obj);
+        updateShapeFromTable(circle, obj);
         return circle;
 }
 
@@ -230,9 +231,10 @@ inline std::unique_ptr<sf::CircleShape>& updateCircleShapeFromTable(
  *  - points: Table of vectors representing positions of all vertices.
  *  - all properties from Shape
  */
-inline std::unique_ptr<sf::ConvexShape>& updateConvexShapeFromTable(
-        std::unique_ptr<sf::ConvexShape>& convex, sol::table obj)
+inline std::unique_ptr<sf::ConvexShape> tableToConvexShape(sol::table obj)
 {
+        auto convex = std::make_unique<sf::ConvexShape>();
+        
         if prop (points, sol::table)
         {
                 sol::table pts = points;
@@ -243,7 +245,7 @@ inline std::unique_ptr<sf::ConvexShape>& updateConvexShapeFromTable(
                 }
         }
 
-        updateShapeFromTable<sf::ConvexShape>(convex, obj);
+        updateShapeFromTable(convex, obj);
         return convex;
 }
 
@@ -253,16 +255,17 @@ inline std::unique_ptr<sf::ConvexShape>& updateConvexShapeFromTable(
  *  - size: Vector representing size of the rectangle.
  *  - all properties from Shape
  */
-inline std::unique_ptr<sf::RectangleShape>& updateRectangleShapeFromTable(
-        std::unique_ptr<sf::RectangleShape>& rect, sol::table obj)
+inline std::unique_ptr<sf::RectangleShape> tableToRectangleShape(sol::table obj)
 {
+        auto rectangle = std::make_unique<sf::RectangleShape>();
+        
         if prop (size, sf::Vector2f)
         {
-                rect->setSize(size.as<sf::Vector2f>());
+                rectangle->setSize(size.as<sf::Vector2f>());
         }
 
-        updateShapeFromTable<sf::RectangleShape>(rect, obj);
-        return rect;
+        updateShapeFromTable(rectangle, obj);
+        return rectangle;
 }
 
 /** Transforms a Lua table into an sf::Sprite object.
@@ -272,8 +275,10 @@ inline std::unique_ptr<sf::RectangleShape>& updateRectangleShapeFromTable(
  *  - textureRect: Rectangle representing the area of the texture to be displayed.
  *  - color:       Color blended with the texture.
  */
-inline std::unique_ptr<sf::Sprite>& updateSpriteFromTable(std::unique_ptr<sf::Sprite>& sprite, sol::table obj)
+inline std::unique_ptr<sf::Sprite> tableToSprite(sol::table obj)
 {
+        auto sprite = std::make_unique<sf::Sprite>();
+        
         if prop (texture, std::string)
         {
                 if (auto tex = engine::Resources<sf::Texture>::get(texture.as<std::string>()))
@@ -325,8 +330,10 @@ inline std::unique_ptr<sf::Sprite>& updateSpriteFromTable(std::unique_ptr<sf::Sp
  *  - underlined
  *  - strikethrough
  */
-inline std::unique_ptr<sf::Text>& updateTextFromTable(std::unique_ptr<sf::Text>& text, sol::table obj)
+inline std::unique_ptr<sf::Text> tableToText(sol::table obj)
 {       
+        auto text = std::make_unique<sf::Text>();
+        
         if prop (content, std::string)
         {
                 text->setString(std::string(content.as<std::string>()));
@@ -433,17 +440,18 @@ inline std::unique_ptr<sf::Text>& updateTextFromTable(std::unique_ptr<sf::Text>&
  *  - fill:         Number specifying the ID of the tile with which the map should be filled.
  *  - texture:      String specifying the ID of the texture.
  */
-inline std::unique_ptr<util::graphics::RectTileMap>& updateRectTileMapFromTable(
-        std::unique_ptr<util::graphics::RectTileMap>& tmap, sol::table obj)
+inline std::unique_ptr<util::graphics::RectTileMap> tableToRectTileMap(sol::table obj)
 {
+        auto rectTileMap = std::make_unique<util::graphics::RectTileMap>();
+
         if prop (tileSize, sf::Vector2f)
         {
-                tmap->setTileSize(tileSize.as<sf::Vector2f>());
+                rectTileMap->setTileSize(tileSize.as<sf::Vector2f>());
         }
         else if prop (tileSize, float)
         {
                 const float s = tileSize.as<float>();
-                tmap->setTileSize({s, s});
+                rectTileMap->setTileSize({s, s});
         }
         else
         {
@@ -452,19 +460,19 @@ inline std::unique_ptr<util::graphics::RectTileMap>& updateRectTileMapFromTable(
 
         if prop (tileIconSize, sf::Vector2u)
         {
-                tmap->setTileIconSize(tileIconSize.as<sf::Vector2u>());
+                rectTileMap->setTileIconSize(tileIconSize.as<sf::Vector2u>());
         }
         else if prop (tileIconSize, std::uint32_t)
         {
                 const std::uint32_t s = tileIconSize.as<std::uint32_t>();
-                tmap->setTileIconSize({s, s});
+                rectTileMap->setTileIconSize({s, s});
         }
 
         if prop (texture, std::string)
         {
                 if (auto tex = engine::Resources<sf::Texture>::get(texture.as<std::string>()))
                 {
-                        tmap->setTexture(&tex->get());
+                        rectTileMap->setTexture(&tex->get());
                 }
                 else
                 {
@@ -475,27 +483,27 @@ inline std::unique_ptr<util::graphics::RectTileMap>& updateRectTileMapFromTable(
         if prop (tiles, sol::table)
         {
                 auto tileMatrix = impl::tableToMatrix<util::graphics::TileID>(tiles);
-                tmap->setMap(tileMatrix);
+                rectTileMap->setMap(tileMatrix);
         }
 
         if prop (size, sf::Vector2u)
         {
-                tmap->setSize(size.as<sf::Vector2u>());
+                rectTileMap->setSize(size.as<sf::Vector2u>());
         }
         else if prop (size, std::uint32_t)
         {
                 const auto s = size.as<std::uint32_t>();
-                tmap->setSize({s, s});
+                rectTileMap->setSize({s, s});
         }
 
         if prop (fill, std::uint32_t)
         {
-                tmap->fill(fill.as<std::uint32_t>());
+                rectTileMap->fill(fill.as<std::uint32_t>());
                 obj["fill"] = sol::nil;
         }
 
-        updateTransformFromTable(tmap, obj);
-        return tmap;
+        updateTransformFromTable(rectTileMap, obj);
+        return rectTileMap;
 }
 
 #undef prop
@@ -526,33 +534,27 @@ inline std::optional<std::unique_ptr<sf::Drawable>> tableToDrawable(sol::table o
 
         if (type == "circle")
         {
-                auto circleShape = std::make_unique<sf::CircleShape>();
-                return std::move(updateCircleShapeFromTable(circleShape, obj));
+                return tableToCircleShape(obj);
         }
         if (type == "convex")
         {
-                auto convexShape = std::make_unique<sf::ConvexShape>();
-                return std::move(updateConvexShapeFromTable(convexShape, obj));
+                return tableToConvexShape(obj);
         }
         if (type == "rectangle")
         {
-                auto rectangleShape = std::make_unique<sf::RectangleShape>();
-                return std::move(updateRectangleShapeFromTable(rectangleShape, obj));
+                return tableToRectangleShape(obj);
         }
         if (type == "sprite")
         {
-                auto sprite = std::make_unique<sf::Sprite>();
-                return std::move(updateSpriteFromTable(sprite, obj));
+                return tableToSprite(obj);
         }
         if (type == "text")
         {
-                auto text = std::make_unique<sf::Text>();
-                return std::move(updateTextFromTable(text, obj));
+                return tableToText(obj);
         }
         if (type == "rect tile map")
         {
-                auto rectTileMap = std::make_unique<util::graphics::RectTileMap>();
-                return std::move(updateRectTileMapFromTable(rectTileMap, obj));
+                return tableToRectTileMap(obj);
         }
 
         std::cerr << util::err::noDrawableTypeId << std::endl;
