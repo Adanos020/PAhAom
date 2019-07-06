@@ -50,29 +50,33 @@ namespace impl
 
         /** Table of tables of numbers, where all inner tables must have equal lengths.
          */
-        template<util::Arithmetic T = float>
+        template<util::Arithmetic T>
         inline util::Matrix<T> tableToMatrix(sol::table obj)
         {
-                util::Matrix<T> mat;
-                mat.resize(obj.size());
+                util::Matrix<T> mat{obj.size()};
 
-                obj.for_each([&](sol::object i, sol::object row)
+                // Gotta use those because of a weird bug in GCC's parser.
+                static const auto as_table = &sol::object::as<sol::table>;
+                static const auto as_uint32 = &sol::object::as<std::uint32_t>;
+                static const auto as_T = &sol::object::as<T>;
+
+                for (auto [i, row] : obj)
                 {
                         if (row.get_type() != sol::type::table)
                         {
                                 std::cerr << util::err::notATable << std::endl;
-                                return;
+                                continue;
                         }
-                        row.as<sol::table>().for_each([&](sol::object, sol::object entry)
+                        for (auto [_, entry] : (row.*as_table)())
                         {
                                 if (entry.get_type() != sol::type::number)
                                 {
                                         std::cerr << util::err::notANumber << std::endl;
-                                        return;
+                                        continue;
                                 }
-                                mat[i.as<std::int32_t>() - 1].push_back(entry.as<T>());
-                        });
-                });
+                                mat[(i.*as_uint32)() - 1].push_back((entry.*as_T)());
+                        }
+                }
 
                 // All columns must have equal numbers of rows.
                 if (std::any_of(mat.begin(), mat.end(), [&](auto& row)
