@@ -9,6 +9,7 @@
 #include <sol/sol.hpp>
 
 #include <cmath>
+#include <iostream>
 #include <type_traits>
 
 
@@ -27,12 +28,7 @@ template<typename T>
 concept Integral = std::is_integral_v<T>;
 
 
-// Numeric
-
-inline float lerp(const float val1, const float val2, const float alpha)
-{
-        return val1 + alpha * (val2 - val1);
-}
+// Functions
 
 inline float normalize(const float val, const float lo, const float hi)
 {
@@ -58,7 +54,7 @@ inline constexpr bool isWithin(const T& value, const T& lo, const T& hi)
 }
 
 
-// Vector
+// Types
 
 template<Arithmetic T>
 struct Vector : sf::Vector2<T>
@@ -78,11 +74,6 @@ struct Vector : sf::Vector2<T>
         template<Arithmetic U>
         Vector<T>(const sf::Vector2<U>& other)
         : sf::Vector2<T>(other)
-        {
-        }
-
-        Vector<T>(sol::table vec)
-        : sf::Vector2<T>(vec.get_or<T>("x", 0), vec.get_or<T>("y", 0))
         {
         }
 
@@ -200,5 +191,110 @@ public:
 
 using FVector = Vector<float>;
 using IVector = Vector<std::int32_t>;
+using UVector = Vector<std::uint32_t>;
+
+template<Arithmetic T>
+class Matrix
+{
+public:
+
+        Matrix(const Matrix<T>& copy)
+        : r(copy.r)
+        , c(copy.c)
+        , data(copy.data)
+        {
+        }
+
+        Matrix(const std::size_t r, const std::size_t c, const T fill = 0)
+        : r(r)
+        , c(c)
+        , data(r * c, static_cast<T>(fill))
+        {
+        }
+
+        template<typename InputRange>
+        Matrix(const std::size_t r, const std::size_t c, InputRange input)
+        : r(r)
+        , c(c)
+        , data(std::begin(input), std::end(input))
+        {
+                if (data.size() != this->r * this->c)
+                {
+                        std::cerr << "Size of input doesn't match given matrix bounds. Resizing." << std::endl;
+                        data.resize(this->r * this->c);
+                }
+        }
+
+        Matrix(const std::size_t r, const std::size_t c, sol::table input)
+        : Matrix(r, c,
+                [&] {
+                        static const auto as_size = &sol::object::as<std::size_t>;
+                        static const auto as_T = &sol::object::as<T>;
+
+                        std::basic_string<T> data(r * c, static_cast<T>(0));
+                        for (auto [i, x] : input)
+                        {
+                                if (x.get_type() != sol::type::number)
+                                {
+                                        std::cerr << util::err::notANumber << std::endl;
+                                        continue;
+                                }
+                                data[(i.*as_size)()] = (x.*as_T)();
+                        }
+                        return data;
+                }())
+        {
+        }
+
+        T get(std::size_t row, std::size_t column) const
+        {
+                if (row > this->r or column > this->c)
+                {
+                        std::cerr << util::format("Matrix indices (%lu, %lu) out of bounds (%lu, %lu).",
+                                row, column, this->r, this->c) << std::endl;
+                        return static_cast<T>(-1);
+                }
+                return data[row + column * this->r];
+        }
+
+        void set(std::size_t row, std::size_t column, const T entry)
+        {
+                if (row > this->r or column > this->c)
+                {
+                        std::cerr << util::format("Matrix indices (%lu, %lu) out of bounds (%lu, %lu).",
+                                row, column, this->r, this->c) << std::endl;
+                        return;
+                }
+                data[row + column * this->r] = entry;
+        }
+
+public:
+
+        Matrix<T>& operator=(const Matrix<T>& other)
+        {
+                this->r = other.r;
+                this->c = other.c;
+                this->data = other.data;
+                return *this;
+        }
+
+public:
+
+        std::size_t rows() const
+        {
+                return this->r;
+        }
+
+        std::size_t columns() const
+        {
+                return this->c;
+        }
+
+private:
+
+        std::size_t r;
+        std::size_t c;
+        std::basic_string<T> data;
+};
 
 }

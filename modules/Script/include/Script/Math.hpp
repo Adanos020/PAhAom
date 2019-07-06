@@ -7,6 +7,7 @@
 #include <SFML/Graphics/Rect.hpp>
 
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <iostream>
 
@@ -29,8 +30,8 @@ namespace impl
                         "y", &sf::Vector2<T>::y,
                         "add",      std::plus<sf::Vector2<T>>{},
                         "subtract", std::minus<sf::Vector2<T>>{},
-                        "multiply", [](sf::Vector2<T>& v, T x) { return v * x; },
-                        "divide",   [](sf::Vector2<T>& v, T x) { return v / x; },
+                        "multiply", [](const sf::Vector2<T>& v, T x) { return v * x; },
+                        "divide",   [](const sf::Vector2<T>& v, T x) { return v / x; },
                         "inverse",  std::negate<sf::Vector2<T>>{});
 
                 using VT = util::Vector<T>;
@@ -47,15 +48,15 @@ namespace impl
                         "length",        sol::property(
                                 static_cast<T(VT::*)() const>(&VT::length),
                                 static_cast<VT(VT::*)(T) const>(&VT::length)),
-                        "dot",           &VT::dot,
-                        "limit",         static_cast<VT(VT::*)(T) const>(&VT::limit),
-                        "normalize",     static_cast<VT(VT::*)() const>(&VT::normalize),
-                        "clamp",         sol::overload(
+                        "dot",       &VT::dot,
+                        "limit",     static_cast<VT(VT::*)(T) const>(&VT::limit),
+                        "normalize", static_cast<VT(VT::*)() const>(&VT::normalize),
+                        "clamp",     sol::overload(
                                 static_cast<VT(VT::*)(VT, VT) const>(&VT::clamp),
                                 static_cast<VT(VT::*)(T, T) const>(&VT::clamp)),
-                        "fromPolar",     VT::fromPolar,
-                        "angleBetween",  VT::angleBetween,
-                        "lerp",          VT::lerp);
+                        "fromPolar",    VT::fromPolar,
+                        "angleBetween", VT::angleBetween,
+                        "lerp",         VT::lerp);
         }
 
         template<util::Arithmetic T>
@@ -78,13 +79,36 @@ namespace impl
                                 static_cast<bool(RT::*)(const RT&) const>(&RT::intersects),
                                 static_cast<bool(RT::*)(const RT&, RT&) const>(&RT::intersects)));
         }
+
+        template<util::Arithmetic T>
+        inline static void registerMatrixUserType(const std::string& name)
+        {
+                using MT = util::Matrix<T>;
+                lua.new_usertype<MT>(name,
+                        sol::constructors<
+                                MT(const MT&),
+                                MT(std::size_t, std::size_t),
+                                MT(std::size_t, std::size_t, T),
+                                MT(std::size_t, std::size_t, sol::table)
+                        >{},
+                        "get",  [](const MT& m, std::size_t r, std::size_t c)
+                                {
+                                        return m.get(r - 1, c - 1);
+                                },
+                        "set",  [](MT& m, std::size_t r, std::size_t c, T x)
+                                {
+                                        return m.set(r - 1, c - 1, x);
+                                },
+                        "rows", &MT::rows,
+                        "columns", &MT::columns);
+        }
 }
 
 inline static void loadMath()
 {
         lua["clamp"]     = std::clamp<double>;
         lua["iclamp"]    = std::clamp<std::int32_t>;
-        lua["lerp"]      = util::lerp;
+        lua["lerp"]      = static_cast<double(*)(double, double, double)>(std::lerp);
         lua["normalize"] = util::normalize;
         lua["map"]       = util::map;
 
@@ -95,6 +119,10 @@ inline static void loadMath()
         impl::registerRectangleUserType<float>("rect");
         impl::registerRectangleUserType<std::int32_t>("irect");
         impl::registerRectangleUserType<std::uint32_t>("urect");
+
+        impl::registerMatrixUserType<float>("mat");
+        impl::registerMatrixUserType<std::int32_t>("imat");
+        impl::registerMatrixUserType<std::uint32_t>("umat");
 }
 
 }

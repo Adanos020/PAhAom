@@ -62,7 +62,7 @@ function Game:new(o)
     o = o or {}
     setmetatable(o, self)
     self.__index = self
-    level.graphics.tiles = generateDungeon(ivec.new(37, 21))
+    level.graphics.tiles = generateDungeon(21, 37)
     return o
 end
 

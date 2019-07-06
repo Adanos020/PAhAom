@@ -35,9 +35,6 @@ template<typename T>
 using MapStringTo = std::unordered_map<std::string, T>;
 
 template<typename T>
-using Matrix = std::vector<std::vector<T>>;
-
-template<typename T>
 using UniquePtrs = std::vector<std::unique_ptr<T>>;
 
 using SceneID = std::uint32_t;

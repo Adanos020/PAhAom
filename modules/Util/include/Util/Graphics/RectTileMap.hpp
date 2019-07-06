@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include <Util/Types.hpp>
+#include <Util/Math.hpp>
 
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
@@ -16,7 +16,7 @@
 namespace util::graphics
 {
 
-using TileID = std::uint_fast32_t;
+using TileID = std::int32_t;
 
 class RectTileMap : public sf::Drawable, public sf::Transformable
 {
@@ -30,10 +30,10 @@ public: // Constructors.
         : size(size)
         , tileSize(tileSize)
         , tileIconSize(tileIconSize)
+        , tiles(size.y, size.x)
         , vertices(sf::Quads)
         , texture(texture)
         {
-                this->setSize(size);
                 this->placeVertices();
                 this->fill(fill);
         }
@@ -42,8 +42,11 @@ public: // Constructors.
                     const sf::Vector2f tileSize = {0, 0},
                     const sf::Vector2u tileIconSize = {0, 0},
                     sf::Texture* const texture = nullptr)
-        : RectTileMap(sf::Vector2u(tiles.size(), tiles.size() ? tiles[0].size() : 0),
-                      tileSize, tileIconSize, texture)
+        : RectTileMap(
+                sf::Vector2u(tiles.columns(), tiles.rows()),
+                tileSize,
+                tileIconSize,
+                texture)
         {
                 this->setMap(tiles);
         }
@@ -72,13 +75,13 @@ public: // Mutators.
 
         void fill(const TileID fill)
         {
-                this->fillArea(fill, {{}, size});
+                this->fillArea(fill, {{}, this->size});
         }
 
         void fillArea(const TileID fill, const sf::UintRect area)
         {
-                for (std::uint32_t x = area.left; x < area.width; ++x)
                 for (std::uint32_t y = area.top; y < area.height; ++y)
+                for (std::uint32_t x = area.left; x < area.width; ++x)
                 {
                         this->setTile({x, y}, fill);
                 }
@@ -86,7 +89,7 @@ public: // Mutators.
 
         void setTile(const sf::Vector2u pos, const TileID iconIndex)
         {
-                this->tiles[pos.y][pos.x] = iconIndex;
+                this->tiles.set(pos.y, pos.x, iconIndex);
 
                 const std::size_t vertex = 4 * (pos.x + pos.y * this->size.x);
 
@@ -111,26 +114,15 @@ public: // Mutators.
         void setMap(const Matrix<TileID>& tiles)
         {
                 this->tiles = tiles;
-                this->size.y = tiles.size();
-                this->size.x = this->size.y ? tiles[0].size() : 0;
+                this->size.x = tiles.columns();
+                this->size.y = tiles.rows();
 
                 this->placeVertices();
 
-                for (std::uint32_t x = 0; x < this->size.x; ++x)
                 for (std::uint32_t y = 0; y < this->size.y; ++y)
+                for (std::uint32_t x = 0; x < this->size.x; ++x)
                 {
-                        this->setTile({x, y}, tiles[y][x]);
-                }
-        }
-
-        void setSize(const sf::Vector2u size)
-        {
-                this->size = size;
-
-                this->tiles.resize(size.y);
-                for (auto& row : this->tiles)
-                {
-                        row.resize(size.x);
+                        this->setTile({x, y}, tiles.get(y, x));
                 }
         }
 
@@ -158,12 +150,12 @@ public: // Accessors.
 
         TileID getTile(const sf::Vector2u pos) const
         {
-                return this->tiles[pos.y][pos.x];
+                return this->tiles.get(pos.y, pos.x);
         }
 
         TileID getTile(const std::size_t row, const std::size_t col) const
         {
-                return this->tiles[col][row];
+                return this->tiles.get(col, row);
         }
 
         sf::Vector2u getSize() const
@@ -183,20 +175,16 @@ public: // Accessors.
 
         sf::FloatRect getGlobalBounds() const
         {
-                return {
-                        this->getPosition(),
+                return {this->getPosition(),
                         {this->size.x * this->tileSize.x,
-                         this->size.y * this->tileSize.y}
-                };
+                         this->size.y * this->tileSize.y}};
         }
 
         sf::FloatRect getLocalBounds() const
         {
-                return {
-                        0.f, 0.f,
+                return {0.f, 0.f,
                         this->size.x * this->tileSize.x,
-                        this->size.y * this->tileSize.y
-                };
+                        this->size.y * this->tileSize.y};
         }
 
 public: // Overloaded operators.

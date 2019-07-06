@@ -47,46 +47,6 @@ namespace impl
                 std::cerr << util::err::badColorName(str) << std::endl;
                 return sf::Color::Transparent;
         }
-
-        /** Table of tables of numbers, where all inner tables must have equal lengths.
-         */
-        template<util::Arithmetic T>
-        inline util::Matrix<T> tableToMatrix(sol::table obj)
-        {
-                util::Matrix<T> mat{obj.size()};
-
-                // Gotta use those because of a weird bug in GCC's parser.
-                static const auto as_table = &sol::object::as<sol::table>;
-                static const auto as_uint32 = &sol::object::as<std::uint32_t>;
-                static const auto as_T = &sol::object::as<T>;
-
-                for (auto [i, row] : obj)
-                {
-                        if (row.get_type() != sol::type::table)
-                        {
-                                std::cerr << util::err::notATable << std::endl;
-                                continue;
-                        }
-                        for (auto [_, entry] : (row.*as_table)())
-                        {
-                                if (entry.get_type() != sol::type::number)
-                                {
-                                        std::cerr << util::err::notANumber << std::endl;
-                                        continue;
-                                }
-                                mat[(i.*as_uint32)() - 1].push_back((entry.*as_T)());
-                        }
-                }
-
-                // All columns must have equal numbers of rows.
-                if (std::any_of(mat.begin(), mat.end(), [&](auto& row)
-                        { return row.size() != mat[0].size(); }))
-                {
-                        std::cerr << util::err::matrixNotRegular << std::endl;
-                }
-
-                return mat;
-        }
 }
 
 
@@ -484,21 +444,21 @@ inline std::unique_ptr<util::graphics::RectTileMap> tableToRectTileMap(sol::tabl
                 } 
         }
 
-        if prop (tiles, sol::table)
+        if prop (tiles, util::Matrix<std::int32_t>)
         {
-                auto tileMatrix = impl::tableToMatrix<util::graphics::TileID>(tiles);
+                auto tileMatrix = tiles.as<util::Matrix<std::int32_t>>();
                 rectTileMap->setMap(tileMatrix);
         }
 
-        if prop (size, sf::Vector2u)
-        {
-                rectTileMap->setSize(size.as<sf::Vector2u>());
-        }
-        else if prop (size, std::uint32_t)
-        {
-                const auto s = size.as<std::uint32_t>();
-                rectTileMap->setSize({s, s});
-        }
+        // if prop (size, sf::Vector2u)
+        // {
+        //         rectTileMap->setSize(size.as<sf::Vector2u>());
+        // }
+        // else if prop (size, std::uint32_t)
+        // {
+        //         const auto s = size.as<std::uint32_t>();
+        //         rectTileMap->setSize({s, s});
+        // }
 
         if prop (fill, std::uint32_t)
         {
@@ -795,9 +755,7 @@ inline static void loadGraphics()
                 "fillAreaWith", &util::graphics::RectTileMap::fillArea,
                 "setTile",      &util::graphics::RectTileMap::setTile,
                 "setMap",       &util::graphics::RectTileMap::setMap,
-                "size", sol::property(
-                        &util::graphics::RectTileMap::getSize,
-                        &util::graphics::RectTileMap::setSize),
+                "size", sol::property(&util::graphics::RectTileMap::getSize),
                 "tileSize", sol::property(
                         &util::graphics::RectTileMap::getTileSize,
                         &util::graphics::RectTileMap::setTileSize),

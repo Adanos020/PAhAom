@@ -1,5 +1,5 @@
 local mapSize      -- vector
-local mapArea      -- irect.new
+local mapArea      -- rectangle
 local maxRoomSize  -- vector
 local tiles        -- matrix of numbers
 
@@ -31,7 +31,7 @@ local function fillArea(area, tile)
     assert(math.type(tile) == "integer")
     for x = area.left, area.left + area.width - 1 do
         for y = area.top, area.top + area.height - 1 do
-            tiles[y][x] = tile
+            tiles:set(y, x, tile)
         end
     end
 end
@@ -39,19 +39,19 @@ end
 local function findNeighbours(pos, tile, distance)
     local function leftIs(pos, tile, distance)
         return pos.x > distance
-           and tiles[pos.y][pos.x - distance] == tile
+           and tiles:get(pos.y, pos.x - distance) == tile
     end
     local function rightIs(pos, tile, distance)
         return pos.x <= mapSize.x - distance
-           and tiles[pos.y][pos.x + distance] == tile
+           and tiles:get(pos.y, pos.x + distance) == tile
     end
     local function upIs(pos, tile, distance)
         return pos.y > distance
-           and tiles[pos.y - distance][pos.x] == tile
+           and tiles:get(pos.y - distance, pos.x) == tile
     end
     local function downIs(pos, tile, distance)
         return pos.y <= mapSize.y - distance
-           and tiles[pos.y + distance][pos.x] == tile
+           and tiles:get(pos.y + distance, pos.x) == tile
     end
     return (leftIs (pos, tile, distance) and Neighbours.LEFT  or 0)
          | (rightIs(pos, tile, distance) and Neighbours.RIGHT or 0)
@@ -93,23 +93,19 @@ local function pickDirection(neighbours)
 end
 
 local function isDeadEnd(pos)
-    return tiles[pos.y][pos.x] == Tile.HALLWAY
+    return tiles:get(pos.y, pos.x) == Tile.HALLWAY
        and countCloseNeighbours(pos, Tile.WALL) == 3
 end
 
 
 -- Procedures
 
-local function initialise(size)
-    mapSize = ivec.new(size)
+local function initialise(rows, cols)
+    mapSize = ivec.new(cols, rows)
     mapArea = irect.new(ivec.new(1, 1), mapSize)
-    maxRoomSize = ivec.new(iclamp(mapSize.x // 2, 3, 13),
-                           iclamp(mapSize.y // 2, 3, 13))
-    tiles = {}
-    for row = 1, mapSize.y do
-        tiles[row] = {}
-    end
-    fillArea(mapArea, Tile.WALL)
+    maxRoomSize = ivec.new(mapSize:divide(2))
+                    :clamp(ivec.new(3, 3), ivec.new(13, 13))
+    tiles = imat.new(mapSize.y, mapSize.x, Tile.WALL)
 end
 
 local function generateMaze()
@@ -120,7 +116,7 @@ local function generateMaze()
     }
 
     local currCell = cells[#cells]
-    tiles[currCell.y][currCell.x] = Tile.HALLWAY
+    tiles:set(currCell.y, currCell.x, Tile.HALLWAY)
 
     while #cells > 0 do
         currCell = cells[#cells]
@@ -136,7 +132,7 @@ local function generateMaze()
 
             -- Decide on whether make a turn.
             while not mapArea:contains(nextCell)
-                or tiles[nextCell.y][nextCell.x] == Tile.HALLWAY
+                or tiles:get(nextCell.y, nextCell.x) == Tile.HALLWAY
                 or random.chance(0.1)
             do
                 currDir = pickDirection(neighbours)
@@ -145,8 +141,8 @@ local function generateMaze()
 
             -- Carve the corridor.
             local midWay = currCell:add(currDir:divide(2))
-            tiles[midWay.y][midWay.x] = Tile.HALLWAY
-            tiles[nextCell.y][nextCell.x] = Tile.HALLWAY
+            tiles:set(midWay.y, midWay.x, Tile.HALLWAY)
+            tiles:set(nextCell.y, nextCell.x, Tile.HALLWAY)
             table.insert(cells, nextCell)
         end
     end
@@ -201,16 +197,16 @@ local function fillDeadEnds()
             local dir = directions[neighboursIndices(neighbours)[1]]
             local midWay = cell:add(dir:divide(2))
 
-            tiles[cell.y][cell.x] = Tile.WALL
-            tiles[midWay.y][midWay.x] = Tile.WALL
+            tiles:set(cell.y, cell.x, Tile.WALL)
+            tiles:set(midWay.y, midWay.x, Tile.WALL)
 
             cell = cell:add(dir)
         end
     end
 end
 
-function generateDungeon(size)
-    initialise(size)
+function generateDungeon(rows, cols)
+    initialise(rows, cols)
     generateMaze()
     spreadRooms()
     fillDeadEnds()
