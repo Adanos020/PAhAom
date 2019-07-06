@@ -7,6 +7,7 @@ To build the project you'll need:
 - [SFML](https://github.com/SFML/SFML) and [Lua](https://github.com/lua/lua)
 - CMake 3.1 or newer
 - Make
+
 Make sure that the required libraries have all its headers in an appropriate for your compiler `include` directory, and compiled lib files in `lib`.
 
 First clone the repository and the submodules:
