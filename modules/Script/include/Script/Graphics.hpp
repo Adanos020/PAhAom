@@ -153,15 +153,10 @@ inline std::unique_ptr<T>& updateTransformFromTable(std::unique_ptr<T>& dobj, so
  *  - outlineColor:     Color of the text outline.
  *  - outlineThickness: Number representing width of the text outline.
  */
-template<class ShapeClass>
+template<class ShapeClass> requires std::is_base_of_v<sf::Shape, ShapeClass>
 inline std::unique_ptr<ShapeClass>& updateShapeFromTable(
         std::unique_ptr<ShapeClass>& shape, sol::table obj)
 {
-        static_assert(
-                std::is_same_v<ShapeClass, sf::CircleShape> or
-                std::is_same_v<ShapeClass, sf::ConvexShape> or
-                std::is_same_v<ShapeClass, sf::RectangleShape>);
-
         if prop (texture, std::string)
         {
                 if (auto tex = engine::Resources<sf::Texture>::get(texture.as<std::string>()))
@@ -330,8 +325,7 @@ inline std::unique_ptr<sf::Sprite>& updateSpriteFromTable(std::unique_ptr<sf::Sp
  *  - underlined
  *  - strikethrough
  */
-inline std::unique_ptr<sf::Text>& updateTextFromTable(
-        std::unique_ptr<sf::Text>& text, sol::table obj)
+inline std::unique_ptr<sf::Text>& updateTextFromTable(std::unique_ptr<sf::Text>& text, sol::table obj)
 {       
         if prop (content, std::string)
         {
