@@ -31,7 +31,7 @@ public:
 
         void assignRigidBody(const entt::entity entity, const util::FVector velocity, const float mass)
         {
-                this->entities.assign<RigidBody>(entity, velocity, mass);
+                this->entities.emplace<RigidBody>(entity, velocity, mass);
         }
 
         void assignRigidBody(const entt::entity entity, sol::table entityTable)
@@ -39,9 +39,10 @@ public:
                 if (entityTable["rigidBody"].get_type() == sol::type::table)
                 {
                         sol::table rigidBody = entityTable["rigidBody"];
+                        auto defaultVelocity = util::FVector::Zero;
                         this->assignRigidBody(entity,
-                                rigidBody.get_or("velocity", sol::make_user(util::FVector{0, 0})),
-                                rigidBody.get_or("mass", 0.f));
+                                rigidBody["velocity"].get_or(defaultVelocity),
+                                rigidBody["mass"].get_or(0.f));
                 }
         }
 

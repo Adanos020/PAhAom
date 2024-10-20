@@ -228,15 +228,15 @@ inline static void loadInput(sf::Window& window [[maybe_unused]])
                 "axisCount",    sf::Joystick::AxisCount,
                 "buttonCount",  sf::Joystick::ButtonCount,
                 "count",        sf::Joystick::Count,
-                "isConnected",  sf::Joystick::isConnected,
-                "isPressed",    sf::Joystick::isButtonPressed,
-                "buttonCount",  sf::Joystick::getButtonCount,
-                "axisPosition", sf::Joystick::getAxisPosition,
-                "info",         sf::Joystick::getIdentification,
-                "update",       sf::Joystick::update);
+                "isConnected",  &sf::Joystick::isConnected,
+                "isPressed",    &sf::Joystick::isButtonPressed,
+                "buttonCount",  &sf::Joystick::getButtonCount,
+                "axisPosition", &sf::Joystick::getAxisPosition,
+                "info",         &sf::Joystick::getIdentification,
+                "update",       &sf::Joystick::update);
 
         // Keyboard
-        lua.create_named_table("keyboard",
+        sol::table keyboard = lua.create_named_table("keyboard",
                 "unknown",   sf::Keyboard::Unknown,
                 "a",         sf::Keyboard::A,
                 "b",         sf::Keyboard::B,
@@ -340,7 +340,7 @@ inline static void loadInput(sf::Window& window [[maybe_unused]])
                 "f15",       sf::Keyboard::F15,
                 "pause",     sf::Keyboard::Pause,
                 "keyCount",  sf::Keyboard::KeyCount,
-                "isPressed", sf::Keyboard::isKeyPressed);
+                "isPressed", static_cast<bool(*)(sf::Keyboard::Key)>(&sf::Keyboard::isKeyPressed));
 
         // Mouse
         lua.create_named_table("mouse",
@@ -352,7 +352,7 @@ inline static void loadInput(sf::Window& window [[maybe_unused]])
                 "buttonCount",     sf::Mouse::ButtonCount,
                 "verticalWheel",   sf::Mouse::VerticalWheel,
                 "horizontalWheel", sf::Mouse::HorizontalWheel,
-                "isPressed",       sf::Mouse::isButtonPressed,
+                "isPressed",       &sf::Mouse::isButtonPressed,
                 "position", sol::property(
                         [] { return sf::Mouse::getPosition(); },
                         [] (const sf::Vector2i pos) { sf::Mouse::setPosition(pos); }),

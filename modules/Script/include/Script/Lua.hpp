@@ -7,6 +7,6 @@
 namespace script
 {
 
-static sol::state lua;
+inline sol::state lua;
 
 }

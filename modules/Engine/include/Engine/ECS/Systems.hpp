@@ -45,7 +45,7 @@ public:
         void reset()
         {
                 this->input.clearKeys();
-                this->entities.reset();
+                this->entities.clear();
         }
 
 public:

@@ -23,7 +23,8 @@ inline static void setPosition(sol::table entity, sf::Vector2f position)
 inline static void moveBy(sol::table entity, sf::Vector2f displacement)
 {
         util::Subject::send(util::Message::MoveEntityBy{entity["id"], displacement});
-        const auto pos = entity.get_or("position", sol::make_user(sf::Vector2f{0, 0}));
+        auto defaultPosition = sf::Vector2f{0, 0};
+        const auto pos = entity["position"].get_or(defaultPosition);
         entity.set("position", pos + displacement);
 }
 
@@ -36,7 +37,7 @@ inline static void setRotation(sol::table entity, const float rotation)
 inline static void rotateBy(sol::table entity, const float rotation)
 {
         util::Subject::send(util::Message::RotateEntityBy{entity["id"], rotation});
-        entity.set("rotation", entity.get_or("rotation", 0.f) + rotation);
+        entity.set("rotation", entity["rotation"].get_or(0.f) + rotation);
 }
 
 inline static void setScale(sol::table entity, const sf::Vector2f scale)
@@ -53,7 +54,8 @@ inline static void setScale(sol::table entity, const float scale)
 inline static void scaleBy(sol::table entity, const sf::Vector2f scale)
 {
         util::Subject::send(util::Message::ScaleEntityBy{entity["id"], scale});
-        const auto current = entity.get_or("scale", sol::make_user(sf::Vector2f{1, 1}));
+        auto defaultScale = sf::Vector2f{1, 1};
+        const auto current = entity["scale"].get_or(defaultScale);
         entity.set("scale", sf::Vector2f{current.x * scale.x, current.y * scale.y});
 }
 
@@ -83,7 +85,8 @@ inline static void accelerateBy(sol::table entity, const sf::Vector2f accelerati
         {
                 util::Subject::send(util::Message::AccelerateEntityBy{entity["id"], acceleration});
                 sol::table rigidBody = entity["rigidBody"];
-                const auto pos = rigidBody.get_or("velocity", sol::make_user(sf::Vector2f{0, 0}));
+                auto defaultVelocity = sf::Vector2f{0, 0};
+                const auto pos = rigidBody["velocity"].get_or(defaultVelocity);
                 rigidBody.set("velocity", pos + acceleration);
         }
         else

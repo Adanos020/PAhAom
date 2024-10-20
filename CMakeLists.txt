@@ -33,14 +33,14 @@ set(PAHAOM_HEADERS "modules/Engine/include/Engine/*.hpp")
 file(GLOB_RECURSE SOURCES ${PAHAOM_SOURCES} ${PAHAOM_HEADERS})
 add_executable(Pahaom ${SOURCES})
 
-target_compile_options(Pahaom PUBLIC -Wall -Wextra -fconcepts)
+target_compile_options(Pahaom PUBLIC -Wall -Wextra)
 target_include_directories(Pahaom PUBLIC "modules/Engine/include")
 target_link_libraries(
     Pahaom
         PUBLIC
-            sfml-graphics-d
-            sfml-window-d
-            sfml-audio-d
-            sfml-system-d
+            sfml-graphics
+            sfml-window
+            sfml-audio
+            sfml-system
             lua
 )

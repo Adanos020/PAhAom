@@ -31,14 +31,16 @@ public:
         void assignTransform(const entt::entity entity, const util::FVector position,
                              const util::FVector scale, const float rotation)
         {
-                this->entities.assign<Transform>(entity, position, scale, rotation);
+                this->entities.emplace<Transform>(entity, position, scale, rotation);
         }
 
         void assignTransform(const entt::entity entity, sol::table entityTable)
         {
-                const auto position = entityTable.get_or("position", sol::make_user(util::FVector{0, 0}));
-                const auto scale    = entityTable.get_or("scale",    sol::make_user(util::FVector{1, 1}));
-                const auto rotation = entityTable.get_or("rotation", 0.f);
+                auto defaultPosition = util::FVector::Zero;
+                auto defaultScale = util::FVector{1, 1};
+                const auto position = entityTable["position"].get_or(defaultPosition);
+                const auto scale    = entityTable["scale"].get_or(defaultScale);
+                const auto rotation = entityTable["rotation"].get_or(0.f);
                 this->assignTransform(entity, position, scale, rotation);
         }
 

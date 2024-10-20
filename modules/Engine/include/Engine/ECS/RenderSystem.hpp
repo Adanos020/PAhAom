@@ -26,7 +26,7 @@ public:
         void assignGraphics(entt::entity entity, std::unique_ptr<sf::Drawable>&& drawable,
                             const std::int32_t z, const bool visible)
         {
-                this->entities.assign<Graphics>(entity, std::move(drawable), z, visible);
+                this->entities.emplace<Graphics>(entity, std::move(drawable), z, visible);
                 this->entities.sort<Graphics>(
                         [](const Graphics& a, const Graphics& b) { return a.z < b.z; });
         }
@@ -38,8 +38,8 @@ public:
                         sol::table gfxTable = entityTable["graphics"];
                         if (auto gfx = script::tableToDrawable(gfxTable))
                         {
-                                const auto z       = gfxTable.get_or("z", 0);
-                                const auto visible = gfxTable.get_or("visible", true);
+                                const auto z       = gfxTable["z"].get_or(0);
+                                const auto visible = gfxTable["visible"].get_or(true);
                                 this->assignGraphics(entity, std::move(*gfx), z, visible);
                         }
                 }

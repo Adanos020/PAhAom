@@ -4,3 +4,4 @@
 [submodule "modules/sol2"]
 	path = modules/sol2
 	url = https://github.com/ThePhD/sol2
+	branch = develop

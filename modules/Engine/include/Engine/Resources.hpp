@@ -20,15 +20,15 @@ namespace engine
 template<class T>
 concept Loadable = requires(T r)
 {
-        { r.loadFromFile("") } -> bool;
-        { r.loadFromMemory("", 0) } -> bool;
+        { r.loadFromFile("") } -> std::same_as<bool>;
+        { r.loadFromMemory("", 0) } -> std::same_as<bool>;
 };
 
 template<class T>
 concept Openable = requires(T r)
 {
-        { r.openFromFile("") } -> bool;
-        { r.openFromMemory("", 0) } -> bool;
+        { r.openFromFile("") } -> std::same_as<bool>;
+        { r.openFromMemory("", 0) } -> std::same_as<bool>;
 };
 
 template<class T>

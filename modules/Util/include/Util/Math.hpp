@@ -59,20 +59,20 @@ inline constexpr bool isWithin(const T& value, const T& lo, const T& hi)
 template<Arithmetic T>
 struct Vector : sf::Vector2<T>
 {
-        Vector<T>() {}
+        Vector() {}
 
-        Vector<T>(const T x, const T y)
+        Vector(const T x, const T y)
         : sf::Vector2<T>(x, y)
         {
         }
 
-        Vector<T>(const Vector<T>& copy)
+        Vector(const Vector<T>& copy)
         : sf::Vector2<T>(copy)
         {
         }
 
         template<Arithmetic U>
-        Vector<T>(const sf::Vector2<U>& other)
+        Vector(const sf::Vector2<U>& other)
         : sf::Vector2<T>(other)
         {
         }
@@ -187,6 +187,10 @@ public:
         {
                 return std::acos(v1.dot(v2) / v1.length() / v2.length());
         }
+
+public:
+
+        inline static const Vector Zero = Vector(T{0}, T{0});
 };
 
 using FVector = Vector<float>;
