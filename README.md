@@ -1,10 +1,10 @@
 # About
-PAhAom is an open-source 2D game engine sans any graphical editor - everything is programmable exclusively using Lua scripts.
+PAhAom is an open-source 2D game engine without a graphical editor - everything is programmable exclusively using Lua scripts.
 
 # Build
 To build the project you'll need:
-- any C++ compiler that supports concepts from the upcoming C++20 standard
-- [SFML](https://github.com/SFML/SFML) and [Lua](https://github.com/lua/lua)
+- any C++ compiler that supports C++20
+- [Lua](https://github.com/lua/lua)
 - CMake 3.1 or newer
 - Make
 
@@ -12,9 +12,7 @@ Make sure that the required libraries have all its headers in an appropriate for
 
 First clone the repository and the submodules:
 ```bash
-$ git clone https://github.com/Adanos020/PAhAom
-$ git submodule init
-$ git submodule update --recursive
+$ git clone --recurse-submodules git@github.com:Adanos020/PAhAom.git
 ```
 
 Then generate the Makefile and run it:
@@ -22,6 +20,12 @@ Then generate the Makefile and run it:
 $ cmake -B build
 $ cd build
 $ make -j
+```
+
+To run the game, return to the project's root directory and simply run the executable:
+```bash
+$ cd ..
+$ build/Pahaom
 ```
 
 # To-do list (the order is arbitrary)

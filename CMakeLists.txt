@@ -14,27 +14,33 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# SFML
+include_directories(${PROJECT_SOURCE_DIR}/modules/SFML/include)
+add_subdirectory(${PROJECT_SOURCE_DIR}/modules/SFML)
+
 # Sol3
-include_directories("modules/sol2/include")
+include_directories(${PROJECT_SOURCE_DIR}/modules/sol2/include)
+add_subdirectory(${PROJECT_SOURCE_DIR}/modules/sol2)
 
 # EnTT
-include_directories("modules/entt/src")
+include_directories(${PROJECT_SOURCE_DIR}/modules/entt/src)
+add_subdirectory(${PROJECT_SOURCE_DIR}/modules/entt)
 
 # SCRIPT BINDINGS
-include_directories("modules/Script/include")
+include_directories(${PROJECT_SOURCE_DIR}/modules/Script/include)
 
 # UTILITIES
-include_directories("modules/Util/include")
+include_directories(${PROJECT_SOURCE_DIR}/modules/Util/include)
 
 # MAIN EXEC
-set(PAHAOM_SOURCES "modules/Engine/src/Engine/Engine.cpp")
-set(PAHAOM_HEADERS "modules/Engine/include/Engine/*.hpp")
+set(PAHAOM_SOURCES ${PROJECT_SOURCE_DIR}/modules/Engine/src/Engine/Engine.cpp)
+set(PAHAOM_HEADERS ${PROJECT_SOURCE_DIR}/modules/Engine/include/Engine/*.hpp)
 
 file(GLOB_RECURSE SOURCES ${PAHAOM_SOURCES} ${PAHAOM_HEADERS})
 add_executable(Pahaom ${SOURCES})
 
 target_compile_options(Pahaom PUBLIC -Wall -Wextra)
-target_include_directories(Pahaom PUBLIC "modules/Engine/include")
+target_include_directories(Pahaom PUBLIC ${PROJECT_SOURCE_DIR}/modules/Engine/include)
 target_link_libraries(
     Pahaom
         PUBLIC
