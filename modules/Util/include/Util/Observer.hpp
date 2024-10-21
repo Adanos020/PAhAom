@@ -1,15 +1,12 @@
 #pragma once
 
-
 #include <Util/Math.hpp>
 #include <Util/Types.hpp>
 
 #include <entt/entity/registry.hpp>
 
-#include <algorithm>
 #include <unordered_set>
 #include <variant>
-
 
 namespace util
 {
@@ -138,13 +135,9 @@ class Observer
         friend class Subject;
 
 public:
-
-        virtual ~Observer()
-        {
-        }
+        virtual ~Observer() = default;
 
 private:
-
         virtual void receive(const Message&) = 0;
 };
 
@@ -156,16 +149,8 @@ class Subject
         Subject() = delete;
 
 public:
-
-        static void addObserver(Observer* const o)
-        {
-                observers.insert(o);
-        }
-
-        static void deleteObserver(Observer* const o)
-        {
-                observers.erase(o);
-        }
+        static void addObserver(Observer* const o);
+        static void deleteObserver(Observer* const o);
 
         template<class T>
         static void send(const T& msgType)
@@ -173,16 +158,9 @@ public:
                 send(Message{msgType});
         }
 
-        static void send(const Message& msg)
-        {
-                for (Observer* o : observers)
-                {
-                        o->receive(msg);
-                }
-        }
+        static void send(const Message& msg);
 
 private:
-
         inline static std::unordered_set<Observer*> observers;
 };
 

@@ -1,12 +1,6 @@
 #pragma once
 
-
 #include <Engine/Scene.hpp>
-
-#include <Script/Lua.hpp>
-
-#include <Util/Observer.hpp>
-
 
 namespace script
 {
@@ -16,10 +10,7 @@ namespace script
  *  Params:
  *      sceneName = String. Name of the scene type.
  */
-inline static void switchTo(const std::string& sceneName)
-{
-        util::Subject::send(util::Message::SwitchScene{sceneName});
-}
+void switchTo(const std::string& sceneName);
 
 /** Saves the current scene. If a valid scene ID is given, an existing scene
  *  will be overwritten. Otherwise, the current scene will be saved in a new
@@ -31,11 +22,7 @@ inline static void switchTo(const std::string& sceneName)
  * 
  *  Returns: ID of the saved scene.
  */
-inline static util::SceneID saveScene(const util::SceneID id = 0)
-{
-        util::Subject::send(util::Message::SaveScene{id});
-        return id ? id : engine::Scene::nextId();
-}
+util::SceneID saveScene(const util::SceneID id = 0);
 
 /** Loads another previously saved scene and switches to without saving
  *  the current scene.
@@ -43,25 +30,12 @@ inline static util::SceneID saveScene(const util::SceneID id = 0)
  *  Params:
  *      id (0) = Number. ID of the scene to load.
  */
-inline static void loadScene(const util::SceneID id)
-{
-        util::Subject::send(util::Message::LoadScene{id});
-}
+void loadScene(const util::SceneID id = 0);
 
 /** Terminates the program.
  */
-inline static void quit()
-{
-        util::Subject::send(util::Message::Quit{});
-}
+void quit();
 
-inline static void loadScenes()
-{
-        lua.create_named_table("game",
-                "switchTo",  switchTo,
-                "saveScene", saveScene,
-                "loadScene", loadScene,
-                "quit",      quit);
-}
+void loadScenes();
 
 }

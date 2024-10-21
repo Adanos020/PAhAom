@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <Util/ErrorMessages.hpp>
 #include <Util/Types.hpp>
 
@@ -11,7 +10,6 @@
 #include <cmath>
 #include <iostream>
 #include <type_traits>
-
 
 namespace util
 {
@@ -44,13 +42,13 @@ inline float map(const float val, const float lo1, const float hi1,
 template<Integral T>
 inline constexpr bool isWithin(const T& value, const T& lo, const T& hi)
 {
-        return static_cast<std::uint32_t>(value - lo) < (hi - lo);
+        return static_cast<uint32_t>(value - lo) < (hi - lo);
 }
 
 template<Floating T>
 inline constexpr bool isWithin(const T& value, const T& lo, const T& hi)
 {
-        return lo <= value and value < hi;
+        return lo <= value && value < hi;
 }
 
 
@@ -194,8 +192,8 @@ public:
 };
 
 using FVector = Vector<float>;
-using IVector = Vector<std::int32_t>;
-using UVector = Vector<std::uint32_t>;
+using IVector = Vector<int32_t>;
+using UVector = Vector<uint32_t>;
 
 template<Arithmetic T>
 class Matrix
@@ -252,7 +250,7 @@ public:
 
         T get(std::size_t row, std::size_t column) const
         {
-                if (row > this->r or column > this->c)
+                if (row > this->r || column > this->c)
                 {
                         std::cerr << util::format("Matrix indices (%lu, %lu) out of bounds (%lu, %lu).",
                                 row, column, this->r, this->c) << std::endl;
@@ -263,7 +261,7 @@ public:
 
         void set(std::size_t row, std::size_t column, const T entry)
         {
-                if (row > this->r or column > this->c)
+                if (row > this->r || column > this->c)
                 {
                         std::cerr << util::format("Matrix indices (%lu, %lu) out of bounds (%lu, %lu).",
                                 row, column, this->r, this->c) << std::endl;

@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <Util/ErrorMessages.hpp>
 #include <Util/Types.hpp>
 
@@ -10,7 +9,6 @@
 #include <string>
 #include <type_traits>
 #include <unordered_map>
-
 
 namespace engine
 {
@@ -32,7 +30,7 @@ concept Openable = requires(T r)
 };
 
 template<class T>
-concept Resource = Loadable<T> or Openable<T>;
+concept Resource = Loadable<T> || Openable<T>;
 
 
 /** Manager of given type of resources.
@@ -43,7 +41,6 @@ class Resources
         Resources() = delete;
 
 public:
-
         static bool load(const std::string& id, const std::string& path)
         {
                 return resources[id].loadFromFile(path);
@@ -69,7 +66,6 @@ public:
         }
 
 private:
-
         inline static util::MapStringTo<Type> resources;
 };
 

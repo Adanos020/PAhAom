@@ -1,10 +1,10 @@
 #pragma once
 
-
 #include <Script/Input.hpp>
 
-#include <vector>
+#include <SFML/Window/Event.hpp>
 
+#include <Util/String.hpp>
 
 namespace engine::ecs
 {
@@ -12,54 +12,19 @@ namespace engine::ecs
 class InputSystem
 {
 public:
+        InputSystem() = default;
 
-        InputSystem()
-        : entityCount(0)
-        {
-        }
+        ~InputSystem();
 
-        ~InputSystem()
-        {
-                this->clearKeys();
-        }
-
-        void assignInput(sol::table entityTable)
-        {
-                if (entityTable["input"].get_type() == sol::type::table)
-                {
-                        sol::table input = entityTable["input"];
-                        script::lua.registry()[this->key(this->entityCount++)] = entityTable;
-                }
-        }
-
-        void handleInput(const sf::Event& event)
-        {
-                for (std::uint32_t i = 0; i < this->entityCount; ++i)
-                {
-                        sol::table entityTable = script::lua.registry()[this->key(i)];
-                        script::callInputHandler(entityTable, entityTable["input"], event);
-                }
-        }
-
-        void clearKeys()
-        {
-                for (std::uint32_t i = 0; i < this->entityCount; ++i)
-                {
-                        script::lua.registry()[this->key(i)] = sol::nil;
-                }
-                this->entityCount = 0;
-        }
+        void assignInput(sol::table entityTable);
+        void handleInput(const sf::Event& event);
+        void clearKeys();
 
 private:
-
-        std::string key(const std::uint32_t i)
-        {
-                return util::format("%s%u", keyPrefix, i);
-        }
+        std::string key(const uint32_t i);
 
 private:
-
-        std::uint32_t entityCount;
+        uint32_t entityCount = 0;
         inline static util::CStr keyPrefix = "pahaom_entity_input_";
 };
 

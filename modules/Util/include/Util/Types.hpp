@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/Rect.hpp>
@@ -16,11 +15,10 @@
 #include <unordered_map>
 #include <vector>
 
-
 namespace sf
 {
 
-using UintRect = Rect<unsigned>;
+using UintRect = Rect<uint32_t>;
 
 }
 
@@ -37,6 +35,6 @@ using MapStringTo = std::unordered_map<std::string, T>;
 template<typename T>
 using UniquePtrs = std::vector<std::unique_ptr<T>>;
 
-using SceneID = std::uint32_t;
+using SceneID = uint32_t;
 
 }

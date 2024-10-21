@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <Util/ErrorMessages.hpp>
 #include <Util/Math.hpp>
 
@@ -8,11 +7,10 @@
 #include <random>
 #include <type_traits>
 
-
 namespace util
 {
 
-static auto rng = std::default_random_engine(0);
+inline auto rng = std::default_random_engine(0);
 
 inline bool chance(const double prob = 0.5)
 {
@@ -42,7 +40,7 @@ inline T normal(const T mean = 0, const T stddev = 1)
 template<typename RandomAccessIterator>
 inline decltype(auto) oneOf(RandomAccessIterator begin, RandomAccessIterator end)
 {
-        return *(begin + uniform(0, static_cast<std::int32_t>(end - begin)));
+        return *(begin + uniform(0, static_cast<int32_t>(end - begin)));
 }
 
 }

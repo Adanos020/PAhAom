@@ -26,7 +26,7 @@ struct Transform
 struct Graphics
 {
         std::unique_ptr<sf::Drawable> object;
-        std::int32_t z = 0;
+        int32_t z = 0;
         bool visible = true;
 };
 

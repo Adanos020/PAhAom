@@ -7,7 +7,7 @@ endif()
 project(
     PAhAom
         VERSION 0.1
-        DESCRIPTION "2D game engine."
+        DESCRIPTION "A 2D game engine."
         LANGUAGES CXX
 )
 set(CMAKE_CXX_STANDARD 20)
@@ -28,12 +28,14 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/modules/entt)
 
 # SCRIPT BINDINGS
 include_directories(${PROJECT_SOURCE_DIR}/modules/Script/include)
+add_subdirectory(${PROJECT_SOURCE_DIR}/modules/Script)
 
 # UTILITIES
 include_directories(${PROJECT_SOURCE_DIR}/modules/Util/include)
+add_subdirectory(${PROJECT_SOURCE_DIR}/modules/Util)
 
 # MAIN EXEC
-set(PAHAOM_SOURCES ${PROJECT_SOURCE_DIR}/modules/Engine/src/Engine/Engine.cpp)
+set(PAHAOM_SOURCES ${PROJECT_SOURCE_DIR}/modules/Engine/src/Engine/*.cpp)
 set(PAHAOM_HEADERS ${PROJECT_SOURCE_DIR}/modules/Engine/include/Engine/*.hpp)
 
 file(GLOB_RECURSE SOURCES ${PAHAOM_SOURCES} ${PAHAOM_HEADERS})
@@ -44,6 +46,8 @@ target_include_directories(Pahaom PUBLIC ${PROJECT_SOURCE_DIR}/modules/Engine/in
 target_link_libraries(
     Pahaom
         PUBLIC
+            Pahaom_Script
+            Pahaom_Util
             sfml-graphics
             sfml-window
             sfml-audio
